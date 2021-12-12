@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { TaskQueue } from '../taskQueue';
-import TaskQueueEditor from './taskQueueEditor';
+import TaskQueueEditor from './TaskQueueEditor';
 import { Schedule } from '../schedule';
-import { ScheduleView } from './scheduleView';
+import { ScheduleView } from './ScheduleView';
 import './global.css';
 
 const App = () => {
