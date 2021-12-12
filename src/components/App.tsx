@@ -17,10 +17,12 @@ const App = () => {
 
   return (
     <div className='app'>
-      <TaskQueueEditor taskQueue={taskQueue} />
-      <ScheduleView schedule={schedule} />
-      <button type="button" onClick={onStart}>Start</button>
-      <button type="button" onClick={onNext}>Next</button>
+      <div className='flex'>
+        <TaskQueueEditor taskQueue={taskQueue} />
+        <ScheduleView schedule={schedule} />
+      </div>
+      <button onClick={onStart}>Start</button>
+      <button onClick={onNext}>Next</button>
     </div>
   );
 };

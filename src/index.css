@@ -1,12 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html, body {
 	height: 100%;
 	width: 100%;
 	padding: 0;
 	margin: 0;
-	background: #FAFAFA;
-	font-family: 'Helvetica Neue', arial, sans-serif;
+	color: #FAFAFA;
+	font-family: monospace;
+        font-size: 16px;
 	font-weight: 400;
-	color: #444;
+	background: #040404;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -17,4 +22,10 @@ html, body {
 
 #app {
 	height: 100%;
+}
+
+@layer components {
+  button {
+    @apply bg-gray-800 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md;
+  }
 }
