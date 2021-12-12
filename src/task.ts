@@ -1,4 +1,4 @@
-export type TaskKind = 'explore-ruins' | 'scavenge-batteries';
+export type TaskKind = 'explore-ruins' | 'scavenge-batteries' | 'scavenge-weapons';
 
 /**
  * A task, something that goes in the task queue.
@@ -49,6 +49,7 @@ export function fromJSON(obj: TaskJson): Task {
   switch (obj.kind) {
     case 'explore-ruins': return EXPLORE_RUINS;
     case 'scavenge-batteries': return SCAVENGE_BATTERIES;
+    case 'scavenge-weapons': return SCAVENGE_WEAPONS;
       // no default
   }
 }

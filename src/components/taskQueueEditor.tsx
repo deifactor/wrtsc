@@ -1,4 +1,3 @@
-import { FunctionalComponent, h, Fragment } from 'preact';
 import { observer } from 'mobx-react-lite';
 import { TaskQueue } from '../taskQueue';
 import { ALL_TASKS } from '../task';
@@ -8,7 +7,7 @@ interface Props {
   taskQueue: TaskQueue
 }
 
-const TaskQueueEditor: FunctionalComponent<Props> = observer((props: Props) => {
+const TaskQueueEditor =  observer((props: Props) => {
   const { taskQueue } = props;
   const tasks = taskQueue.entries.map((entry, idx) => {
     const incrementCount = (): void => taskQueue.modifyCount(idx, 1);

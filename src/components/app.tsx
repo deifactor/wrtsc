@@ -1,13 +1,11 @@
-import { Button, ButtonGroup } from '@chakra-ui/react';
-import { FunctionalComponent, h } from 'preact';
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { TaskQueue } from '../taskQueue';
 import TaskQueueEditor from './taskQueueEditor';
 import { Schedule } from '../schedule';
 import { ScheduleView } from './scheduleView';
-import style from './global.scss';
+import './global.css';
 
-const App: FunctionalComponent = () => {
+const App = () => {
   const [taskQueue] = useState(() => new TaskQueue());
   const [schedule, setSchedule] = useState(() => new Schedule(taskQueue.clone()));
   const onStart = (): void => {
@@ -18,10 +16,9 @@ const App: FunctionalComponent = () => {
   };
 
   return (
-    <div class={style.app}>
+    <div className='app'>
       <TaskQueueEditor taskQueue={taskQueue} />
       <ScheduleView schedule={schedule} />
-      <Button size='md'>Start</Button>
       <button type="button" onClick={onStart}>Start</button>
       <button type="button" onClick={onNext}>Next</button>
     </div>

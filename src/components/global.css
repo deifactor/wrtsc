@@ -3,9 +3,9 @@
   margin: 0em;
   padding: 0em;
   font-size: 0.9em;
+}
 
-  p {
+.app div[data-id='tooltip'] p {
     margin: 0em;
     padding: 0.5em 1em;
-  }
 }
