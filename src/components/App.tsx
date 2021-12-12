@@ -1,3 +1,4 @@
+import { Button } from './common/Button';
 import { useState } from 'react';
 import { TaskQueue } from '../taskQueue';
 import TaskQueueEditor from './TaskQueueEditor';
@@ -21,8 +22,8 @@ const App = () => {
         <TaskQueueEditor taskQueue={taskQueue} />
         <ScheduleView schedule={schedule} />
       </div>
-      <button onClick={onStart}>Start</button>
-      <button onClick={onNext}>Next</button>
+      <Button onClick={onStart}>Start</Button>
+      <Button onClick={onNext}>Next</Button>
     </div>
   );
 };
