@@ -1,8 +1,8 @@
-import { observer } from 'mobx-react-lite';
-import { Schedule } from '../schedule';
+import { observer } from "mobx-react-lite";
+import { Schedule } from "../schedule";
 
 interface Props {
-  schedule: Schedule
+  schedule: Schedule;
 }
 
 export const ScheduleView = observer((props: Props) => {

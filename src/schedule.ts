@@ -1,8 +1,8 @@
-import { makeAutoObservable } from 'mobx';
-import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from './taskQueue';
+import { makeAutoObservable } from "mobx";
+import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
 export interface Stats {
-  completions: number
+  completions: number;
 }
 
 /**
@@ -34,7 +34,8 @@ export class Schedule {
     }
     if (index < entry.index) {
       return this.queue.entry(index)!.count;
-    } if (index === entry.index) {
+    }
+    if (index === entry.index) {
       return entry.iteration;
     }
     return 0;

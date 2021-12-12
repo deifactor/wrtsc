@@ -1,18 +1,18 @@
-import { makeAutoObservable } from 'mobx';
-import { Task } from './task';
+import { makeAutoObservable } from "mobx";
+import { Task } from "./task";
 
 /**
  * An entry in a task queue consists of a task and a number of times to repeat it.
  */
 export interface TaskQueueEntry {
-  task: Task
-  count: number
+  task: Task;
+  count: number;
 }
 
 export interface TaskQueuePointer {
-  index: number
-  entry: TaskQueueEntry
-  iteration: number
+  index: number;
+  entry: TaskQueueEntry;
+  iteration: number;
 }
 
 /**
@@ -45,7 +45,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     return {
       index: this.index,
       entry,
-      iteration: this.iteration
+      iteration: this.iteration,
     };
   }
 
@@ -106,7 +106,9 @@ export class TaskQueue {
   modifyCount(idx: number, amount: number): void {
     const entry = this.entry(idx);
     if (entry == null) {
-      throw Error(`Tried to modify count of ${idx}, which is >= length ${this.length}`);
+      throw Error(
+        `Tried to modify count of ${idx}, which is >= length ${this.length}`
+      );
     }
     entry.count += amount;
     if (entry.count <= 0) {

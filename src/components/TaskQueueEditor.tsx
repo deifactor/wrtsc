@@ -1,10 +1,10 @@
-import { Button } from './common/Button';
-import { observer } from 'mobx-react-lite';
-import { TaskQueue } from '../taskQueue';
-import { ALL_TASKS } from '../task';
+import { Button } from "./common/Button";
+import { observer } from "mobx-react-lite";
+import { TaskQueue } from "../taskQueue";
+import { ALL_TASKS } from "../task";
 
 interface Props {
-  taskQueue: TaskQueue
+  taskQueue: TaskQueue;
 }
 
 const TaskQueueEditor = observer((props: Props) => {
@@ -24,7 +24,11 @@ const TaskQueueEditor = observer((props: Props) => {
 
   const addButtons = ALL_TASKS.map((task) => {
     const tooltipId = `task-tooltip-${task.kind}`;
-    return <Button key={task.kind} onClick={() => taskQueue.push(task)}>{task.name}</Button>
+    return (
+      <Button key={task.kind} onClick={() => taskQueue.push(task)}>
+        {task.name}
+      </Button>
+    );
   });
   return (
     <div>
