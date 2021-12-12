@@ -16,8 +16,12 @@ const TaskQueueEditor = observer((props: Props) => {
       // eslint-disable-next-line react/no-array-index-key
       <div key={idx}>
         {entry.task.name} x{entry.count}
-        <Button onClick={incrementCount}>+1</Button>
-        <Button onClick={decrementCount}>-1</Button>
+        <Button size="sm" onClick={incrementCount}>
+          +1
+        </Button>
+        <Button size="sm" onClick={decrementCount}>
+          -1
+        </Button>
       </div>
     );
   });
