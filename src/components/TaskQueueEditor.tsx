@@ -15,7 +15,9 @@ const TaskQueueEditor = observer((props: Props) => {
     return (
       // eslint-disable-next-line react/no-array-index-key
       <div key={idx} className="flex items-center">
-        <div className="flex-grow">{entry.task.name} x{entry.count}</div>
+        <div className="flex-grow">
+          {entry.task.name} x{entry.count}
+        </div>
         <Button size="sm" onClick={incrementCount}>
           +1
         </Button>
@@ -27,9 +29,20 @@ const TaskQueueEditor = observer((props: Props) => {
   });
 
   const addButtons = ALL_TASKS.map((task) => {
-    const tooltipId = `task-tooltip-${task.kind}`;
+    const tooltip = (
+      <div>
+        <p>{task.description}</p>
+        <p>
+          <strong>Cost:</strong> {task.baseCost}
+        </p>
+      </div>
+    );
     return (
-      <Button key={task.kind} onClick={() => taskQueue.push(task)}>
+      <Button
+        key={task.kind}
+        onClick={() => taskQueue.push(task)}
+        tooltip={tooltip}
+      >
         {task.name}
       </Button>
     );

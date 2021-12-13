@@ -1,14 +1,18 @@
 import classNames from "classnames";
 import { ReactNode } from "react";
+import Tooltip from "rc-tooltip";
+import "rc-tooltip/assets/bootstrap.css";
+
 interface Props {
   onClick: () => void;
   size?: "sm" | "md";
   children: ReactNode;
+  tooltip?: ReactNode | (() => ReactNode);
 }
 
 export const Button = (props: Props) => {
   const size = props.size || "md";
-  return (
+  const button = (
     <button
       onClick={props.onClick}
       className={classNames(
@@ -21,4 +25,9 @@ export const Button = (props: Props) => {
       {props.children}
     </button>
   );
+  if (props.tooltip) {
+    return <Tooltip overlay={props.tooltip}>{button}</Tooltip>;
+  } else {
+    return button;
+  }
 };

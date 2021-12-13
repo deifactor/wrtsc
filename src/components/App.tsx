@@ -4,7 +4,6 @@ import { TaskQueue } from "../taskQueue";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { Schedule } from "../schedule";
 import { ScheduleView } from "./ScheduleView";
-import "./global.css";
 
 const App = () => {
   const [taskQueue] = useState(() => new TaskQueue());
