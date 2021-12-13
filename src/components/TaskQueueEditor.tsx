@@ -14,8 +14,8 @@ const TaskQueueEditor = observer((props: Props) => {
     const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
     return (
       // eslint-disable-next-line react/no-array-index-key
-      <div key={idx}>
-        {entry.task.name} x{entry.count}
+      <div key={idx} className="flex items-center">
+        <div className="flex-grow">{entry.task.name} x{entry.count}</div>
         <Button size="sm" onClick={incrementCount}>
           +1
         </Button>
