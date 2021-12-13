@@ -19,7 +19,7 @@ export const Button = (props: Props) => {
         "bg-slate-900 hover:bg-gray-500 text-white font-bold rounded-sm",
         "outline outline-1 outline-offset-1 outline-gray-500",
         "m-1",
-        { "py-2 px-4": size == "md", "py-1 px-2": size == "sm" }
+        { "py-2 px-4": size === "md", "py-1 px-2": size === "sm" }
       )}
     >
       {props.children}

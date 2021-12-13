@@ -1,3 +1,5 @@
+import { Player } from "./player";
+
 export type TaskKind =
   | "explore-ruins"
   | "scavenge-batteries"
@@ -12,6 +14,7 @@ export interface Task {
   // Cost in AEUs.
   baseCost: number;
   description: string;
+  perform: (player: Player) => void;
 }
 
 /**
@@ -27,6 +30,9 @@ export const EXPLORE_RUINS: Task = {
   baseCost: 100,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
+  perform: (player: Player) => {
+    player.stats.ruinsExploration.addXp(1024);
+  },
 };
 
 export const SCAVENGE_BATTERIES: Task = {
@@ -35,6 +41,9 @@ export const SCAVENGE_BATTERIES: Task = {
   baseCost: 50,
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
+  perform: (player: Player) => {
+    // TODO: not implemented yet!
+  },
 };
 
 export const SCAVENGE_WEAPONS: Task = {
@@ -43,6 +52,9 @@ export const SCAVENGE_WEAPONS: Task = {
   baseCost: 50,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
+  perform: (player: Player) => {
+    player.stats.combat.addXp(1024);
+  },
 };
 
 export const ALL_TASKS = [EXPLORE_RUINS, SCAVENGE_BATTERIES, SCAVENGE_WEAPONS];

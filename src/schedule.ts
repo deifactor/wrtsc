@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { Task } from "./task";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
 export interface Stats {
@@ -21,6 +22,10 @@ export class Schedule {
     this.queue = queue;
     this.iter = new TaskQueueIterator(this.queue);
     makeAutoObservable(this);
+  }
+
+  get task(): Task | undefined {
+    return this.entry?.entry.task;
   }
 
   get entry(): TaskQueuePointer | undefined {
