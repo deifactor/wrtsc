@@ -20,7 +20,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <div className="flex">
+      <div className="flex space-x-10">
         <TaskQueueEditor taskQueue={taskQueue} />
         <ScheduleView schedule={schedule} />
       </div>
