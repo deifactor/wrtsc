@@ -1,0 +1,28 @@
+* Story
+
+You are a robot girl, the sole survivor of the space station that you lived on. The rest of the inhabitants have been backed up to your internal storage. Your mission is revenge.
+
+* General mechanics
+** Power
+Power and time are not necessarily the same, although early on they will be. You loop when your power hits 0 (lore is that this is power above what's necessary to execute the loop).
+
+Measured in AEUs (Arbitrary Energy Units).
+
+** Actions
+As in Loops. One big difference: 'global' actions that can be done anywhere. Mostly things about optimizing your own chassis.
+
+- Optimize Cognition :: Like training. Increases your mental stats. I don't want spamming this to be the optimal early-game strat, so it probably increases them only 2x/3x. What's the point if stats persist? Unclear. Something to spend extra power on instead of looping early, maybe?
+
+** Persistent stats
+Mental stats persist across loops, accumulate slowly. Chassis stats don't (but you eventually get the ability to keep some amount of things across loops).
+
+* Act 1
+The ruins of the base. Your goal is to get as much power and supplies as you can, and then get out.  Exit criteria is that you have sufficient power to transit to Phobos-Deimos and land there.
+
+** Actions
+- Explore Ruins :: Lets you see where other stuff is. Unlike Loops, this is *separate* from actually using the stuff, and it can unlock multiple resources at a time.
+- Scavenge Batteries :: Refuels power. Unlocked by Explore Ruins.
+- Scavenge Weapons :: Increases your combat stat (for the loop). Unlocked by Explore Ruins.
+- Calibrate Weapons :: More increases to combat stat. Not capped, but more expensive than Scavenge Weapons. *Not* persistent (you're calibrating the weapons themselves, lore-wise).
+- Observe Patrol Routes :: Decreases power necessary to go to the next zone (because you need fewer evasive maneuvers).
+- Hijack Ship :: Get the hell out. You're vacuum-capable, but the pilot isn't. Sucks for them. Requires some amount of Observe Patrol Routes and Scavenge Weapons.
