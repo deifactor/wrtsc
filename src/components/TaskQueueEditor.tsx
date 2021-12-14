@@ -49,7 +49,10 @@ const TaskQueueEditor = observer((props: Props) => {
   });
   return (
     <div>
-      {tasks}
+      <div className="h-[36rem]">
+        <h1>Queue</h1>
+        {tasks}
+      </div>
       {addButtons}
     </div>
   );

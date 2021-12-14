@@ -26,7 +26,7 @@ export const Button = (props: Props) => {
     </button>
   );
   if (props.tooltip) {
-    return <Tooltip overlay={props.tooltip}>{button}</Tooltip>;
+    return <Tooltip overlay={props.tooltip}  placement="bottom">{button}</Tooltip>;
   } else {
     return button;
   }
