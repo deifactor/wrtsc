@@ -15,6 +15,7 @@ export interface Stats {
 export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
+  timeOnTask: number = 0;
 
   private readonly iter: TaskQueueIterator;
 
@@ -32,6 +33,10 @@ export class Schedule {
     return this.iter.peek();
   }
 
+  get taskDone(): boolean {
+    return Boolean(this.task && this.timeOnTask >= this.task.baseCost);
+  }
+
   completions(index: number): number {
     const { entry } = this;
     if (entry == null) {
@@ -47,10 +52,18 @@ export class Schedule {
   }
 
   /**
+   * Ticks the progress on the current task by the given amount.
+   */
+  tickTime(amount: number) {
+    this.timeOnTask += amount;
+  }
+
+  /**
    * Advances to the next task. Argument indicates whether the current task
    * succeeded or not.
    */
   next(): void {
     this.iter.next();
+    this.timeOnTask = 0;
   }
 }
