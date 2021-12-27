@@ -27,7 +27,7 @@ export interface TaskJson {
 export const EXPLORE_RUINS: Task = {
   kind: "explore-ruins",
   name: "Explore Ruins",
-  baseCost: 100,
+  baseCost: 20,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   perform: (player: Player) => {
@@ -38,7 +38,7 @@ export const EXPLORE_RUINS: Task = {
 export const SCAVENGE_BATTERIES: Task = {
   kind: "scavenge-batteries",
   name: "Scavenge Batteries",
-  baseCost: 50,
+  baseCost: 5,
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
   perform: (player: Player) => {
@@ -49,7 +49,7 @@ export const SCAVENGE_BATTERIES: Task = {
 export const SCAVENGE_WEAPONS: Task = {
   kind: "scavenge-weapons",
   name: "Scavenge Weapons",
-  baseCost: 50,
+  baseCost: 5,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   perform: (player: Player) => {
