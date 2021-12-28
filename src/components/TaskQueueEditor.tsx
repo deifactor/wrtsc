@@ -2,13 +2,16 @@ import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
 import { TaskQueue } from "../taskQueue";
 import { ALL_TASKS } from "../task";
+import { Player } from "../player";
 
 interface Props {
   taskQueue: TaskQueue;
+  // Necessary so that we can figure out what tasks are enabled.
+  player: Player;
 }
 
 const TaskQueueEditor = observer((props: Props) => {
-  const { taskQueue } = props;
+  const { taskQueue, player } = props;
   const tasks = taskQueue.entries.map((entry, idx) => {
     const incrementCount = (): void => taskQueue.modifyCount(idx, 1);
     const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
@@ -42,6 +45,7 @@ const TaskQueueEditor = observer((props: Props) => {
         key={task.kind}
         onClick={() => taskQueue.push(task)}
         tooltip={tooltip}
+        state={task.unlocked(player) ? "active" : "locked"}
       >
         {task.name}
       </Button>

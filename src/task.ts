@@ -15,6 +15,7 @@ export interface Task {
   baseCost: number;
   description: string;
   perform: (player: Player) => void;
+  unlocked: (player: Player) => boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export const EXPLORE_RUINS: Task = {
   perform: (player: Player) => {
     player.stats.ruinsExploration.addXp(1024);
   },
+  unlocked: () => true,
 };
 
 export const SCAVENGE_BATTERIES: Task = {
@@ -44,6 +46,7 @@ export const SCAVENGE_BATTERIES: Task = {
   perform: (player: Player) => {
     // TODO: not implemented yet!
   },
+  unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
 
 export const SCAVENGE_WEAPONS: Task = {
@@ -55,6 +58,7 @@ export const SCAVENGE_WEAPONS: Task = {
   perform: (player: Player) => {
     player.stats.combat.addXp(1024);
   },
+  unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
 
 export const ALL_TASKS = [EXPLORE_RUINS, SCAVENGE_BATTERIES, SCAVENGE_WEAPONS];

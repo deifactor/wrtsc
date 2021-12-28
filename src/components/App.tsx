@@ -67,7 +67,7 @@ const App = () => {
   return (
     <div className="app flex space-x-10 p-4">
       <StatsView className="w-96" stats={player.stats} />
-      <TaskQueueEditor taskQueue={taskQueue} />
+      <TaskQueueEditor taskQueue={taskQueue} player={player} />
       <div className="flex-grow">
         <ScheduleView className="h-[36rem]" schedule={schedule} />
         <Button onClick={onStart}>Start</Button>
