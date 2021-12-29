@@ -50,7 +50,7 @@ const App = () => {
 
   return (
     <div className="app flex space-x-10 p-4">
-      <StatsView className="w-96" stats={engine.player.stats} />
+      <StatsView className="w-96" stats={engine.player.statList()} />
       <TaskQueueEditor taskQueue={engine.taskQueue} player={engine.player} />
       <div className="w-96">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
