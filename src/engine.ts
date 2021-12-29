@@ -1,8 +1,10 @@
 import { makeAutoObservable } from "mobx";
-import { Player } from "./player";
+import { Player, PlayerJSON } from "./player";
 import { Schedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, Zone } from "./zone";
+
+export const STORAGE_KEY = "save";
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
@@ -39,4 +41,29 @@ export class Engine {
       this.schedule.next();
     }
   }
+
+  save(): GameSave {
+    return { player: this.player.save() };
+  }
+
+  load(save: GameSave) {
+    this.player.load(save.player);
+  }
+
+  saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.save()));
+  }
+
+  static loadFromStorage(): Engine {
+    const engine = new Engine();
+    const stringified = localStorage.getItem(STORAGE_KEY);
+    if (stringified) {
+      engine.load(JSON.parse(stringified));
+    }
+    return engine;
+  }
 }
+
+type GameSave = {
+  player: PlayerJSON;
+};

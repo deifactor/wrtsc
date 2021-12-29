@@ -37,7 +37,7 @@ const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 12;
 
 const App = () => {
-  const [engine] = useState(() => new Engine());
+  const [engine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
 
@@ -46,6 +46,7 @@ const App = () => {
     const multiplier = isDev ? 5 : 1;
     engine.tickTime((multiplier * (delta - lastUpdate)) / 1000);
     setLastUpdate(delta);
+    engine.saveToStorage();
   }, 1000 / UPDATES_PER_SEC);
 
   return (
