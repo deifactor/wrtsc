@@ -33,7 +33,7 @@ const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 12;
 
 const App = () => {
-  const [engine] = useState(Engine.loadFromStorage);
+  const [engine, setEngine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
 
@@ -47,7 +47,12 @@ const App = () => {
 
   return (
     <div className="app flex space-x-10 p-4">
-      <StatsView className="w-96" stats={engine.player.statList()} />
+      <div className="w-96">
+        <StatsView className="w-96" stats={engine.player.statList()} />
+        <Button kind="danger" onClick={() => setEngine(new Engine())}>
+          Hard Reset
+        </Button>
+      </div>
       <TaskQueueEditor taskQueue={engine.taskQueue} player={engine.player} />
       <div className="w-96">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />

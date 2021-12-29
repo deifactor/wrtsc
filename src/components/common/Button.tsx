@@ -6,34 +6,50 @@ import "rc-tooltip/assets/bootstrap.css";
 interface Props {
   onClick: () => void;
   state?: "active" | "locked";
+  kind?: "normal" | "danger";
   size?: "sm" | "md";
   children: ReactNode;
   tooltip?: ReactNode | (() => ReactNode);
 }
 
-export const Button = (props: Props) => {
-  const size = props.size || "md";
-  const state = props.state || "active";
+export const Button = ({
+  onClick,
+  state = "active",
+  kind = "normal",
+  size = "md",
+  children,
+  tooltip,
+}: Props) => {
+  const sizeClass = {
+    sm: "py-1 px-2",
+    md: "py-2 px-4",
+  };
+  const stateClass = {
+    locked: "text-red-600",
+    active: "text-white",
+  };
+  const kindClass = {
+    normal: "bg-gray-900 hover:bg-gray-500",
+    danger: "bg-red-500 hover:bg-red-100",
+  };
   const button = (
     <button
-      onClick={state !== "locked" ? props.onClick : () => {}}
+      onClick={state !== "locked" ? onClick : () => {}}
       className={classNames(
-        "bg-gray-900  hover:bg-gray-500 font-bold rounded-sm",
+        "font-bold rounded-sm",
         "outline outline-1 outline-offset-1 outline-gray-500",
         "m-1",
-        { "py-2 px-4": size === "md", "py-1 px-2": size === "sm" },
-        {
-          "text-red-600": state === "locked",
-          "text-white": state === "active",
-        }
+        sizeClass[size],
+        stateClass[state],
+        kindClass[kind]
       )}
     >
-      {props.children}
+      {children}
     </button>
   );
-  if (props.tooltip) {
+  if (tooltip) {
     return (
-      <Tooltip overlay={props.tooltip} placement="bottom">
+      <Tooltip overlay={tooltip} placement="bottom">
         {button}
       </Tooltip>
     );
