@@ -52,7 +52,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4">
       <StatsView className="w-96" stats={engine.player.stats} />
       <TaskQueueEditor taskQueue={engine.taskQueue} player={engine.player} />
-      <div className="flex-grow">
+      <div className="w-96">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
