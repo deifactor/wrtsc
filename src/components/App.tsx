@@ -8,6 +8,7 @@ import { StatsView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Player } from "../player";
 import { RUINS } from "../zone";
+import { Engine } from "../engine";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -36,44 +37,27 @@ const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 12;
 
 const App = () => {
-  const [taskQueue] = useState(() => new TaskQueue());
-  const [player] = useState(() => new Player());
-  const [zone] = useState(() => RUINS);
-  const [schedule, setSchedule] = useState(
-    () => new Schedule(taskQueue.clone())
-  );
-  const onStart = (): void => {
-    setSchedule(new Schedule(taskQueue.clone()));
-  };
-  const onNext = (): void => {
-    schedule.task?.perform(player);
-    schedule.next();
-  };
+  const [engine] = useState(() => new Engine());
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
 
   useInterval(() => {
     const delta = new Date().getTime();
     const multiplier = isDev ? 5 : 1;
-    schedule.tickTime((multiplier * (delta - lastUpdate)) / 1000);
+    engine.tickTime((multiplier * (delta - lastUpdate)) / 1000);
     setLastUpdate(delta);
-
-    if (schedule.taskDone) {
-      schedule.task?.perform(player);
-      schedule.next();
-    }
   }, 1000 / UPDATES_PER_SEC);
 
   return (
     <div className="app flex space-x-10 p-4">
-      <StatsView className="w-96" stats={player.stats} />
-      <TaskQueueEditor taskQueue={taskQueue} player={player} />
+      <StatsView className="w-96" stats={engine.player.stats} />
+      <TaskQueueEditor taskQueue={engine.taskQueue} player={engine.player} />
       <div className="flex-grow">
-        <ScheduleView className="h-[36rem]" schedule={schedule} />
-        <Button onClick={onStart}>Start</Button>
-        <Button onClick={onNext}>Next</Button>
+        <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
+        <Button onClick={() => engine.startLoop()}>Start</Button>
+        <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
-      <ZoneView className="w-96" zone={zone} />
+      <ZoneView className="w-96" zone={engine.zone} />
     </div>
   );
 };
