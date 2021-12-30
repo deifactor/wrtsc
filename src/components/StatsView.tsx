@@ -11,8 +11,7 @@ export const StatsView = observer((props: Props) => {
     const statPercent = Math.floor((100 * stat.xp) / stat.totalToNextLevel);
     return (
       <div key={stat.name}>
-        <strong>{stat.name}</strong>: {stat.level} ({statPercent}% {stat.xp}/
-        {stat.totalToNextLevel})
+        <strong>{stat.name}</strong>: {stat.level} ({statPercent}%)
       </div>
     );
   });

@@ -61,7 +61,8 @@ const App = () => {
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
       <div>
-        <ZoneView className="w-96" zone={engine.zone} />
+        <ZoneView className="w-96 mb-12" zone={engine.zone} />
+        <h2>Progress</h2>
         <StatsView stats={engine.player.zoneProgress(engine.zone)} />
       </div>
     </div>
