@@ -5,9 +5,7 @@ export type TaskKind =
   | "scavenge-batteries"
   | "scavenge-weapons";
 
-/**
- * A task, something that goes in the task queue.
- */
+/** A task, something that goes in the task queue. */
 export interface Task {
   kind: TaskKind;
   name: string;
@@ -18,9 +16,7 @@ export interface Task {
   unlocked: (player: Player) => boolean;
 }
 
-/**
- * A task serialized to JSON, for persisting in localStorage or similar.
- */
+/** A task serialized to JSON, for persisting in localStorage or similar. */
 export interface TaskJson {
   kind: TaskKind;
 }
@@ -31,8 +27,9 @@ export const EXPLORE_RUINS: Task = {
   baseCost: 20,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
-  perform: (player: Player) => {
-    player.stats.ruinsExploration.addXp(1024);
+  perform: ({ stats, resources }: Player) => {
+    stats.ruinsExploration.addXp(1024);
+    resources.ruinsBatteries.max = stats.ruinsExploration.level;
   },
   unlocked: () => true,
 };

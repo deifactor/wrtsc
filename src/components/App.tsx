@@ -2,7 +2,7 @@ import { Button } from "./common/Button";
 import { useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleView } from "./ScheduleView";
-import { StatsView } from "./StatsView";
+import { StatView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
 
@@ -49,7 +49,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4">
       <div className="w-96">
         <h1>Stats</h1>
-        <StatsView stats={engine.player.statList()} />
+        <StatView stat={engine.player.stats.combat} />
         <Button kind="danger" onClick={() => setEngine(new Engine())}>
           Hard Reset
         </Button>
@@ -61,9 +61,11 @@ const App = () => {
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
       <div>
-        <ZoneView className="w-96 mb-12" zone={engine.zone} />
-        <h2>Progress</h2>
-        <StatsView stats={engine.player.zoneProgress(engine.zone)} />
+        <ZoneView
+          className="w-96 mb-12"
+          zone={engine.zone}
+          player={engine.player}
+        />
       </div>
     </div>
   );
