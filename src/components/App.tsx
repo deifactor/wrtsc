@@ -5,6 +5,7 @@ import { ScheduleView } from "./ScheduleView";
 import { StatView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
+import { PlayerView } from "./PlayerView";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -49,7 +50,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4">
       <div className="w-96">
         <h1>Stats</h1>
-        <StatView stat={engine.player.stats.combat} />
+        <PlayerView player={engine.player} />
         <Button kind="danger" onClick={() => setEngine(new Engine())}>
           Hard Reset
         </Button>

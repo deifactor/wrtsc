@@ -1,9 +1,12 @@
 import { makeAutoObservable } from "mobx";
 import { Zone, ZoneKind } from "./zone";
 
+const INITIAL_ENERGY = 20;
+
 export class Player {
   readonly stats: Record<StatName, Stat>;
   readonly resources: Record<ResourceName, Resource>;
+  energy: number = INITIAL_ENERGY;
 
   constructor(json?: PlayerJSON) {
     this.stats = {
@@ -24,10 +27,12 @@ export class Player {
     makeAutoObservable(this);
   }
 
+  /** Invoked whenevew the time loop restarts. */
   startLoop() {
     for (const resource of Object.values(this.resources)) {
       resource.startLoop();
     }
+    this.energy = INITIAL_ENERGY;
   }
 
   save(): PlayerJSON {
@@ -41,6 +46,10 @@ export class Player {
     return zone.progressStats.map((name) => this.stats[name]);
   }
 
+  /**
+   * Updates the maximum limits on each resource. This should be called whenever
+   * a stat changes/could have changed.
+   */
   setResourceLimits() {
     this.resources.ruinsBatteries.max = this.stats.ruinsExploration.level;
   }
