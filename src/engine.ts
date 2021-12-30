@@ -40,6 +40,7 @@ export class Engine {
     if (this.schedule.taskDone) {
       this.schedule.task!.perform(this.player);
       this.schedule.next();
+      this.player.setResourceLimits();
     }
   }
 

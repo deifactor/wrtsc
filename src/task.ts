@@ -27,9 +27,8 @@ export const EXPLORE_RUINS: Task = {
   baseCost: 20,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
-  perform: ({ stats, resources }: Player) => {
+  perform: ({ stats }: Player) => {
     stats.ruinsExploration.addXp(1024);
-    resources.ruinsBatteries.max = stats.ruinsExploration.level;
   },
   unlocked: () => true,
 };

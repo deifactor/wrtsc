@@ -13,6 +13,7 @@ export class Player {
     this.resources = {
       ruinsBatteries: new Resource("Wreckage Batteries"),
     };
+    this.setResourceLimits();
 
     makeAutoObservable(this);
   }
@@ -31,11 +32,16 @@ export class Player {
 
   load(json: PlayerJSON) {
     STAT_NAMES.map((name) => this.stats[name].load(json.stats[name]));
+    this.setResourceLimits();
   }
 
   /** The 'stats' that are actually progress elements for the given zone. */
   zoneProgress(zone: Zone): Stat[] {
     return zone.progressStats.map((name) => this.stats[name]);
+  }
+
+  setResourceLimits() {
+    this.resources.ruinsBatteries.max = this.stats.ruinsExploration.level;
   }
 }
 
