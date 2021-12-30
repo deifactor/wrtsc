@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
 import { Zone, ZoneKind } from "../zone";
+import { ResourceView } from "./ResourceView";
 import { StatView } from "./StatsView";
 
 type Props = {
@@ -22,6 +23,7 @@ export const ZoneView = observer((props: Props) => {
         return (
           <div>
             <StatView stat={stats.ruinsExploration}></StatView>
+            <ResourceView resource={resources.ruinsBatteries}></ResourceView>
           </div>
         );
     }
