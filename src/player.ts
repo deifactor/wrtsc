@@ -7,7 +7,7 @@ export class Player {
   constructor() {
     this.stats = {
       combat: new Stat("Combat"),
-      ruinsExploration: new Stat("Ruins Exploration"),
+      ruinsExploration: new Stat("Ruins Exploration", "progress"),
     };
     makeAutoObservable(this);
   }
@@ -36,15 +36,21 @@ export const STAT_NAMES = ["combat", "ruinsExploration"] as const;
 export type StatName = typeof STAT_NAMES[number];
 export type Stats = Record<StatName, Stat>;
 
+export type StatKind = "normal" | "progress";
+
 export class Stat {
   // Stores the amount to the next level, not total XP.
   name: string;
   xp: number = 0;
   level: number = 0;
+  kind: StatKind;
+  maxLevel?: number;
 
-  constructor(name: string) {
+  constructor(name: string, kind: StatKind = "normal") {
     makeAutoObservable(this);
     this.name = name;
+    this.kind = kind;
+    this.maxLevel = kind == "normal" ? undefined : 100;
   }
 
   get totalToNextLevel(): number {
@@ -52,11 +58,22 @@ export class Stat {
   }
 
   addXp(amount: number) {
+    if (this.atMaxLevel) {
+      return;
+    }
     this.xp += amount;
     while (this.xp >= this.totalToNextLevel) {
       this.xp -= this.totalToNextLevel;
       this.level++;
+      if (this.atMaxLevel) {
+        this.xp = 0;
+        return;
+      }
     }
+  }
+
+  get atMaxLevel(): boolean {
+    return this.maxLevel !== undefined && this.level >= this.maxLevel;
   }
 
   save(): StatJSON {
