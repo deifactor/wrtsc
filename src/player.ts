@@ -17,8 +17,10 @@ export class Player {
     makeAutoObservable(this);
   }
 
-  statList() {
-    return [this.stats.combat];
+  reset() {
+    for (const resource of Object.values(this.resources)) {
+      resource.reset();
+    }
   }
 
   save(): PlayerJSON {
@@ -120,5 +122,9 @@ export class Resource {
   constructor(name: string) {
     this.name = name;
     makeAutoObservable(this);
+  }
+
+  reset() {
+    this.current = this.max;
   }
 }
