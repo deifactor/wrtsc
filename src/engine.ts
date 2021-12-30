@@ -25,7 +25,7 @@ export class Engine {
   /** Restart the time loop. */
   startLoop() {
     this.schedule = new Schedule(this.taskQueue.clone());
-    this.player.reset();
+    this.player.startLoop();
   }
 
   /** Iterate to the next task. This includes performing the current task. */

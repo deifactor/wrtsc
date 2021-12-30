@@ -19,13 +19,14 @@ export class Player {
     };
 
     this.setResourceLimits();
+    this.startLoop();
 
     makeAutoObservable(this);
   }
 
-  reset() {
+  startLoop() {
     for (const resource of Object.values(this.resources)) {
-      resource.reset();
+      resource.startLoop();
     }
   }
 
@@ -129,7 +130,7 @@ export class Resource {
     makeAutoObservable(this);
   }
 
-  reset() {
+  startLoop() {
     this.current = this.max;
   }
 }
