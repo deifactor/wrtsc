@@ -3,12 +3,17 @@ import { Zone, ZoneKind } from "./zone";
 
 export class Player {
   readonly stats: Record<StatName, Stat>;
+  readonly resources: Record<ResourceName, Resource>;
 
   constructor() {
     this.stats = {
       combat: new Stat("Combat"),
       ruinsExploration: new Stat("Ruins Exploration", "progress"),
     };
+    this.resources = {
+      ruinsBatteries: new Resource("Wreckage Batteries"),
+    };
+
     makeAutoObservable(this);
   }
 
@@ -97,3 +102,23 @@ export type StatJSON = {
   xp: number;
   level: number;
 };
+
+export const RESOURCE_NAMES = ["ruinsBatteries"] as const;
+export type ResourceName = typeof RESOURCE_NAMES[number];
+export type Resources = Record<ResourceName, Resource>;
+
+/**
+ * A Resource is something in the world that the player 'harvests' over the
+ * course of the loop. The current count of each resource resets on loop start,
+ * but the maximum doesn't.
+ */
+export class Resource {
+  readonly name: string;
+  current: number = 0;
+  max: number = 0;
+
+  constructor(name: string) {
+    this.name = name;
+    makeAutoObservable(this);
+  }
+}
