@@ -48,7 +48,8 @@ const App = () => {
   return (
     <div className="app flex space-x-10 p-4">
       <div className="w-96">
-        <StatsView className="w-96" stats={engine.player.statList()} />
+        <h1>Stats</h1>
+        <StatsView stats={engine.player.statList()} />
         <Button kind="danger" onClick={() => setEngine(new Engine())}>
           Hard Reset
         </Button>
@@ -59,7 +60,10 @@ const App = () => {
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
-      <ZoneView className="w-96" zone={engine.zone} />
+      <div>
+        <ZoneView className="w-96" zone={engine.zone} />
+        <StatsView stats={engine.player.zoneProgress(engine.zone)} />
+      </div>
     </div>
   );
 };

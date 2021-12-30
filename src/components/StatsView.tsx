@@ -3,11 +3,10 @@ import { Stat } from "../player";
 
 type Props = {
   stats: Stat[];
-  className?: string;
 };
 
 export const StatsView = observer((props: Props) => {
-  const { stats, className } = props;
+  const { stats } = props;
   const statBlock = stats.map((stat) => {
     const statPercent = Math.floor((100 * stat.xp) / stat.totalToNextLevel);
     return (
@@ -17,10 +16,5 @@ export const StatsView = observer((props: Props) => {
       </div>
     );
   });
-  return (
-    <div className={className}>
-      <h1>Stats</h1>
-      {statBlock}
-    </div>
-  );
+  return <div>{statBlock}</div>;
 });

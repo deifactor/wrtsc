@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { Zone, ZoneKind } from "./zone";
 
 export class Player {
   readonly stats: Record<StatName, Stat>;
@@ -12,7 +13,7 @@ export class Player {
   }
 
   statList() {
-    return [this.stats.combat, this.stats.ruinsExploration];
+    return [this.stats.combat];
   }
 
   save(): PlayerJSON {
@@ -23,6 +24,11 @@ export class Player {
 
   load(json: PlayerJSON) {
     STAT_NAMES.map((name) => this.stats[name].load(json.stats[name]));
+  }
+
+  /** The 'stats' that are actually progress elements for the given zone. */
+  zoneProgress(zone: Zone): Stat[] {
+    return zone.progressStats.map((name) => this.stats[name]);
   }
 }
 
