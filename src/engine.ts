@@ -14,8 +14,8 @@ export class Engine {
   schedule: Schedule;
   readonly taskQueue: TaskQueue;
 
-  constructor() {
-    this.player = new Player();
+  constructor(json?: GameSave) {
+    this.player = new Player(json?.player);
     this.zone = RUINS;
     this.schedule = new Schedule(new TaskQueue());
     this.taskQueue = new TaskQueue();
@@ -48,21 +48,17 @@ export class Engine {
     return { player: this.player.save() };
   }
 
-  load(save: GameSave) {
-    this.player.load(save.player);
-  }
-
   saveToStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.save()));
   }
 
   static loadFromStorage(): Engine {
-    const engine = new Engine();
     const stringified = localStorage.getItem(STORAGE_KEY);
     if (stringified) {
-      engine.load(JSON.parse(stringified));
+      return new Engine(JSON.parse(stringified));
+    } else {
+      return new Engine();
     }
-    return engine;
   }
 }
 

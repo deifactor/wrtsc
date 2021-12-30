@@ -5,14 +5,19 @@ export class Player {
   readonly stats: Record<StatName, Stat>;
   readonly resources: Record<ResourceName, Resource>;
 
-  constructor() {
+  constructor(json?: PlayerJSON) {
     this.stats = {
-      combat: new Stat("Combat"),
-      ruinsExploration: new Stat("Ruins Exploration", "progress"),
+      combat: new Stat("Combat", "normal", json?.stats.combat),
+      ruinsExploration: new Stat(
+        "Ruins Exploration",
+        "progress",
+        json?.stats.ruinsExploration
+      ),
     };
     this.resources = {
       ruinsBatteries: new Resource("Wreckage Batteries"),
     };
+
     this.setResourceLimits();
 
     makeAutoObservable(this);
@@ -28,11 +33,6 @@ export class Player {
     const stats: Partial<Record<StatName, StatJSON>> = {};
     STAT_NAMES.map((name) => (stats[name] = this.stats[name]));
     return { stats: stats as Record<StatName, StatJSON> };
-  }
-
-  load(json: PlayerJSON) {
-    STAT_NAMES.map((name) => this.stats[name].load(json.stats[name]));
-    this.setResourceLimits();
   }
 
   /** The 'stats' that are actually progress elements for the given zone. */
@@ -59,11 +59,15 @@ export class Stat {
   kind: StatKind;
   maxLevel?: number;
 
-  constructor(name: string, kind: StatKind = "normal") {
+  constructor(name: string, kind: StatKind, json?: StatJSON) {
     makeAutoObservable(this);
     this.name = name;
     this.kind = kind;
     this.maxLevel = kind == "normal" ? undefined : 100;
+    if (json) {
+      this.xp = json.xp;
+      this.level = json.level;
+    }
   }
 
   get totalToNextLevel(): number {
@@ -94,11 +98,6 @@ export class Stat {
       xp: this.xp,
       level: this.level,
     };
-  }
-
-  load(json: StatJSON) {
-    this.xp = json.xp;
-    this.level = json.level;
   }
 }
 
