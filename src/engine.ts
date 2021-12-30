@@ -39,6 +39,9 @@ export class Engine {
    * energy, this will restart the engine loop.
    */
   tickTime(amount: number) {
+    if (!this.schedule.task) {
+      return;
+    }
     this.schedule.tickTime(amount);
     if (this.schedule.taskDone) {
       this.schedule.task!.perform(this.player);
