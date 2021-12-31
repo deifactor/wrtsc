@@ -22,10 +22,7 @@ export class Schedule {
   constructor(queue: TaskQueue) {
     this.queue = queue;
     this.iter = new TaskQueueIterator(this.queue);
-    makeAutoObservable(this, {
-      // Not sure why this has to be specially marked.
-      next: action,
-    });
+    makeAutoObservable(this);
   }
 
   get task(): Task | undefined {
