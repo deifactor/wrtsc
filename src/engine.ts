@@ -1,10 +1,13 @@
-import { makeAutoObservable } from "mobx";
+import { trace, makeAutoObservable, runInAction, untracked } from "mobx";
 import { Player, PlayerJSON } from "./player";
 import { Schedule } from "./schedule";
+import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
+
+export type SimulationResult = { kind: "ok" } | { kind: "error"; step: Task };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
@@ -12,7 +15,7 @@ export class Engine {
   readonly zone: Zone;
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
   schedule: Schedule;
-  readonly taskQueue: TaskQueue;
+  taskQueue: TaskQueue;
 
   constructor(json?: GameSave) {
     this.player = new Player(json?.player);
@@ -49,9 +52,25 @@ export class Engine {
       this.player.setResourceLimits();
     }
     this.player.removeEnergy(amount);
-    if (this.player.energy <= 0) {
-      this.startLoop();
-    }
+  }
+
+  get simulation(): SimulationResult {
+    // Deep-copy the engine into a new state
+    const sim = new Engine(JSON.parse(JSON.stringify(this.save())));
+    const queue = this.taskQueue.clone();
+    return untracked(() => {
+      sim.taskQueue = queue;
+      sim.startLoop();
+      while (sim.schedule.task) {
+        const task = sim.schedule.task;
+        if (!task.enabled(sim.player)) {
+          return { kind: "error", step: task };
+        }
+        sim.tickTime(1000 / 12);
+      }
+      console.log("Run");
+      return { kind: "ok" };
+    });
   }
 
   save(): GameSave {

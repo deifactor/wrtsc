@@ -3,21 +3,30 @@ import { observer } from "mobx-react-lite";
 import { TaskQueue } from "../taskQueue";
 import { ALL_TASKS } from "../task";
 import { Player } from "../player";
+import { Engine, SimulationResult } from "../engine";
+import classNames from "classnames";
 
 interface Props {
-  taskQueue: TaskQueue;
-  // Necessary so that we can figure out what tasks are enabled.
-  player: Player;
+  engine: Engine;
 }
 
 const TaskQueueEditor = observer((props: Props) => {
-  const { taskQueue, player } = props;
+  const {
+    engine: { taskQueue, player, simulation },
+  } = props;
   const tasks = taskQueue.entries.map((entry, idx) => {
     const incrementCount = (): void => taskQueue.modifyCount(idx, 1);
     const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
+    const isFailure =
+      simulation.kind == "error" && simulation.step == entry.task;
     return (
       // eslint-disable-next-line react/no-array-index-key
-      <div key={idx} className="flex items-center">
+      <div
+        key={idx}
+        className={classNames("flex items-center", {
+          "text-red-300": isFailure,
+        })}
+      >
         <div className="flex-grow">
           {entry.task.name} x{entry.count}
         </div>

@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import { Task } from "./task";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
@@ -22,7 +22,10 @@ export class Schedule {
   constructor(queue: TaskQueue) {
     this.queue = queue;
     this.iter = new TaskQueueIterator(this.queue);
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      // Not sure why this has to be specially marked.
+      next: action,
+    });
   }
 
   get task(): Task | undefined {
@@ -51,9 +54,7 @@ export class Schedule {
     return 0;
   }
 
-  /**
-   * Ticks the progress on the current task by the given amount.
-   */
+  /** Ticks the progress on the current task by the given amount. */
   tickTime(amount: number) {
     this.timeOnTask += amount;
   }

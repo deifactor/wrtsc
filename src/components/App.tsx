@@ -62,7 +62,7 @@ const App = observer(() => {
           Hard Reset
         </Button>
       </div>
-      <TaskQueueEditor taskQueue={engine.taskQueue} player={engine.player} />
+      <TaskQueueEditor engine={engine} />
       <div className="w-96">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
         <Button onClick={() => engine.startLoop()}>Start</Button>

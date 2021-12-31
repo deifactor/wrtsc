@@ -29,6 +29,10 @@ export class Player {
     makeAutoObservable(this);
   }
 
+  clone(): Player {
+    return new Player(this.save());
+  }
+
   get energy(): number {
     return this._energy;
   }
@@ -90,7 +94,6 @@ export class Stat {
   maxLevel?: number;
 
   constructor(name: string, kind: StatKind, json?: StatJSON) {
-    makeAutoObservable(this);
     this.name = name;
     this.kind = kind;
     this.maxLevel = kind == "normal" ? undefined : 100;
@@ -98,6 +101,7 @@ export class Stat {
       this.xp = json.xp;
       this.level = json.level;
     }
+    makeAutoObservable(this);
   }
 
   get totalToNextLevel(): number {
