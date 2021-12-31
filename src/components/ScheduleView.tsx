@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { Schedule } from "../schedule";
+import { TASKS } from "../task";
 
 interface Props {
   schedule: Schedule;
@@ -17,7 +18,7 @@ export const ScheduleView = observer((props: Props) => {
     schedule.task && schedule.timeOnTask / schedule.task.baseCost;
 
   const entries = schedule.queue.entries.map((entry, idx) => {
-    const isCurrent = entry === schedule.entry?.entry;
+    const isCurrent = idx === schedule.current?.index;
     // We need whitespace-pre here because we pad with spaces.
     const progressSpan = isCurrent && (
       <span className="inline-block ml-auto whitespace-pre">

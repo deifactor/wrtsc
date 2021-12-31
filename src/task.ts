@@ -70,7 +70,11 @@ export const SCAVENGE_WEAPONS: Task = {
   enabled: always,
 };
 
-export const ALL_TASKS = [EXPLORE_RUINS, SCAVENGE_BATTERIES, SCAVENGE_WEAPONS];
+export const TASKS: Record<TaskKind, Task> = {
+  "explore-ruins": EXPLORE_RUINS,
+  "scavenge-batteries": SCAVENGE_BATTERIES,
+  "scavenge-weapons": SCAVENGE_WEAPONS,
+};
 
 export function fromJSON(obj: TaskJson): Task {
   switch (obj.kind) {

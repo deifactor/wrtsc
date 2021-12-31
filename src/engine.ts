@@ -2,12 +2,14 @@ import { trace, makeAutoObservable, runInAction, untracked } from "mobx";
 import { Player, PlayerJSON } from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
-import { TaskQueue } from "./taskQueue";
+import { TaskQueue, TaskQueuePointer } from "./taskQueue";
 import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
 
-export type SimulationResult = { kind: "ok" } | { kind: "error"; step: Task };
+export type SimulationResult =
+  | { kind: "ok" }
+  | { kind: "error"; step: TaskQueuePointer };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
@@ -64,11 +66,10 @@ export class Engine {
       while (sim.schedule.task) {
         const task = sim.schedule.task;
         if (!task.enabled(sim.player)) {
-          return { kind: "error", step: task };
+          return { kind: "error", step: sim.schedule.current! };
         }
         sim.tickTime(1000 / 12);
       }
-      console.log("Run");
       return { kind: "ok" };
     });
   }

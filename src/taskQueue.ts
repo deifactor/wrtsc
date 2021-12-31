@@ -1,31 +1,33 @@
 import { makeAutoObservable } from "mobx";
-import { Task } from "./task";
+import { Task, TaskKind, TASKS } from "./task";
 
-/**
- * An entry in a task queue consists of a task and a number of times to repeat it.
- */
+/** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskQueueEntry {
   task: Task;
   count: number;
 }
 
 export interface TaskQueuePointer {
+  task: Task;
   index: number;
-  entry: TaskQueueEntry;
   iteration: number;
+  /**
+   * Indicates the index within the task list as a whole. That is, this
+   * increases by one with every call to next().
+   */
+  step: number;
 }
 
 /**
  * Iterates over the entries in a task queue.
  *
- * Note that once this has finished, modifying the task queue further is not
- * supported.
+ * Note that once this has finished, modifying the task queue further is not supported.
  */
 export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
   private readonly queue: TaskQueue;
 
   private index = 0;
-
+  private step = 0;
   private iteration = 0;
 
   constructor(queue: TaskQueue) {
@@ -44,8 +46,9 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     }
     return {
       index: this.index,
-      entry,
       iteration: this.iteration,
+      task: entry.task,
+      step: this.step,
     };
   }
 
@@ -58,6 +61,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     if (value == null) {
       return { value, done: true };
     }
+    this.step += 1;
     this.iteration += 1;
     if (this.iteration >= this.queue.entries[this.index].count) {
       this.index += 1;
@@ -78,14 +82,12 @@ export class TaskQueue {
   clone(): TaskQueue {
     const cloned = new TaskQueue();
     for (const pointer of this.taskIterator()) {
-      cloned.push(pointer.entry.task);
+      cloned.push(pointer.task.kind);
     }
     return cloned;
   }
 
-  /**
-   * An array accessor that will make MobX happy.
-   */
+  /** An array accessor that will make MobX happy. */
   entry(idx: number): TaskQueueEntry | undefined {
     return idx < this.entries.length ? this.entries[idx] : undefined;
   }
@@ -94,12 +96,12 @@ export class TaskQueue {
     return new TaskQueueIterator(this);
   }
 
-  push(task: Task): void {
+  push(kind: TaskKind): void {
     const lastEntry = this.entries[this.entries.length - 1];
-    if (lastEntry?.task.kind === task.kind) {
+    if (lastEntry?.task.kind === kind) {
       lastEntry.count += 1;
     } else {
-      this.entries.push({ task, count: 1 });
+      this.entries.push({ task: TASKS[kind], count: 1 });
     }
   }
 

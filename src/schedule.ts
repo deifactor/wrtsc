@@ -29,10 +29,10 @@ export class Schedule {
   }
 
   get task(): Task | undefined {
-    return this.entry?.entry.task;
+    return this.current?.task;
   }
 
-  get entry(): TaskQueuePointer | undefined {
+  get current(): TaskQueuePointer | undefined {
     return this.iter.peek();
   }
 
@@ -41,15 +41,15 @@ export class Schedule {
   }
 
   completions(index: number): number {
-    const { entry } = this;
-    if (entry == null) {
+    const { current } = this;
+    if (current == null) {
       return this.queue.entry(index)!.count;
     }
-    if (index < entry.index) {
+    if (index < current.index) {
       return this.queue.entry(index)!.count;
     }
-    if (index === entry.index) {
-      return entry.iteration;
+    if (index === current.index) {
+      return current.iteration;
     }
     return 0;
   }

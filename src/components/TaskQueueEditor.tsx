@@ -1,7 +1,7 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
 import { TaskQueue } from "../taskQueue";
-import { ALL_TASKS } from "../task";
+import { TASKS } from "../task";
 import { Player } from "../player";
 import { Engine, SimulationResult } from "../engine";
 import classNames from "classnames";
@@ -18,7 +18,7 @@ const TaskQueueEditor = observer((props: Props) => {
     const incrementCount = (): void => taskQueue.modifyCount(idx, 1);
     const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
     const isFailure =
-      simulation.kind == "error" && simulation.step == entry.task;
+      simulation.kind == "error" && simulation.step.index == idx;
     return (
       // eslint-disable-next-line react/no-array-index-key
       <div
@@ -40,7 +40,7 @@ const TaskQueueEditor = observer((props: Props) => {
     );
   });
 
-  const addButtons = ALL_TASKS.map((task) => {
+  const addButtons = Object.values(TASKS).map((task) => {
     const tooltip = (
       <div>
         <p>{task.description}</p>
@@ -52,7 +52,7 @@ const TaskQueueEditor = observer((props: Props) => {
     return (
       <Button
         key={task.kind}
-        onClick={() => taskQueue.push(task)}
+        onClick={() => taskQueue.push(task.kind)}
         tooltip={tooltip}
         state={task.unlocked(player) ? "active" : "locked"}
       >
