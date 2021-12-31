@@ -40,6 +40,7 @@ export const SCAVENGE_BATTERIES: Task = {
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
   perform: (player: Player) => {
+    player.addEnergy(15);
     // TODO: not implemented yet!
   },
   unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,

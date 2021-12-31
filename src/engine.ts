@@ -48,7 +48,7 @@ export class Engine {
       this.schedule.next();
       this.player.setResourceLimits();
     }
-    this.player.energy -= amount;
+    this.player.removeEnergy(amount);
     if (this.player.energy <= 0) {
       this.startLoop();
     }

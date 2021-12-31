@@ -6,7 +6,9 @@ const INITIAL_ENERGY = 20;
 export class Player {
   readonly stats: Record<StatName, Stat>;
   readonly resources: Record<ResourceName, Resource>;
-  energy: number = INITIAL_ENERGY;
+  private _energy: number = INITIAL_ENERGY;
+  /** The total amount of energy acquired in this loop. */
+  private _totalEnergy: number = INITIAL_ENERGY;
 
   constructor(json?: PlayerJSON) {
     this.stats = {
@@ -27,12 +29,30 @@ export class Player {
     makeAutoObservable(this);
   }
 
+  get energy(): number {
+    return this._energy;
+  }
+
+  get totalEnergy(): number {
+    return this._totalEnergy;
+  }
+
+  addEnergy(amount: number) {
+    this._energy += amount;
+    this._totalEnergy += amount;
+  }
+
+  removeEnergy(amount: number) {
+    this._energy -= amount;
+  }
+
   /** Invoked whenevew the time loop restarts. */
   startLoop() {
     for (const resource of Object.values(this.resources)) {
       resource.startLoop();
     }
-    this.energy = INITIAL_ENERGY;
+    this._energy = INITIAL_ENERGY;
+    this._totalEnergy = INITIAL_ENERGY;
   }
 
   save(): PlayerJSON {
