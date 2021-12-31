@@ -42,11 +42,12 @@ const TaskQueueEditor = observer((props: Props) => {
 
   const addButtons = Object.values(TASKS).map((task) => {
     const tooltip = (
-      <div>
-        <p>{task.description}</p>
+      <div className="w-96 p-2">
         <p>
           <strong>Cost:</strong> {task.baseCost}
         </p>
+        <hr className="border-gray-700 my-3" />
+        <p className="text-sm mb-2 text-gray-400">{task.description}</p>
       </div>
     );
     return (

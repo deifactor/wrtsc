@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { ReactNode } from "react";
-import Tooltip from "rc-tooltip";
-import "rc-tooltip/assets/bootstrap.css";
+import { usePopperTooltip } from "react-popper-tooltip";
+import "react-popper-tooltip/dist/styles.css";
 
 interface Props {
   onClick: () => void;
@@ -9,7 +9,7 @@ interface Props {
   kind?: "normal" | "danger";
   size?: "sm" | "md";
   children: ReactNode;
-  tooltip?: ReactNode | (() => ReactNode);
+  tooltip?: ReactNode;
 }
 
 export const Button = ({
@@ -20,6 +20,14 @@ export const Button = ({
   children,
   tooltip,
 }: Props) => {
+  const {
+    getArrowProps,
+    getTooltipProps,
+    setTooltipRef,
+    setTriggerRef,
+    visible,
+  } = usePopperTooltip();
+
   const sizeClass = {
     sm: "py-1 px-2",
     md: "py-2 px-4",
@@ -34,6 +42,7 @@ export const Button = ({
   };
   const button = (
     <button
+      ref={setTriggerRef}
       onClick={state !== "locked" ? onClick : () => {}}
       className={classNames(
         "font-bold rounded-sm",
@@ -47,11 +56,21 @@ export const Button = ({
       {children}
     </button>
   );
+
   if (tooltip) {
     return (
-      <Tooltip overlay={tooltip} placement="bottom">
+      <>
         {button}
-      </Tooltip>
+        {visible && (
+          <div
+            ref={setTooltipRef}
+            {...getTooltipProps({ className: "tooltip-container" })}
+          >
+            {tooltip}
+            <div {...getArrowProps({ className: "tooltip-arrow" })} />
+          </div>
+        )}
+      </>
     );
   } else {
     return button;

@@ -40,3 +40,14 @@ body {
     @apply bg-gray-800 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md;
   }
 }
+
+/* We use div. here in order to get extra specificity. */
+
+div.tooltip-container {
+  --tooltipBackground: black;
+  color: inherit;
+}
+
+div.tooltip-arrow::after {
+  --tooltipBackground: black;
+}
