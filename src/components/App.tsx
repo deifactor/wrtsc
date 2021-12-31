@@ -7,6 +7,7 @@ import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";
 import { configure } from "mobx";
+import { observer } from "mobx-react-lite";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -39,7 +40,7 @@ configure({
   reactionRequiresObservable: true,
 });
 
-const App = () => {
+const App = observer(() => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
@@ -76,6 +77,6 @@ const App = () => {
       </div>
     </div>
   );
-};
+});
 
 export default App;
