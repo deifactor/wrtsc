@@ -6,6 +6,7 @@ import { StatView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";
+import { configure } from "mobx";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -32,6 +33,11 @@ function useInterval(callback: () => void, delay: number) {
 
 const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 12;
+
+configure({
+  observableRequiresReaction: true,
+  reactionRequiresObservable: true,
+});
 
 const App = () => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
