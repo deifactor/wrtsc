@@ -25,4 +25,6 @@ The ruins of the base. Your goal is to get as much power and supplies as you can
 - Scavenge Weapons :: Increases your combat stat (for the loop). Unlocked by Explore Ruins.
 - Calibrate Weapons :: More increases to combat stat. Not capped, but more expensive than Scavenge Weapons. *Not* persistent (you're calibrating the weapons themselves, lore-wise).
 - Observe Patrol Routes :: Decreases power necessary to go to the next zone (because you need fewer evasive maneuvers).
-- Hijack Ship :: Get the hell out. You're vacuum-capable, but the pilot isn't. Sucks for them. Requires some amount of Observe Patrol Routes and Scavenge Weapons.
+- Hijack Ship :: Get the hell out. You're vacuum-capable, but the pilot isn't. Sucks for them. Requires some amount of Observe Patrol Routes (so you can find when they're isolated) and Combat stat. Cost decreases somewhat with Combat stat.
+- Disable Lockouts :: Going to be a problem if this thing keeps beaming that it's stolen. There are anti-brute-force mechanisms, but that's not a problem for you. You need to get it to 100%.
+- Leave :: Evade the other patrol routes and leave. Requires more OPR than Hijack does.
