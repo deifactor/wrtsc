@@ -24,6 +24,7 @@ export const ZoneView = observer((props: Props) => {
           <div>
             <StatView stat={stats.ruinsExploration}></StatView>
             <ResourceView resource={resources.ruinsBatteries}></ResourceView>
+            <ResourceView resource={resources.ruinsWeapons}></ResourceView>
           </div>
         );
     }

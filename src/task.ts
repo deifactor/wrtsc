@@ -53,7 +53,7 @@ export const SCAVENGE_BATTERIES: Task = {
     player.addEnergy(15);
     player.resources.ruinsBatteries.current -= 1;
   },
-  visible: (player: Player) => player.stats.ruinsExploration.level > 0,
+  visible: (player: Player) => player.resources.ruinsBatteries.max > 0,
   canPerform: (player: Player) => player.resources.ruinsBatteries.current > 0,
 };
 

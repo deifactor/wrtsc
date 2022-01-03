@@ -26,6 +26,7 @@ export class Player {
     };
     this.resources = {
       ruinsBatteries: new Resource("Wreckage Batteries"),
+      ruinsWeapons: new Resource("Salvageable Weaponry"),
     };
 
     this.setResourceLimits();
@@ -80,7 +81,12 @@ export class Player {
    * a stat changes/could have changed.
    */
   setResourceLimits() {
-    this.resources.ruinsBatteries.max = this.stats.ruinsExploration.level;
+    this.resources.ruinsBatteries.max = Math.floor(
+      this.stats.ruinsExploration.level / 5
+    );
+    this.resources.ruinsWeapons.max = Math.floor(
+      this.stats.ruinsExploration.level / 10
+    );
   }
 }
 
@@ -153,7 +159,7 @@ export type StatJSON = {
   level: number;
 };
 
-export const RESOURCE_NAMES = ["ruinsBatteries"] as const;
+export const RESOURCE_NAMES = ["ruinsBatteries", "ruinsWeapons"] as const;
 export type ResourceName = typeof RESOURCE_NAMES[number];
 export type Resources = Record<ResourceName, Resource>;
 
