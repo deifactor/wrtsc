@@ -11,6 +11,7 @@ export interface TaskQueuePointer {
   task: Task;
   index: number;
   iteration: number;
+  count: number;
   /**
    * Indicates the index within the task list as a whole. That is, this
    * increases by one with every call to next().
@@ -47,6 +48,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     return {
       index: this.index,
       iteration: this.iteration,
+      count: entry.count,
       task: entry.task,
       step: this.step,
     };

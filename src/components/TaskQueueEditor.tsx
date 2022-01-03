@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { TaskQueue } from "../taskQueue";
 import { TASKS } from "../task";
 import { Player } from "../player";
-import { Engine, SimulationResult } from "../engine";
+import { Engine, SimulationResult, SimulationStep } from "../engine";
 import classNames from "classnames";
 
 interface Props {
@@ -17,19 +17,19 @@ const TaskQueueEditor = observer((props: Props) => {
   const tasks = taskQueue.entries.map((entry, idx) => {
     const incrementCount = (): void => taskQueue.modifyCount(idx, 1);
     const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
-    const isFailure =
-      simulation.kind == "error" && simulation.step.index == idx;
+    const step: SimulationStep | undefined = simulation[idx];
     return (
       // eslint-disable-next-line react/no-array-index-key
       <div
         key={idx}
         className={classNames("flex items-center", {
-          "text-red-300": isFailure,
+          "text-red-300": step?.status == "error",
         })}
       >
         <div className="flex-grow">
           {entry.task.name} x{entry.count}
         </div>
+        <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>
         <Button size="sm" onClick={incrementCount}>
           +1
         </Button>

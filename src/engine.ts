@@ -7,9 +7,12 @@ import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
 
-export type SimulationResult =
-  | { kind: "ok" }
-  | { kind: "error"; step: TaskQueuePointer };
+export type SimulationStep = {
+  status: "ok" | "error";
+  energy: number;
+};
+
+export type SimulationResult = SimulationStep[];
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
@@ -62,16 +65,39 @@ export class Engine {
     const queue = this.taskQueue.clone();
     return untracked(() => {
       sim.taskQueue = queue;
-      sim.startLoop();
-      while (sim.schedule.task) {
-        const task = sim.schedule.task;
-        if (!task.enabled(sim.player)) {
-          return { kind: "error", step: sim.schedule.current! };
-        }
-        sim.tickTime(1000 / 12);
-      }
-      return { kind: "ok" };
+      return sim.simulationImpl();
     });
+  }
+
+  /** Simulates the entire task queue. This mutates everything, so clone before running it! */
+  private simulationImpl(): SimulationResult {
+    const result: SimulationResult = [];
+    this.startLoop();
+    while (this.schedule.task) {
+      const task = this.schedule.task;
+      if (!task.enabled(this.player)) {
+        result.push({
+          status: "error",
+          energy: this.player.energy,
+        });
+        return result;
+      }
+      // TODO: deduplicate with Engine.tickTime
+      this.schedule.task.perform(this.player);
+      this.player.removeEnergy(this.schedule.task.baseCost);
+      this.player.setResourceLimits();
+      if (
+        this.schedule.current!.count ==
+        this.schedule.current!.iteration + 1
+      ) {
+        result.push({
+          status: "ok",
+          energy: this.player.energy,
+        });
+      }
+      this.schedule.next();
+    }
+    return result;
   }
 
   save(): GameSave {
