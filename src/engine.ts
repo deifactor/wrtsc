@@ -75,7 +75,7 @@ export class Engine {
     this.startLoop();
     while (this.schedule.task) {
       const task = this.schedule.task;
-      if (!task.enabled(this.player)) {
+      if (!task.canPerform(this.player)) {
         result.push({
           status: "error",
           energy: this.player.energy,

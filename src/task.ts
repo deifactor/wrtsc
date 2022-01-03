@@ -20,9 +20,9 @@ export interface Task {
    * Predicate that determines whether the action should be shown to the player.
    * Note that this doesn't mean the player can take it; see `enabled`.
    */
-  unlocked: (player: Player) => boolean;
+  visible: (player: Player) => boolean;
   /** Predicate indicating whether the action can be taken. */
-  enabled: (player: Player) => boolean;
+  canPerform: (player: Player) => boolean;
 }
 
 /** A task serialized to JSON, for persisting in localStorage or similar. */
@@ -39,8 +39,8 @@ export const EXPLORE_RUINS: Task = {
   perform: ({ stats }: Player) => {
     stats.ruinsExploration.addXp(1024);
   },
-  unlocked: () => true,
-  enabled: always,
+  visible: () => true,
+  canPerform: always,
 };
 
 export const SCAVENGE_BATTERIES: Task = {
@@ -53,8 +53,8 @@ export const SCAVENGE_BATTERIES: Task = {
     player.addEnergy(15);
     player.resources.ruinsBatteries.current -= 1;
   },
-  unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,
-  enabled: (player: Player) => player.resources.ruinsBatteries.current > 0,
+  visible: (player: Player) => player.stats.ruinsExploration.level > 0,
+  canPerform: (player: Player) => player.resources.ruinsBatteries.current > 0,
 };
 
 export const SCAVENGE_WEAPONS: Task = {
@@ -66,8 +66,8 @@ export const SCAVENGE_WEAPONS: Task = {
   perform: (player: Player) => {
     player.stats.combat.addXp(1024);
   },
-  unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,
-  enabled: always,
+  visible: (player: Player) => player.stats.ruinsExploration.level > 0,
+  canPerform: always,
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -79,8 +79,8 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   perform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024);
   },
-  unlocked: always,
-  enabled: always,
+  visible: always,
+  canPerform: always,
 };
 
 export const TASKS: Record<TaskKind, Task> = {
