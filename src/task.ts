@@ -1,9 +1,9 @@
 import { Player } from "./player";
 
 export type TaskKind =
-  | "explore-ruins"
-  | "scavenge-batteries"
-  | "scavenge-weapons";
+  | "exploreRuins"
+  | "scavengeBatteries"
+  | "scavengeWeapons";
 
 const always = () => true;
 
@@ -30,7 +30,7 @@ export interface TaskJson {
 }
 
 export const EXPLORE_RUINS: Task = {
-  kind: "explore-ruins",
+  kind: "exploreRuins",
   name: "Explore Ruins",
   baseCost: 20,
   description:
@@ -43,7 +43,7 @@ export const EXPLORE_RUINS: Task = {
 };
 
 export const SCAVENGE_BATTERIES: Task = {
-  kind: "scavenge-batteries",
+  kind: "scavengeBatteries",
   name: "Scavenge Batteries",
   baseCost: 5,
   description:
@@ -58,7 +58,7 @@ export const SCAVENGE_BATTERIES: Task = {
 };
 
 export const SCAVENGE_WEAPONS: Task = {
-  kind: "scavenge-weapons",
+  kind: "scavengeWeapons",
   name: "Scavenge Weapons",
   baseCost: 5,
   description:
@@ -71,18 +71,18 @@ export const SCAVENGE_WEAPONS: Task = {
 };
 
 export const TASKS: Record<TaskKind, Task> = {
-  "explore-ruins": EXPLORE_RUINS,
-  "scavenge-batteries": SCAVENGE_BATTERIES,
-  "scavenge-weapons": SCAVENGE_WEAPONS,
+  "exploreRuins": EXPLORE_RUINS,
+  "scavengeBatteries": SCAVENGE_BATTERIES,
+  "scavengeWeapons": SCAVENGE_WEAPONS,
 };
 
 export function fromJSON(obj: TaskJson): Task {
   switch (obj.kind) {
-    case "explore-ruins":
+    case "exploreRuins":
       return EXPLORE_RUINS;
-    case "scavenge-batteries":
+    case "scavengeBatteries":
       return SCAVENGE_BATTERIES;
-    case "scavenge-weapons":
+    case "scavengeWeapons":
       return SCAVENGE_WEAPONS;
     // no default
   }
