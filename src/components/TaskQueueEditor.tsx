@@ -40,27 +40,29 @@ const TaskQueueEditor = observer((props: Props) => {
     );
   });
 
-  const addButtons = Object.values(TASKS).map((task) => {
-    const tooltip = (
-      <div className="w-96 p-2">
-        <p>
-          <strong>Cost:</strong> {task.baseCost}
-        </p>
-        <hr className="border-gray-700 my-3" />
-        <p className="text-sm mb-2 text-gray-400">{task.description}</p>
-      </div>
-    );
-    return (
-      <Button
-        key={task.kind}
-        onClick={() => taskQueue.push(task.kind)}
-        tooltip={tooltip}
-        state={task.visible(player) ? "active" : "locked"}
-      >
-        {task.name}
-      </Button>
-    );
-  });
+  const addButtons = Object.values(TASKS)
+    .filter((task) => task.visible(player))
+    .map((task) => {
+      const tooltip = (
+        <div className="w-96 p-2">
+          <p>
+            <strong>Cost:</strong> {task.baseCost}
+          </p>
+          <hr className="border-gray-700 my-3" />
+          <p className="text-sm mb-2 text-gray-400">{task.description}</p>
+        </div>
+      );
+      return (
+        <Button
+          key={task.kind}
+          onClick={() => taskQueue.push(task.kind)}
+          tooltip={tooltip}
+          state={task.visible(player) ? "active" : "locked"}
+        >
+          {task.name}
+        </Button>
+      );
+    });
   return (
     <div>
       <div className="h-[36rem]">
