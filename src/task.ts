@@ -3,7 +3,8 @@ import { Player } from "./player";
 export type TaskKind =
   | "exploreRuins"
   | "scavengeBatteries"
-  | "scavengeWeapons";
+  | "scavengeWeapons"
+  | "observePatrolRoutes";
 
 const always = () => true;
 
@@ -51,7 +52,6 @@ export const SCAVENGE_BATTERIES: Task = {
   perform: (player: Player) => {
     player.addEnergy(15);
     player.resources.ruinsBatteries.current -= 1;
-    // TODO: not implemented yet!
   },
   unlocked: (player: Player) => player.stats.ruinsExploration.level > 0,
   enabled: (player: Player) => player.resources.ruinsBatteries.current > 0,
@@ -70,27 +70,22 @@ export const SCAVENGE_WEAPONS: Task = {
   enabled: always,
 };
 
-export const TASKS: Record<TaskKind, Task> = {
-  "exploreRuins": EXPLORE_RUINS,
-  "scavengeBatteries": SCAVENGE_BATTERIES,
-  "scavengeWeapons": SCAVENGE_WEAPONS,
+export const OBSERVE_PATROL_ROUTES: Task = {
+  kind: "observePatrolRoutes",
+  name: "Observe Patrol Routes",
+  baseCost: 10,
+  description:
+    "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
+  perform: (player: Player) => {
+    player.stats.patrolRoutesObserved.addXp(1024);
+  },
+  unlocked: always,
+  enabled: always,
 };
 
-export function fromJSON(obj: TaskJson): Task {
-  switch (obj.kind) {
-    case "exploreRuins":
-      return EXPLORE_RUINS;
-    case "scavengeBatteries":
-      return SCAVENGE_BATTERIES;
-    case "scavengeWeapons":
-      return SCAVENGE_WEAPONS;
-    // no default
-  }
-}
-
-export function toJSON(task: Task): TaskJson {
-  switch (task.kind) {
-    default:
-      return { kind: task.kind };
-  }
-}
+export const TASKS: Record<TaskKind, Task> = {
+  exploreRuins: EXPLORE_RUINS,
+  scavengeBatteries: SCAVENGE_BATTERIES,
+  scavengeWeapons: SCAVENGE_WEAPONS,
+  observePatrolRoutes: OBSERVE_PATROL_ROUTES,
+};

@@ -18,6 +18,11 @@ export class Player {
         "progress",
         json?.stats.ruinsExploration
       ),
+      patrolRoutesObserved: new Stat(
+        "Patrol Routes Observed",
+        "progress",
+        json?.stats.patrolRoutesObserved
+      ),
     };
     this.resources = {
       ruinsBatteries: new Resource("Wreckage Batteries"),
@@ -79,7 +84,11 @@ export class Player {
   }
 }
 
-export const STAT_NAMES = ["combat", "ruinsExploration"] as const;
+export const STAT_NAMES = [
+  "combat",
+  "ruinsExploration",
+  "patrolRoutesObserved",
+] as const;
 export type StatName = typeof STAT_NAMES[number];
 export type Stats = Record<StatName, Stat>;
 
