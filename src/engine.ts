@@ -7,6 +7,17 @@ import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
 
+export type TaskFailureReason = "outOfEnergy" | "noTask" | "taskFailed";
+
+export type TickResult =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      reason: TaskFailureReason;
+    };
+
 export type SimulationStep = {
   status: "ok" | "error";
   energy: number;
@@ -46,9 +57,15 @@ export class Engine {
    * Advance the simulation by this many *seconds*. If the player runs out of
    * energy, this will restart the engine loop.
    */
-  tickTime(amount: number) {
+  tickTime(amount: number): TickResult {
     if (!this.schedule.task) {
-      return;
+      return { ok: false, reason: "noTask" };
+    }
+    if (!this.schedule.task.canPerform(this.player)) {
+      return { ok: false, reason: "taskFailed" };
+    }
+    if (amount > this.player.energy) {
+      return { ok: false, reason: "outOfEnergy" };
     }
     this.schedule.tickTime(amount);
     if (this.schedule.taskDone) {
@@ -56,7 +73,7 @@ export class Engine {
       this.schedule.next();
       this.player.setResourceLimits();
     }
-    this.player.removeEnergy(amount);
+    return { ok: true };
   }
 
   get simulation(): SimulationResult {
