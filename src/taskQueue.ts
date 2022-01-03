@@ -7,12 +7,11 @@ export interface TaskQueueEntry {
   count: number;
 }
 
-export interface TaskQueuePointer {
-  task: Task;
+export type TaskQueuePointer = Task & {
   index: number;
   iteration: number;
   count: number;
-}
+};
 
 /**
  * Iterates over the entries in a task queue.
@@ -43,7 +42,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
       index: this.index,
       iteration: this.iteration,
       count: entry.count,
-      task: entry.task,
+      ...entry.task,
     };
   }
 
@@ -75,8 +74,8 @@ export class TaskQueue {
 
   clone(): TaskQueue {
     const cloned = new TaskQueue();
-    for (const pointer of this.taskIterator()) {
-      cloned.push(pointer.task.kind);
+    for (const task of this.taskIterator()) {
+      cloned.push(task.kind);
     }
     return cloned;
   }

@@ -103,10 +103,7 @@ export class Engine {
       this.schedule.task.perform(this.player);
       this.player.removeEnergy(this.schedule.task.baseCost);
       this.player.setResourceLimits();
-      if (
-        this.schedule.current!.count ==
-        this.schedule.current!.iteration + 1
-      ) {
+      if (this.schedule.task.count == this.schedule.task.iteration + 1) {
         result.push({
           status: "ok",
           energy: this.player.energy,

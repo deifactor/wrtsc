@@ -25,11 +25,7 @@ export class Schedule {
     makeAutoObservable(this);
   }
 
-  get task(): Task | undefined {
-    return this.current?.task;
-  }
-
-  get current(): TaskQueuePointer | undefined {
+  get task(): TaskQueuePointer | undefined {
     return this.iter.peek();
   }
 
@@ -38,15 +34,15 @@ export class Schedule {
   }
 
   completions(index: number): number {
-    const { current } = this;
-    if (current == null) {
+    const { task } = this;
+    if (task == null) {
       return this.queue.entry(index)!.count;
     }
-    if (index < current.index) {
+    if (index < task.index) {
       return this.queue.entry(index)!.count;
     }
-    if (index === current.index) {
-      return current.iteration;
+    if (index === task.index) {
+      return task.iteration;
     }
     return 0;
   }

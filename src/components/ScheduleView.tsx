@@ -18,7 +18,7 @@ export const ScheduleView = observer((props: Props) => {
     schedule.task && schedule.timeOnTask / schedule.task.baseCost;
 
   const entries = schedule.queue.entries.map((entry, idx) => {
-    const isCurrent = idx === schedule.current?.index;
+    const isCurrent = idx === schedule.task?.index;
     // We need whitespace-pre here because we pad with spaces.
     const progressSpan = isCurrent && (
       <span className="inline-block ml-auto whitespace-pre">
