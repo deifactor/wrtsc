@@ -12,11 +12,11 @@ interface Props {
 
 const TaskQueueEditor = observer((props: Props) => {
   const {
-    engine: { taskQueue, player, simulation },
+    engine: { nextLoopTasks, player, simulation },
   } = props;
-  const tasks = taskQueue.entries.map((entry, idx) => {
-    const incrementCount = (): void => taskQueue.modifyCount(idx, 1);
-    const decrementCount = (): void => taskQueue.modifyCount(idx, -1);
+  const tasks = nextLoopTasks.entries.map((entry, idx) => {
+    const incrementCount = (): void => nextLoopTasks.modifyCount(idx, 1);
+    const decrementCount = (): void => nextLoopTasks.modifyCount(idx, -1);
     const step: SimulationStep | undefined = simulation[idx];
     return (
       // eslint-disable-next-line react/no-array-index-key
@@ -55,7 +55,7 @@ const TaskQueueEditor = observer((props: Props) => {
       return (
         <Button
           key={task.kind}
-          onClick={() => taskQueue.push(task.kind)}
+          onClick={() => nextLoopTasks.push(task.kind)}
           tooltip={tooltip}
           state={task.visible(player) ? "active" : "locked"}
         >

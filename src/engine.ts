@@ -31,19 +31,19 @@ export class Engine {
   readonly zone: Zone;
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
   schedule: Schedule;
-  taskQueue: TaskQueue;
+  nextLoopTasks: TaskQueue;
 
   constructor(json?: GameSave) {
     this.player = new Player(json?.player);
     this.zone = RUINS;
     this.schedule = new Schedule(new TaskQueue());
-    this.taskQueue = new TaskQueue();
+    this.nextLoopTasks = new TaskQueue();
     makeAutoObservable(this);
   }
 
   /** Restart the time loop. */
   startLoop() {
-    this.schedule = new Schedule(this.taskQueue.clone());
+    this.schedule = new Schedule(this.nextLoopTasks.clone());
     this.player.startLoop();
   }
 
@@ -79,9 +79,9 @@ export class Engine {
   get simulation(): SimulationResult {
     // Deep-copy the engine into a new state
     const sim = new Engine(JSON.parse(JSON.stringify(this.save())));
-    const queue = this.taskQueue.clone();
+    const queue = this.nextLoopTasks.clone();
     return untracked(() => {
-      sim.taskQueue = queue;
+      sim.nextLoopTasks = queue;
       return sim.simulationImpl();
     });
   }
