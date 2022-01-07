@@ -7,7 +7,7 @@ describe("Engine#tickTime", () => {
       const engine = new Engine();
       engine.nextLoopTasks.push(EXPLORE_RUINS.kind);
       engine.startLoop();
-      engine.player.removeEnergy(100);
+      engine.player.removeEnergy(engine.player.energy - 100);
       expect(engine.tickTime(200)).toEqual({
         ok: false,
         reason: "outOfEnergy",

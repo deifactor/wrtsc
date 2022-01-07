@@ -54,8 +54,8 @@ export class Engine {
   }
 
   /**
-   * Advance the simulation by this many *seconds*. If the player runs out of
-   * energy, this will restart the engine loop.
+   * Advance the simulation by this many *milliseconds*. If the player runs out
+   * of energy, this will restart the engine loop.
    */
   tickTime(amount: number): TickResult {
     if (!this.schedule.task) {
@@ -67,6 +67,7 @@ export class Engine {
     if (amount > this.player.energy) {
       return { ok: false, reason: "outOfEnergy" };
     }
+    this.player.removeEnergy(amount);
     this.schedule.tickTime(amount);
     if (this.schedule.taskDone) {
       this.schedule.task!.perform(this.player);

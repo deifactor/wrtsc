@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { Zone, ZoneKind } from "./zone";
 
-const INITIAL_ENERGY = 20;
+const INITIAL_ENERGY = 5000;
 
 export class Player {
   readonly stats: Record<StatName, Stat>;

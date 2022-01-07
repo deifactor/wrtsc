@@ -28,7 +28,7 @@ export type Task = Readonly<{
 export const EXPLORE_RUINS: Task = {
   kind: "exploreRuins",
   name: "Explore Ruins",
-  baseCost: 20,
+  baseCost: 2500,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   perform: ({ stats }: Player) => {
@@ -41,7 +41,7 @@ export const EXPLORE_RUINS: Task = {
 export const SCAVENGE_BATTERIES: Task = {
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
-  baseCost: 5,
+  baseCost: 1000,
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
   perform: (player: Player) => {
@@ -55,7 +55,7 @@ export const SCAVENGE_BATTERIES: Task = {
 export const SCAVENGE_WEAPONS: Task = {
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
-  baseCost: 5,
+  baseCost: 1000,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   perform: (player: Player) => {
@@ -68,7 +68,7 @@ export const SCAVENGE_WEAPONS: Task = {
 export const OBSERVE_PATROL_ROUTES: Task = {
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
-  baseCost: 10,
+  baseCost: 4000,
   description:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   perform: (player: Player) => {
