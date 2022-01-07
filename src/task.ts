@@ -48,7 +48,7 @@ export const SCAVENGE_BATTERIES: Task = {
     player.addEnergy(15);
     player.resources.ruinsBatteries.current -= 1;
   },
-  visible: (player: Player) => player.resources.ruinsBatteries.max > 0,
+  visible: (player: Player) => player.stats.ruinsExploration.level > 0,
   canPerform: (player: Player) => player.resources.ruinsBatteries.current > 0,
 };
 
@@ -62,7 +62,7 @@ export const SCAVENGE_WEAPONS: Task = {
     player.stats.combat.addXp(1024);
   },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  canPerform: always,
+  canPerform: (player: Player) => player.resources.ruinsWeapons.current > 0,
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
