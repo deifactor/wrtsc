@@ -23,7 +23,7 @@ const TaskQueueEditor = observer((props: Props) => {
       <div
         key={idx}
         className={classNames("flex items-center", {
-          "text-red-300": step?.status == "error",
+          "text-red-300": !step?.ok,
         })}
       >
         <div className="flex-grow">

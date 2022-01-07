@@ -19,7 +19,7 @@ export type TickResult =
     };
 
 export type SimulationStep = {
-  status: "ok" | "error";
+  ok: boolean;
   energy: number;
 };
 
@@ -93,24 +93,14 @@ export class Engine {
     this.startLoop();
     while (this.schedule.task) {
       const task = this.schedule.task;
-      if (!task.canPerform(this.player)) {
-        result.push({
-          status: "error",
-          energy: this.player.energy,
-        });
-        return result;
+      const { ok } = this.tickTime(this.schedule.task.baseCost);
+      result[task.index] = {
+        ok: ok,
+        energy: this.player.energy,
+      };
+      if (!ok) {
+        break;
       }
-      // TODO: deduplicate with Engine.tickTime
-      this.schedule.task.perform(this.player);
-      this.player.removeEnergy(this.schedule.task.baseCost);
-      this.player.setResourceLimits();
-      if (this.schedule.task.count == this.schedule.task.iteration + 1) {
-        result.push({
-          status: "ok",
-          energy: this.player.energy,
-        });
-      }
-      this.schedule.next();
     }
     return result;
   }
