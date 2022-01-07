@@ -54,26 +54,35 @@ export class Engine {
   }
 
   /**
-   * Advance the simulation by this many *milliseconds*. If the player runs out
-   * of energy, this will restart the engine loop.
+   * Advance the simulation by this many milliseconds. Returns an indication of
+   * whether there was an error in the simulation.
+   *
+   * Note that this will automatically 'slice' the tick into smaller ticks if it
+   * would cross a boundary. E.g., if there are 50 ms left on a task and you
+   * give it a 100ms tick then it'll do a 50ms and then another 50ms.
    */
-  tickTime(amount: number): TickResult {
-    amount = Math.round(amount);
-    if (!this.schedule.task) {
-      return { ok: false, reason: "noTask" };
-    }
-    if (!this.schedule.task.canPerform(this.player)) {
-      return { ok: false, reason: "taskFailed" };
-    }
-    if (amount > this.player.energy) {
-      return { ok: false, reason: "outOfEnergy" };
-    }
-    this.player.removeEnergy(amount);
-    this.schedule.tickTime(amount);
-    if (this.schedule.taskDone) {
-      this.schedule.task!.perform(this.player);
-      this.schedule.next();
-      this.player.setResourceLimits();
+  tickTime(duration: number): TickResult {
+    // We basically 'spend' time from the duration until we hit 0;
+    duration = Math.round(duration);
+    while (duration > 0) {
+      if (!this.schedule.task) {
+        return { ok: false, reason: "noTask" };
+      }
+      if (!this.schedule.task.canPerform(this.player)) {
+        return { ok: false, reason: "taskFailed" };
+      }
+      if (duration > this.player.energy) {
+        return { ok: false, reason: "outOfEnergy" };
+      }
+      const ticked = this.schedule.tickTime(duration);
+
+      this.player.removeEnergy(ticked);
+      if (this.schedule.taskDone) {
+        this.schedule.task!.perform(this.player);
+        this.schedule.next();
+        this.player.setResourceLimits();
+      }
+      duration -= ticked;
     }
     return { ok: true };
   }

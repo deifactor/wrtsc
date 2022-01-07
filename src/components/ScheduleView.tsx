@@ -15,7 +15,7 @@ function formatCompletion(frac: number): string {
 export const ScheduleView = observer((props: Props) => {
   const { className, schedule } = props;
   const completionFraction =
-    schedule.task && schedule.timeOnTask / schedule.task.baseCost;
+    schedule.task && 1 - schedule.timeLeftOnTask / schedule.task.baseCost;
 
   const entries = schedule.queue.entries.map((entry, idx) => {
     const isCurrent = idx === schedule.task?.index;

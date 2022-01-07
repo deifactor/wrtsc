@@ -34,7 +34,7 @@ describe("Engine#tickTime", () => {
     });
   });
 
-  xit("should split the tick if a task completes in the middle", () => {
+  it("should split the tick if a task completes in the middle", () => {
     const engine = new Engine();
     engine.player.stats.ruinsExploration.level = 10;
     engine.player.setResourceLimits();

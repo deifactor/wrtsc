@@ -15,13 +15,14 @@ export interface Stats {
 export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
-  timeOnTask: number = 0;
+  timeLeftOnTask: number = 0;
 
   private readonly iter: TaskQueueIterator;
 
   constructor(queue: TaskQueue) {
     this.queue = queue;
     this.iter = new TaskQueueIterator(this.queue);
+    this.timeLeftOnTask = this.task?.baseCost ?? 0;
     makeAutoObservable(this);
   }
 
@@ -30,7 +31,7 @@ export class Schedule {
   }
 
   get taskDone(): boolean {
-    return Boolean(this.task && this.timeOnTask >= this.task.baseCost);
+    return Boolean(this.task && this.timeLeftOnTask == 0);
   }
 
   completions(index: number): number {
@@ -47,9 +48,14 @@ export class Schedule {
     return 0;
   }
 
-  /** Ticks the progress on the current task by the given amount. */
-  tickTime(amount: number) {
-    this.timeOnTask += amount;
+  /**
+   * Ticks the progress on the current task by the given amount. Returns the
+   * amount that was actually ticked.
+   */
+  tickTime(amount: number): number {
+    amount = Math.min(amount, this.timeLeftOnTask);
+    this.timeLeftOnTask -= amount;
+    return amount;
   }
 
   /**
@@ -58,6 +64,6 @@ export class Schedule {
    */
   next(): void {
     this.iter.next();
-    this.timeOnTask = 0;
+    this.timeLeftOnTask = this.task?.baseCost ?? 0;
   }
 }
