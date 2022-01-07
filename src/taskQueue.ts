@@ -74,8 +74,8 @@ export class TaskQueue {
 
   clone(): TaskQueue {
     const cloned = new TaskQueue();
-    for (const task of this.taskIterator()) {
-      cloned.push(task.kind);
+    for (const { task, count } of this.entries) {
+      cloned.entries.push({ task, count });
     }
     return cloned;
   }
