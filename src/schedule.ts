@@ -26,7 +26,7 @@ export class Schedule {
   }
 
   get task(): TaskQueuePointer | undefined {
-    return this.iter.peek();
+    return this.iter.peek;
   }
 
   get taskDone(): boolean {

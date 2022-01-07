@@ -33,7 +33,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     return this;
   }
 
-  peek(): TaskQueuePointer | undefined {
+  get peek(): TaskQueuePointer | undefined {
     const entry = this.queue.entry(this.index);
     if (entry == null) {
       return undefined;
@@ -51,7 +51,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
       return { done: true, value: undefined };
     }
 
-    const value = this.peek();
+    const value = this.peek;
     if (value == null) {
       return { value, done: true };
     }
