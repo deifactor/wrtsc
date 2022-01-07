@@ -2,7 +2,7 @@ import { makeAutoObservable } from "mobx";
 import { Task, TaskKind, TASKS } from "./task";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
-export interface TaskQueueEntry {
+export interface TaskBatch {
   task: Task;
   count: number;
 }
@@ -65,7 +65,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
 }
 
 export class TaskQueue {
-  entries: TaskQueueEntry[];
+  entries: TaskBatch[];
 
   constructor() {
     this.entries = [];
@@ -81,7 +81,7 @@ export class TaskQueue {
   }
 
   /** An array accessor that will make MobX happy. */
-  entry(idx: number): TaskQueueEntry | undefined {
+  entry(idx: number): TaskBatch | undefined {
     return idx < this.entries.length ? this.entries[idx] : undefined;
   }
 
