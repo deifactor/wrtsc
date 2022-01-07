@@ -9,8 +9,8 @@ export type TaskKind =
 const always = () => true;
 
 /** A task, something that goes in the task queue. */
-export interface Task {
-  kind: TaskKind;
+export type Task = Readonly<{
+  readonly kind: TaskKind;
   name: string;
   // Cost in AEUs.
   baseCost: number;
@@ -23,7 +23,7 @@ export interface Task {
   visible: (player: Player) => boolean;
   /** Predicate indicating whether the action can be taken. */
   canPerform: (player: Player) => boolean;
-}
+}>;
 
 /** A task serialized to JSON, for persisting in localStorage or similar. */
 export interface TaskJson {
