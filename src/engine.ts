@@ -58,6 +58,7 @@ export class Engine {
    * of energy, this will restart the engine loop.
    */
   tickTime(amount: number): TickResult {
+    amount = Math.round(amount);
     if (!this.schedule.task) {
       return { ok: false, reason: "noTask" };
     }
