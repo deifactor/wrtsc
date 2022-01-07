@@ -25,11 +25,6 @@ export type Task = Readonly<{
   canPerform: (player: Player) => boolean;
 }>;
 
-/** A task serialized to JSON, for persisting in localStorage or similar. */
-export interface TaskJson {
-  kind: TaskKind;
-}
-
 export const EXPLORE_RUINS: Task = {
   kind: "exploreRuins",
   name: "Explore Ruins",
