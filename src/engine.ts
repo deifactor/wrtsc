@@ -71,7 +71,7 @@ export class Engine {
       if (!this.schedule.task.canPerform(this.player)) {
         return { ok: false, reason: "taskFailed" };
       }
-      if (duration > this.player.energy) {
+      if (duration == 0) {
         return { ok: false, reason: "outOfEnergy" };
       }
       const ticked = this.schedule.tickTime(duration);
@@ -82,7 +82,7 @@ export class Engine {
         this.schedule.next();
         this.player.setResourceLimits();
       }
-      duration -= ticked;
+      duration = Math.min(this.player.energy, duration - ticked);
     }
     return { ok: true };
   }
