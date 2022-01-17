@@ -74,8 +74,8 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   perform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024);
   },
-  visible: (player) => player.stats.ruinsExploration.level >= 10,
-  canPerform: always,
+  visible: (player) => player.stats.ruinsExploration.level >= 5,
+  canPerform: (player) => player.stats.ruinsExploration.level >= 10,
 };
 
 export const TASKS: Record<TaskKind, Task> = {
