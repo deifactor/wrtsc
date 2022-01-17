@@ -7,7 +7,7 @@ import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
 
-export type TaskFailureReason = "outOfEnergy" | "noTask" | "taskFailed";
+export type TaskFailureReason = "outOfEnergy" | "taskFailed";
 
 export type TickResult =
   | {
@@ -57,24 +57,26 @@ export class Engine {
    * Advance the simulation by this many milliseconds. Returns an indication of
    * whether there was an error in the simulation.
    *
+   * - `taskFailed` indicates that the task failed to be performed.
+   * - `outOfEnergy` indicates that the player ran out in the middle of a task.
+   *
    * Note that this will automatically 'slice' the tick into smaller ticks if it
    * would cross a boundary. E.g., if there are 50 ms left on a task and you
    * give it a 100ms tick then it'll do a 50ms and then another 50ms.
    */
   tickTime(duration: number): TickResult {
     // We basically 'spend' time from the duration until we hit 0;
-    duration = Math.round(duration);
+    duration = Math.floor(duration);
     while (duration > 0) {
       if (!this.schedule.task) {
-        return { ok: false, reason: "noTask" };
+        return { ok: true };
       }
       if (!this.schedule.task.canPerform(this.player)) {
         return { ok: false, reason: "taskFailed" };
       }
-      if (duration == 0) {
-        return { ok: false, reason: "outOfEnergy" };
-      }
-      const ticked = this.schedule.tickTime(duration);
+      const ticked = this.schedule.tickTime(
+        Math.min(this.player.energy, duration)
+      );
 
       this.player.removeEnergy(ticked);
       if (this.schedule.taskDone) {
@@ -83,6 +85,9 @@ export class Engine {
         this.player.setResourceLimits();
       }
       duration = Math.min(this.player.energy, duration - ticked);
+    }
+    if (this.player.energy <= 0) {
+      return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
   }

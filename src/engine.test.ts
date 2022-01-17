@@ -2,8 +2,16 @@ import { Engine } from "./engine";
 import { EXPLORE_RUINS, SCAVENGE_BATTERIES } from "./task";
 
 describe("Engine#tickTime", () => {
+  it("should succeed when the task queue is empty", () => {
+    const engine = new Engine();
+    engine.startLoop();
+    expect(engine.tickTime(200)).toEqual({
+      ok: true,
+    });
+  });
+
   describe("failure modes", () => {
-    it("should fail when out of energy", () => {
+    it("should fail when running out of energy", () => {
       const engine = new Engine();
       engine.nextLoopTasks.push(EXPLORE_RUINS.kind);
       engine.startLoop();
@@ -11,15 +19,6 @@ describe("Engine#tickTime", () => {
       expect(engine.tickTime(200)).toEqual({
         ok: false,
         reason: "outOfEnergy",
-      });
-    });
-
-    it("should fail when the task queue is empty", () => {
-      const engine = new Engine();
-      engine.startLoop();
-      expect(engine.tickTime(200)).toEqual({
-        ok: false,
-        reason: "noTask",
       });
     });
 
