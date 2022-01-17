@@ -2,9 +2,11 @@ import classNames from "classnames";
 import { ReactNode } from "react";
 import { usePopperTooltip } from "react-popper-tooltip";
 import "react-popper-tooltip/dist/styles.css";
+import { IconType } from "react-icons";
 
 interface Props {
   onClick: () => void;
+  icon?: IconType;
   state?: "active" | "locked";
   kind?: "normal" | "danger";
   size?: "sm" | "md";
@@ -14,6 +16,7 @@ interface Props {
 
 export const Button = ({
   onClick,
+  icon,
   state = "active",
   kind = "normal",
   size = "md",
@@ -30,7 +33,7 @@ export const Button = ({
 
   const sizeClass = {
     sm: "py-1 px-2",
-    md: "py-2 px-4",
+    md: "py-2 px-2",
   };
   const stateClass = {
     locked: "text-red-600",
@@ -40,12 +43,14 @@ export const Button = ({
     normal: "bg-gray-900 hover:bg-gray-500",
     danger: "bg-red-500 hover:bg-red-100",
   };
+  const Icon = icon;
   const button = (
     <button
       ref={setTriggerRef}
       onClick={state !== "locked" ? onClick : () => {}}
       className={classNames(
         "font-bold rounded-sm",
+        "inline-flex items-center",
         "outline outline-1 outline-offset-1 outline-gray-500",
         "m-1",
         sizeClass[size],
@@ -53,6 +58,7 @@ export const Button = ({
         kindClass[kind]
       )}
     >
+      {Icon && <Icon className="mr-2" size="1.25rem" />}
       {children}
     </button>
   );

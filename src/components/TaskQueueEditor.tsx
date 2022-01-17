@@ -1,10 +1,15 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
-import { TASKS } from "../task";
+import { TaskKind, TASKS } from "../task";
 import { StatId, STAT_NAME } from "../player";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { runInAction } from "mobx";
+import { IconType } from "react-icons";
+import { FaBeer } from "react-icons/fa";
+const ICONS: Partial<Record<TaskKind, IconType>> = {
+  hijackShip: FaBeer,
+};
 
 interface Props {
   engine: Engine;
@@ -69,6 +74,7 @@ const TaskQueueEditor = observer((props: Props) => {
       return (
         <Button
           key={task.kind}
+          icon={ICONS[task.kind]}
           onClick={() => runInAction(() => nextLoopTasks.push(task.kind))}
           tooltip={tooltip}
           state={player.canAddToQueue(task) ? "active" : "locked"}
@@ -77,13 +83,15 @@ const TaskQueueEditor = observer((props: Props) => {
         </Button>
       );
     });
+  // For reasons I don't understand, without the flex having an icon messes with
+  // vertical alignment.
   return (
     <div>
       <div className="h-[36rem]">
         <h1>Queue</h1>
         {tasks}
       </div>
-      {addButtons}
+      <div className="flex flex-wrap">{addButtons}</div>
     </div>
   );
 });
