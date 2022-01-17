@@ -1,12 +1,10 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
 import { TASKS } from "../task";
-import {
-  StatId,
-  STAT_NAME,
-} from "../player";
+import { StatId, STAT_NAME } from "../player";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
+import { runInAction } from "mobx";
 
 interface Props {
   engine: Engine;
@@ -55,7 +53,7 @@ const TaskQueueEditor = observer((props: Props) => {
       const tooltip = (
         <div className="w-96 p-2">
           <p>
-            <strong>Cost:</strong> {task.baseCost}
+            <strong>Cost:</strong>
           </p>
           {Object.keys(task.requiredStats).length !== 0 && (
             <p>
@@ -70,7 +68,7 @@ const TaskQueueEditor = observer((props: Props) => {
       return (
         <Button
           key={task.kind}
-          onClick={() => nextLoopTasks.push(task.kind)}
+          onClick={() => runInAction(() => nextLoopTasks.push(task.kind))}
           tooltip={tooltip}
           state={player.canAddToQueue(task) ? "active" : "locked"}
         >

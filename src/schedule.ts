@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { Player } from "./player";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
 export interface Stats {
@@ -14,14 +15,16 @@ export interface Stats {
 export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
+  readonly player: Player;
   timeLeftOnTask: number = 0;
 
   private readonly iter: TaskQueueIterator;
 
-  constructor(queue: TaskQueue) {
+  constructor(queue: TaskQueue, player: Player) {
     this.queue = queue;
+    this.player = player;
     this.iter = new TaskQueueIterator(this.queue);
-    this.timeLeftOnTask = this.task?.baseCost ?? 0;
+    this.timeLeftOnTask = this.task ? player.cost(this.task) : 0;
     makeAutoObservable(this);
   }
 
@@ -63,6 +66,6 @@ export class Schedule {
    */
   next(): void {
     this.iter.next();
-    this.timeLeftOnTask = this.task?.baseCost ?? 0;
+    this.timeLeftOnTask = this.task ? this.player.cost(this.task) : 0;
   }
 }

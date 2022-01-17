@@ -35,14 +35,14 @@ export class Engine {
   constructor(json?: GameSave) {
     this.player = new Player(json?.player);
     this.zone = RUINS;
-    this.schedule = new Schedule(new TaskQueue());
+    this.schedule = new Schedule(new TaskQueue(), this.player);
     this.nextLoopTasks = new TaskQueue();
     makeAutoObservable(this);
   }
 
   /** Restart the time loop. */
   startLoop() {
-    this.schedule = new Schedule(this.nextLoopTasks.clone());
+    this.schedule = new Schedule(this.nextLoopTasks.clone(), this.player);
     this.player.startLoop();
   }
 
@@ -106,7 +106,7 @@ export class Engine {
     this.startLoop();
     while (this.schedule.task) {
       const task = this.schedule.task;
-      const { ok } = this.tickTime(this.schedule.task.baseCost);
+      const { ok } = this.tickTime(this.player.cost(this.schedule.task));
       result[task.index] = {
         ok: ok,
         energy: this.player.energy,

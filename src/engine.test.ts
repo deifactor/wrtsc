@@ -39,7 +39,7 @@ describe("Engine#tickTime", () => {
     engine.nextLoopTasks.push(SCAVENGE_WEAPONS.kind);
     engine.nextLoopTasks.push(SCAVENGE_WEAPONS.kind);
     engine.startLoop();
-    expect(engine.tickTime(2 * SCAVENGE_WEAPONS.baseCost)).toEqual({
+    expect(engine.tickTime(2 * engine.player.cost(SCAVENGE_WEAPONS))).toEqual({
       ok: true,
     });
     expect(engine.player.resources.ruinsWeapons.current).toBe(1);

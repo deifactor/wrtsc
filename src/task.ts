@@ -1,3 +1,4 @@
+import { makeAutoObservable, trace } from "mobx";
 import { FlagId, Player, ResourceId, StatId } from "./player";
 
 export type TaskKind =
@@ -23,8 +24,8 @@ const defaults = {
 export type Task = Readonly<{
   readonly kind: TaskKind;
   name: string;
-  // Cost in AEUs.
-  baseCost: number;
+  /** Cost in AEUs. */
+  cost: number | ((player: Player) => number);
   description: string;
   extraPerform: (player: Player) => void;
   /**
@@ -52,7 +53,7 @@ export const EXPLORE_RUINS: Task = {
   ...defaults,
   kind: "exploreRuins",
   name: "Explore Ruins",
-  baseCost: 2500,
+  cost: 2500,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   extraPerform: ({ stats }: Player) => {
@@ -64,7 +65,7 @@ export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
-  baseCost: 1000,
+  cost: 1000,
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
   extraPerform: (player: Player) => {
@@ -78,7 +79,7 @@ export const SCAVENGE_WEAPONS: Task = {
   ...defaults,
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
-  baseCost: 1000,
+  cost: 1000,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   extraPerform: (player: Player) => {
@@ -92,7 +93,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   ...defaults,
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
-  baseCost: 4000,
+  cost: 4000,
   description:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   extraPerform: (player: Player) => {
@@ -106,7 +107,7 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
-  baseCost: 20000,
+  cost: 20000,
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (player: Player) => {
@@ -120,7 +121,7 @@ export const DISABLE_LOCKOUTS: Task = {
   ...defaults,
   kind: "disableLockouts",
   name: "Disable Lockouts",
-  baseCost: 2000,
+  cost: 2000,
   description:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   extraPerform: () => {},
@@ -133,7 +134,7 @@ export const LEAVE_RUINS: Task = {
   ...defaults,
   kind: "leaveRuins",
   name: "Leave Ruins",
-  baseCost: 20000,
+  cost: 20000,
   description:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   extraPerform: () => {},

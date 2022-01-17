@@ -85,6 +85,14 @@ export class Player {
     return zone.progressStats.map((id) => this.stats[id]);
   }
 
+  cost(task: Task): number {
+    if (typeof task.cost === "number") {
+      return task.cost;
+    } else {
+      return task.cost(this);
+    }
+  }
+
   perform(task: Task) {
     task.extraPerform(this);
     Object.entries(task.requiredResources).forEach(([res, value]) => {
