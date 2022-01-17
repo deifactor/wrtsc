@@ -4,7 +4,8 @@ export type TaskKind =
   | "exploreRuins"
   | "scavengeBatteries"
   | "scavengeWeapons"
-  | "observePatrolRoutes";
+  | "observePatrolRoutes"
+  | "hijackShip";
 
 const always = () => true;
 
@@ -78,9 +79,21 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   canPerform: (player) => player.stats.ruinsExploration.level >= 10,
 };
 
+export const HIJACK_SHIP: Task = {
+  kind: "hijackShip",
+  name: "Hijack Ship",
+  baseCost: 20000,
+  description:
+    "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
+  perform: () => {},
+  visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
+  canPerform: (player) => player.stats.patrolRoutesObserved.level >= 10,
+};
+
 export const TASKS: Record<TaskKind, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
   scavengeWeapons: SCAVENGE_WEAPONS,
   observePatrolRoutes: OBSERVE_PATROL_ROUTES,
+  hijackShip: HIJACK_SHIP,
 };
