@@ -69,6 +69,13 @@ export class Player {
     for (const resource of Object.values(this.resources)) {
       resource.startLoop();
     }
+    for (const stat of Object.values(this.stats)) {
+      if (stat.kind === "normal") {
+        // XXX: gross hack
+        stat.level = 0;
+        stat.xp = 0;
+      }
+    }
     this.flags.shipHijacked = false;
     this._energy = INITIAL_ENERGY;
     this._totalEnergy = INITIAL_ENERGY;
