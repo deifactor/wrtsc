@@ -24,8 +24,11 @@ export type Task = Readonly<{
    * Note that this doesn't mean the player can take it; see `enabled`.
    */
   visible: (player: Player) => boolean;
-  /** Predicate indicating whether the action can be taken. */
-  canPerform: (player: Player) => boolean;
+  /**
+   * An extra predicate indicating whether the action can be taken. This is on
+   * top of any requirements.
+   */
+  extraCheck: (player: Player) => boolean;
 }>;
 
 export const EXPLORE_RUINS: Task = {
@@ -38,7 +41,7 @@ export const EXPLORE_RUINS: Task = {
     stats.ruinsExploration.addXp(1024);
   },
   visible: () => true,
-  canPerform: always,
+  extraCheck: always,
 };
 
 export const SCAVENGE_BATTERIES: Task = {
@@ -52,7 +55,7 @@ export const SCAVENGE_BATTERIES: Task = {
     player.resources.ruinsBatteries.current -= 1;
   },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  canPerform: (player: Player) => player.resources.ruinsBatteries.current > 0,
+  extraCheck: (player: Player) => player.resources.ruinsBatteries.current > 0,
 };
 
 export const SCAVENGE_WEAPONS: Task = {
@@ -65,7 +68,7 @@ export const SCAVENGE_WEAPONS: Task = {
     player.stats.combat.addXp(1024);
   },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  canPerform: (player: Player) => player.resources.ruinsWeapons.current > 0,
+  extraCheck: (player: Player) => player.resources.ruinsWeapons.current > 0,
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -78,7 +81,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     player.stats.patrolRoutesObserved.addXp(1024);
   },
   visible: (player) => player.stats.ruinsExploration.level >= 5,
-  canPerform: (player) => player.stats.ruinsExploration.level >= 10,
+  extraCheck: (player) => player.stats.ruinsExploration.level >= 10,
 };
 
 export const HIJACK_SHIP: Task = {
@@ -89,7 +92,7 @@ export const HIJACK_SHIP: Task = {
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   perform: () => {},
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
-  canPerform: (player) => player.stats.patrolRoutesObserved.level >= 10,
+  extraCheck: (player) => player.stats.patrolRoutesObserved.level >= 10,
 };
 
 export const DISABLE_LOCKOUTS: Task = {
@@ -100,7 +103,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   perform: () => {},
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
-  canPerform: (player) => player.stats.patrolRoutesObserved.level >= 10,
+  extraCheck: (player) => player.stats.patrolRoutesObserved.level >= 10,
 };
 
 export const LEAVE_RUINS: Task = {
@@ -111,7 +114,7 @@ export const LEAVE_RUINS: Task = {
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   perform: () => {},
   visible: always,
-  canPerform: always,
+  extraCheck: always,
 };
 
 export const TASKS: Record<TaskKind, Task> = {

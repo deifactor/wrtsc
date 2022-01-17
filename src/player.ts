@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { Task } from "./task";
 import { Zone, ZoneKind } from "./zone";
 
 const INITIAL_ENERGY = 5000;
@@ -77,6 +78,10 @@ export class Player {
   /** The 'stats' that are actually progress elements for the given zone. */
   zoneProgress(zone: Zone): Stat[] {
     return zone.progressStats.map((name) => this.stats[name]);
+  }
+
+  canPerform(task: Task): boolean {
+    return task.extraCheck(this);
   }
 }
 

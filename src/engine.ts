@@ -71,7 +71,7 @@ export class Engine {
       if (!this.schedule.task) {
         return { ok: true };
       }
-      if (!this.schedule.task.canPerform(this.player)) {
+      if (!this.player.canPerform(this.schedule.task)) {
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = this.schedule.tickTime(
