@@ -6,9 +6,23 @@ import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { runInAction } from "mobx";
 import { IconType } from "react-icons";
-import { FaBeer } from "react-icons/fa";
+import {
+  GiBatteryPack,
+  GiJourney,
+  GiLaserBlast,
+  GiLockPicking,
+  GiSpaceship,
+  GiSpyglass,
+  GiTargeting,
+} from "react-icons/gi";
 const ICONS: Partial<Record<TaskKind, IconType>> = {
-  hijackShip: FaBeer,
+  exploreRuins: GiTargeting,
+  scavengeBatteries: GiBatteryPack,
+  scavengeWeapons: GiLaserBlast,
+  observePatrolRoutes: GiSpyglass,
+  hijackShip: GiSpaceship,
+  disableLockouts: GiLockPicking,
+  leaveRuins: GiJourney,
 };
 
 interface Props {

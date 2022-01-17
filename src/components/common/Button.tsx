@@ -58,7 +58,7 @@ export const Button = ({
         kindClass[kind]
       )}
     >
-      {Icon && <Icon className="mr-2" size="1.25rem" />}
+      {Icon && <Icon className="mr-2" size="1.5em" />}
       {children}
     </button>
   );
