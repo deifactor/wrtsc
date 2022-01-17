@@ -85,7 +85,7 @@ export class Engine {
       }
       duration = Math.min(this.player.energy, duration - ticked);
     }
-    if (this.player.energy <= 0) {
+    if (this.player.energy <= 0 && this.schedule.task) {
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
