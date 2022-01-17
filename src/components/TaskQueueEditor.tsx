@@ -53,7 +53,7 @@ const TaskQueueEditor = observer((props: Props) => {
       const tooltip = (
         <div className="w-96 p-2">
           <p>
-            <strong>Cost:</strong>
+            <strong>Cost:</strong> {player.cost(task)}
           </p>
           {Object.keys(task.requiredStats).length !== 0 && (
             <p>
