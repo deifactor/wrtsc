@@ -66,7 +66,7 @@ const App = observer(() => {
         </Button>
       </div>
       <TaskQueueEditor engine={engine} />
-      <div className="w-96">
+      <div className="w-[48rem]">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
