@@ -33,6 +33,7 @@ export class Player {
       ruinsWeapons: new Resource("ruinsWeapons", () =>
         Math.floor(this.stats.ruinsExploration.level / 8)
       ),
+      qhLockoutAttempts: new Resource("qhLockoutAttempts", () => 5),
     };
     this.flags = {
       shipHijacked: false,
@@ -223,13 +224,18 @@ export type StatJSON = {
   level: number;
 };
 
-export const RESOURCE_IDS = ["ruinsBatteries", "ruinsWeapons"] as const;
+export const RESOURCE_IDS = [
+  "ruinsBatteries",
+  "ruinsWeapons",
+  "qhLockoutAttempts",
+] as const;
 export type ResourceId = typeof RESOURCE_IDS[number];
 export type Resources = Record<ResourceId, Resource>;
 
 export const RESOURCE_NAME: Record<ResourceId, string> = {
   ruinsBatteries: "Ruins Batteries",
   ruinsWeapons: "Ruins Weapons",
+  qhLockoutAttempts: "QH Lockout Attempts",
 };
 
 /**
