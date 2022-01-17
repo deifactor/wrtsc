@@ -13,23 +13,23 @@ export class Player {
 
   constructor(json?: PlayerJSON) {
     this.stats = {
-      combat: new Stat("Combat", "normal", json?.stats.combat),
+      combat: new Stat("combat", "normal", json?.stats.combat),
       ruinsExploration: new Stat(
-        "Ruins Exploration",
+        "ruinsExploration",
         "progress",
         json?.stats.ruinsExploration
       ),
       patrolRoutesObserved: new Stat(
-        "Patrol Routes Observed",
+        "patrolRoutesObserved",
         "progress",
         json?.stats.patrolRoutesObserved
       ),
     };
     this.resources = {
-      ruinsBatteries: new Resource("Wreckage Batteries", () =>
+      ruinsBatteries: new Resource("ruinsBatteries", () =>
         Math.floor(Math.sqrt(this.stats.ruinsExploration.level))
       ),
-      ruinsWeapons: new Resource("Salvageable Weaponry", () =>
+      ruinsWeapons: new Resource("ruinsWeapons", () =>
         Math.floor(this.stats.ruinsExploration.level / 10)
       ),
     };
@@ -108,18 +108,23 @@ export const STAT_IDS = [
 export type StatId = typeof STAT_IDS[number];
 export type Stats = Record<StatId, Stat>;
 
+export const STAT_NAME: Record<StatId, string> = {
+  combat: "Combat",
+  ruinsExploration: "Ruins Exploration",
+  patrolRoutesObserved: "Patrol Routes Observed",
+};
+
 export type StatKind = "normal" | "progress";
 
 export class Stat {
-  // Stores the amount to the next level, not total XP.
-  name: string;
+  id: StatId;
   xp: number = 0;
   level: number = 0;
   kind: StatKind;
   maxLevel?: number;
 
-  constructor(name: string, kind: StatKind, json?: StatJSON) {
-    this.name = name;
+  constructor(id: StatId, kind: StatKind, json?: StatJSON) {
+    this.id = id;
     this.kind = kind;
     this.maxLevel = kind == "normal" ? undefined : 100;
     if (json) {
@@ -127,6 +132,10 @@ export class Stat {
       this.level = json.level;
     }
     makeAutoObservable(this);
+  }
+
+  get name(): string {
+    return STAT_NAME[this.id];
   }
 
   get totalToNextLevel(): number {
@@ -173,20 +182,29 @@ export const RESOURCE_IDS = ["ruinsBatteries", "ruinsWeapons"] as const;
 export type ResourceId = typeof RESOURCE_IDS[number];
 export type Resources = Record<ResourceId, Resource>;
 
+export const RESOURCE_NAME: Record<ResourceId, string> = {
+  ruinsBatteries: "Ruins Batteries",
+  ruinsWeapons: "Ruins Weapons",
+};
+
 /**
  * A Resource is something in the world that the player 'harvests' over the
  * course of the loop. The current count of each resource resets on loop start,
  * but the maximum doesn't.
  */
 export class Resource {
-  readonly name: string;
+  readonly id: ResourceId;
   current: number = 0;
   max: () => number;
 
-  constructor(name: string, max: () => number) {
-    this.name = name;
+  constructor(id: ResourceId, max: () => number) {
+    this.id = id;
     this.max = max;
     makeAutoObservable(this);
+  }
+
+  get name(): string {
+    return RESOURCE_NAME[this.id];
   }
 
   startLoop() {

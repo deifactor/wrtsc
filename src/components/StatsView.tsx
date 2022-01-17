@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Stat } from "../player";
+import { Stat, STAT_NAME } from "../player";
 
 type Props = {
   stat: Stat;

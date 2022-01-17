@@ -2,7 +2,13 @@ import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
 import { TaskQueue } from "../taskQueue";
 import { TASKS } from "../task";
-import { Player } from "../player";
+import {
+  Player,
+  ResourceId,
+  RESOURCE_NAME,
+  StatId,
+  STAT_NAME,
+} from "../player";
 import { Engine, SimulationResult, SimulationStep } from "../engine";
 import classNames from "classnames";
 
@@ -44,9 +50,9 @@ const TaskQueueEditor = observer((props: Props) => {
     .filter((task) => task.visible(player))
     .map((task) => {
       const requirements = Object.entries(task.requiredStats).map(
-        ([name, min]) => (
-          <span>
-            {name} {min}
+        ([id, min]) => (
+          <span key={id}>
+            {STAT_NAME[id as StatId]} {min}
           </span>
         )
       );
