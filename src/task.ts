@@ -107,7 +107,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   extraPerform: (player: Player) => {
-    player.stats.patrolRoutesObserved.addXp(1024);
+    player.stats.patrolRoutesObserved.addXp(1024 * 16);
   },
   requiredStats: { ruinsExploration: 10 },
   visible: (player) => player.stats.ruinsExploration.level >= 5,
