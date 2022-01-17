@@ -44,7 +44,7 @@ const App = observer(() => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
-  const [autoRestart, setAutoRestart] = useState(false);
+  const [autoRestart, setAutoRestart] = useState(true);
 
   useInterval(() => {
     runInAction(() => {
