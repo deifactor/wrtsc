@@ -5,7 +5,9 @@ export type TaskKind =
   | "scavengeBatteries"
   | "scavengeWeapons"
   | "observePatrolRoutes"
-  | "hijackShip";
+  | "hijackShip"
+  | "disableLockouts"
+  | "leaveRuins";
 
 const always = () => true;
 
@@ -90,10 +92,34 @@ export const HIJACK_SHIP: Task = {
   canPerform: (player) => player.stats.patrolRoutesObserved.level >= 10,
 };
 
+export const DISABLE_LOCKOUTS: Task = {
+  kind: "disableLockouts",
+  name: "Disable Lockouts",
+  baseCost: 2000,
+  description:
+    "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
+  perform: () => {},
+  visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
+  canPerform: (player) => player.stats.patrolRoutesObserved.level >= 10,
+};
+
+export const LEAVE_RUINS: Task = {
+  kind: "leaveRuins",
+  name: "Leave Ruins",
+  baseCost: 20000,
+  description:
+    "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
+  perform: () => {},
+  visible: always,
+  canPerform: always,
+};
+
 export const TASKS: Record<TaskKind, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
   scavengeWeapons: SCAVENGE_WEAPONS,
   observePatrolRoutes: OBSERVE_PATROL_ROUTES,
   hijackShip: HIJACK_SHIP,
+  disableLockouts: DISABLE_LOCKOUTS,
+  leaveRuins: LEAVE_RUINS,
 };
