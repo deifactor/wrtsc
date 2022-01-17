@@ -15,6 +15,7 @@ const always = () => true;
 const defaults = {
   visible: always,
   extraCheck: always,
+  extraPerform: () => {},
   requiredStats: {},
   requiredFlags: {},
   requiredResources: {},
@@ -82,9 +83,6 @@ export const SCAVENGE_WEAPONS: Task = {
   cost: 1000,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
-  extraPerform: (player: Player) => {
-    player.stats.combat.addXp(1024);
-  },
   requiredResources: { ruinsWeapons: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
@@ -107,8 +105,7 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
-  cost: (player: Player) =>
-    Math.max(20000 - player.stats.combat.level * 1000, 10000),
+  cost: (player: Player) => Math.max(20000 - player.combat * 1000, 10000),
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (player: Player) => {

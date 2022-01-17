@@ -106,7 +106,9 @@ export class Engine {
     this.startLoop();
     while (this.schedule.task) {
       const task = this.schedule.task;
-      const { ok } = this.tickTime(this.player.cost(this.schedule.task));
+      const { ok } = this.tickTime(
+        Math.max(this.player.cost(this.schedule.task), 1)
+      );
       result[task.index] = {
         ok: ok,
         energy: this.player.energy,

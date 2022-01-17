@@ -13,7 +13,9 @@ export const PlayerView = observer((props: Props) => {
       <div>
         <strong>AEU</strong>: {player.energy.toFixed(0)}
       </div>
-      <StatView stat={player.stats.combat} />
+      <p>
+        <strong>Combat:</strong> {player.combat}
+      </p>
     </div>
   );
 });

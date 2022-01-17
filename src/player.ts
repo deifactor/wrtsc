@@ -14,7 +14,6 @@ export class Player {
 
   constructor(json?: PlayerJSON) {
     this.stats = {
-      combat: new Stat("combat", "normal", json?.stats.combat),
       ruinsExploration: new Stat(
         "ruinsExploration",
         "progress",
@@ -53,6 +52,12 @@ export class Player {
 
   get totalEnergy(): number {
     return this._totalEnergy;
+  }
+
+  get combat(): number {
+    return (
+      this.resources.ruinsWeapons.max() - this.resources.ruinsWeapons.current
+    );
   }
 
   addEnergy(amount: number) {
@@ -139,16 +144,11 @@ export class Player {
   }
 }
 
-export const STAT_IDS = [
-  "combat",
-  "ruinsExploration",
-  "patrolRoutesObserved",
-] as const;
+export const STAT_IDS = ["ruinsExploration", "patrolRoutesObserved"] as const;
 export type StatId = typeof STAT_IDS[number];
 export type Stats = Record<StatId, Stat>;
 
 export const STAT_NAME: Record<StatId, string> = {
-  combat: "Combat",
   ruinsExploration: "Ruins Exploration",
   patrolRoutesObserved: "Patrol Routes Observed",
 };
