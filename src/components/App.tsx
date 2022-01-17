@@ -48,8 +48,11 @@ const App = observer(() => {
   useInterval(() => {
     const delta = new Date().getTime();
     const multiplier = isDev ? 1 : 1;
-    engine.tickTime(multiplier * (delta - lastUpdate));
+    const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
     setLastUpdate(delta);
+    if (!ok || !engine.schedule.task) {
+      engine.startLoop();
+    }
     engine.saveToStorage();
   }, 1000 / UPDATES_PER_SEC);
 
