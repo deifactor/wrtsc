@@ -80,11 +80,22 @@ export class Player {
     return zone.progressStats.map((name) => this.stats[name]);
   }
 
+  perform(task: Task) {
+    task.extraPerform(this);
+    Object.entries(task.requiredResources).map(([res, value]) => {
+      this.resources[res as ResourceName].current -= value;
+    });
+  }
+
   canPerform(task: Task): boolean {
     return (
-      STAT_NAMES.every(
-        (name) => this.stats[name].level >= (task.requiredStats[name] ?? 0)
-      ) && task.extraCheck(this)
+      Object.entries(task.requiredStats).every(
+        ([name, min]) => this.stats[name as StatName].level >= min
+      ) &&
+      Object.entries(task.requiredResources).every(
+        ([name, min]) => this.resources[name as ResourceName].current >= min
+      ) &&
+      task.extraCheck(this)
     );
   }
 }

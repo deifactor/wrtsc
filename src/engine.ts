@@ -49,7 +49,7 @@ export class Engine {
 
   /** Iterate to the next task. This includes performing the current task. */
   nextTask() {
-    this.schedule.task?.perform(this.player);
+    this.schedule.task?.extraPerform(this.player);
     this.schedule.next();
   }
 
@@ -80,7 +80,7 @@ export class Engine {
 
       this.player.removeEnergy(ticked);
       if (this.schedule.taskDone) {
-        this.schedule.task!.perform(this.player);
+        this.player.perform(this.schedule.task!);
         this.schedule.next();
       }
       duration = Math.min(this.player.energy, duration - ticked);

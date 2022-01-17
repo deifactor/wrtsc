@@ -11,7 +11,12 @@ export type TaskKind =
 
 const always = () => true;
 
-const defaults = { visible: always, extraCheck: always, requiredStats: {} };
+const defaults = {
+  visible: always,
+  extraCheck: always,
+  requiredStats: {},
+  requiredResources: {},
+};
 
 /** A task, something that goes in the task queue. */
 export type Task = Readonly<{
@@ -20,14 +25,19 @@ export type Task = Readonly<{
   // Cost in AEUs.
   baseCost: number;
   description: string;
-  perform: (player: Player) => void;
+  extraPerform: (player: Player) => void;
   /**
    * Predicate that determines whether the action should be shown to the player.
    * Note that this doesn't mean the player can take it; see `enabled`.
    */
   visible: (player: Player) => boolean;
-  /** Requirements for the task to be able to be performed. */
+  /** Minimum stats for the action to be performable. */
   requiredStats: Partial<Record<StatName, number>>;
+  /**
+   * Minimum resources for the action to be performable. This will also result
+   * in the player consuming the resources on perform.
+   */
+  requiredResources: Partial<Record<ResourceName, number>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
@@ -42,7 +52,7 @@ export const EXPLORE_RUINS: Task = {
   baseCost: 2500,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
-  perform: ({ stats }: Player) => {
+  extraPerform: ({ stats }: Player) => {
     stats.ruinsExploration.addXp(1024);
   },
 };
@@ -54,11 +64,11 @@ export const SCAVENGE_BATTERIES: Task = {
   baseCost: 1000,
   description:
     "Power source: located. Integration of power source will lead to loop extension.",
-  perform: (player: Player) => {
+  extraPerform: (player: Player) => {
     player.addEnergy(3500);
-    player.resources.ruinsBatteries.current -= 1;
   },
   requiredStats: { ruinsExploration: 1 },
+  requiredResources: { ruinsBatteries: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
 
@@ -69,10 +79,11 @@ export const SCAVENGE_WEAPONS: Task = {
   baseCost: 1000,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
-  perform: (player: Player) => {
+  extraPerform: (player: Player) => {
     player.stats.combat.addXp(1024);
   },
   requiredStats: { ruinsExploration: 1 },
+  requiredResources: { ruinsWeapons: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
 
@@ -83,7 +94,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   baseCost: 4000,
   description:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
-  perform: (player: Player) => {
+  extraPerform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024);
   },
   requiredStats: { ruinsExploration: 10 },
@@ -97,7 +108,7 @@ export const HIJACK_SHIP: Task = {
   baseCost: 20000,
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
-  perform: () => {},
+  extraPerform: () => {},
   requiredStats: { patrolRoutesObserved: 10 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
 };
@@ -109,7 +120,7 @@ export const DISABLE_LOCKOUTS: Task = {
   baseCost: 2000,
   description:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
-  perform: () => {},
+  extraPerform: () => {},
   requiredStats: { patrolRoutesObserved: 10 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
 };
@@ -121,7 +132,7 @@ export const LEAVE_RUINS: Task = {
   baseCost: 20000,
   description:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
-  perform: () => {},
+  extraPerform: () => {},
 };
 
 export const TASKS: Record<TaskKind, Task> = {
