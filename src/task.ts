@@ -67,7 +67,6 @@ export const SCAVENGE_BATTERIES: Task = {
   extraPerform: (player: Player) => {
     player.addEnergy(3500);
   },
-  requiredStats: { ruinsExploration: 1 },
   requiredResources: { ruinsBatteries: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
@@ -82,7 +81,6 @@ export const SCAVENGE_WEAPONS: Task = {
   extraPerform: (player: Player) => {
     player.stats.combat.addXp(1024);
   },
-  requiredStats: { ruinsExploration: 1 },
   requiredResources: { ruinsWeapons: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
