@@ -106,6 +106,22 @@ export class Player {
       task.extraCheck(this)
     );
   }
+
+  /**
+   * Whether the task can be added to the queue. This is true if there's *some*
+   * conceivable world where the player can perform this task. So it skips over
+   * flag checks and only checks against *max* resources.
+   */
+  canAddToQueue(task: Task): boolean {
+    return (
+      Object.entries(task.requiredStats).every(
+        ([id, min]) => this.stats[id as StatId].level >= min
+      ) &&
+      Object.entries(task.requiredResources).every(
+        ([id, min]) => this.resources[id as ResourceId].max() >= min
+      )
+    );
+  }
 }
 
 export const STAT_IDS = [

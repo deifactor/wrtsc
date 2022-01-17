@@ -76,7 +76,7 @@ const TaskQueueEditor = observer((props: Props) => {
           key={task.kind}
           onClick={() => nextLoopTasks.push(task.kind)}
           tooltip={tooltip}
-          state={player.canPerform(task) ? "active" : "locked"}
+          state={player.canAddToQueue(task) ? "active" : "locked"}
         >
           {task.name}
         </Button>
