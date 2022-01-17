@@ -8,6 +8,7 @@ import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
+import { Switch } from "./common/Switch";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -44,6 +45,7 @@ const App = observer(() => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
+  const [autoRestart, setAutoRestart] = useState(false);
 
   useInterval(() => {
     const delta = new Date().getTime();
@@ -70,6 +72,9 @@ const App = observer(() => {
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
+        <Switch checked={autoRestart} onChange={setAutoRestart}>
+          Auto-restart
+        </Switch>
       </div>
       <div>
         <ZoneView
