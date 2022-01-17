@@ -109,7 +109,9 @@ export const HIJACK_SHIP: Task = {
   baseCost: 20000,
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
-  extraPerform: () => {},
+  extraPerform: (player: Player) => {
+    player.flags.shipHijacked = true;
+  },
   requiredStats: { patrolRoutesObserved: 10 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
 };
