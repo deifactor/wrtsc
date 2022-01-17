@@ -59,7 +59,7 @@ export const EXPLORE_RUINS: Task = {
   name: "Explore Ruins",
   cost: 2500,
   description:
-    "Increases amount of weapons and batteries that can be scavenged.",
+    "Increases amount of weapons and batteries that can be scavenged. 8x progress with Ship Hijacked.",
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   extraPerform: (player: Player) => {

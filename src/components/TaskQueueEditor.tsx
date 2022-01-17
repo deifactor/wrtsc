@@ -51,7 +51,7 @@ const TaskQueueEditor = observer((props: Props) => {
         )
       );
       const tooltip = (
-        <div className="w-96 p-2">
+        <div className="w-96 p-2 text-sm">
           <p className="mb-2">{task.description}</p>
           <p>
             <strong>Cost:</strong> {player.cost(task)}
@@ -63,7 +63,7 @@ const TaskQueueEditor = observer((props: Props) => {
             </p>
           )}
           <hr className="border-gray-700 my-3" />
-          <p className="text-sm mb-2 text-gray-400">{task.flavor}</p>
+          <p className="text-xs mb-2 text-gray-400">{task.flavor}</p>
         </div>
       );
       return (
