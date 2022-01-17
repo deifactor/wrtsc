@@ -80,7 +80,7 @@ export const SCAVENGE_WEAPONS: Task = {
   ...defaults,
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
-  cost: 1000,
+  cost: 800,
   description:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   requiredResources: { ruinsWeapons: 1 },
@@ -91,7 +91,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   ...defaults,
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
-  cost: 4000,
+  cost: 3000,
   description:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   extraPerform: (player: Player) => {
@@ -105,7 +105,13 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
-  cost: (player: Player) => Math.max(20000 - player.combat * 1000, 10000),
+  cost: (player: Player) =>
+    Math.max(
+      20000 -
+        player.combat * 1500 -
+        player.stats.patrolRoutesObserved.level * 150,
+      8000
+    ),
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (player: Player) => {
