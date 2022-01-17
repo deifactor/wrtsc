@@ -107,7 +107,8 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
-  cost: 20000,
+  cost: (player: Player) =>
+    Math.max(20000 - player.stats.combat.level * 1000, 10000),
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (player: Player) => {
