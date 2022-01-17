@@ -1,4 +1,4 @@
-import { Player, ResourceId, StatId } from "./player";
+import { FlagId, Player, ResourceId, StatId } from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -15,6 +15,7 @@ const defaults = {
   visible: always,
   extraCheck: always,
   requiredStats: {},
+  requiredFlags: {},
   requiredResources: {},
 };
 
@@ -38,6 +39,8 @@ export type Task = Readonly<{
    * in the player consuming the resources on perform.
    */
   requiredResources: Partial<Record<ResourceId, number>>;
+  /** These flags must be present with the given values. */
+  requiredFlags: Partial<Record<FlagId, boolean>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
@@ -120,6 +123,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   extraPerform: () => {},
   requiredStats: { patrolRoutesObserved: 10 },
+  requiredFlags: { shipHijacked: true },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
 };
 

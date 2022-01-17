@@ -7,6 +7,7 @@ const INITIAL_ENERGY = 5000;
 export class Player {
   readonly stats: Record<StatId, Stat>;
   readonly resources: Record<ResourceId, Resource>;
+  readonly flags: Record<FlagId, boolean>;
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
@@ -32,6 +33,9 @@ export class Player {
       ruinsWeapons: new Resource("ruinsWeapons", () =>
         Math.floor(this.stats.ruinsExploration.level / 10)
       ),
+    };
+    this.flags = {
+      shipHijacked: false,
     };
 
     this.startLoop();
@@ -65,6 +69,7 @@ export class Player {
     for (const resource of Object.values(this.resources)) {
       resource.startLoop();
     }
+    this.flags.shipHijacked = false;
     this._energy = INITIAL_ENERGY;
     this._totalEnergy = INITIAL_ENERGY;
   }
@@ -94,6 +99,9 @@ export class Player {
       ) &&
       Object.entries(task.requiredResources).every(
         ([id, min]) => this.resources[id as ResourceId].current >= min
+      ) &&
+      Object.entries(task.requiredFlags).every(
+        ([id, value]) => this.flags[id as FlagId] == value
       ) &&
       task.extraCheck(this)
     );
@@ -211,3 +219,10 @@ export class Resource {
     this.current = this.max();
   }
 }
+
+export const FLAG_IDS = ["shipHijacked"];
+/**
+ * A Flag is basically a status that the player may or may not have. Flags can
+ * be positive or negative.
+ */
+export type FlagId = typeof FLAG_IDS[number];
