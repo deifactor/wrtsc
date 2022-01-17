@@ -57,8 +57,9 @@ export const EXPLORE_RUINS: Task = {
   cost: 2500,
   description:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
-  extraPerform: ({ stats }: Player) => {
-    stats.ruinsExploration.addXp(1024);
+  extraPerform: (player: Player) => {
+    const mult = player.flags.shipHijacked ? 8 : 1;
+    player.stats.ruinsExploration.addXp(mult * 1024);
   },
 };
 
