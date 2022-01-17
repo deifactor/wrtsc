@@ -6,7 +6,7 @@ import { StatView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";
-import { configure } from "mobx";
+import { configure, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Switch } from "./common/Switch";
 
@@ -48,14 +48,16 @@ const App = observer(() => {
   const [autoRestart, setAutoRestart] = useState(false);
 
   useInterval(() => {
-    const delta = new Date().getTime();
-    const multiplier = isDev ? 1 : 1;
-    const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
-    setLastUpdate(delta);
-    if (!ok || !engine.schedule.task) {
-      engine.startLoop();
-    }
-    engine.saveToStorage();
+    runInAction(() => {
+      const delta = new Date().getTime();
+      const multiplier = isDev ? 1 : 1;
+      const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
+      setLastUpdate(delta);
+      if (!ok || !engine.schedule.task) {
+        engine.startLoop();
+      }
+      engine.saveToStorage();
+    });
   }, 1000 / UPDATES_PER_SEC);
 
   return (
