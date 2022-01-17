@@ -53,7 +53,7 @@ const App = observer(() => {
       const multiplier = isDev ? 1 : 1;
       const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
       setLastUpdate(delta);
-      if (!ok || !engine.schedule.task) {
+      if (autoRestart && (!ok || !engine.schedule.task)) {
         engine.startLoop();
       }
       engine.saveToStorage();
@@ -65,18 +65,22 @@ const App = observer(() => {
       <div className="w-96">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
-        <Button kind="danger" onClick={() => setEngine(new Engine())}>
-          Hard Reset
-        </Button>
+        <div>
+          <Button kind="danger" onClick={() => setEngine(new Engine())}>
+            Hard Reset
+          </Button>
+        </div>
+        <div>
+          <Switch checked={autoRestart} onChange={setAutoRestart}>
+            Auto-restart
+          </Switch>
+        </div>
       </div>
       <TaskQueueEditor engine={engine} />
       <div className="w-[48rem]">
         <ScheduleView className="h-[36rem]" schedule={engine.schedule} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
-        <Switch checked={autoRestart} onChange={setAutoRestart}>
-          Auto-restart
-        </Switch>
       </div>
       <div>
         <ZoneView
