@@ -143,7 +143,7 @@ export const DISABLE_LOCKOUTS: Task = {
   name: "Disable Lockouts",
   cost: 3000,
   description:
-    "Can only be performed 5 times in a loop. Requires Ship Hijacked.",
+    "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   extraPerform: (player: Player) => {

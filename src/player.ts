@@ -33,7 +33,7 @@ export class Player {
       ruinsWeapons: new Resource("ruinsWeapons", () =>
         Math.floor(this.stats.ruinsExploration.level / 8)
       ),
-      qhLockoutAttempts: new Resource("qhLockoutAttempts", () => 5),
+      qhLockoutAttempts: new Resource("qhLockoutAttempts", () => 12),
     };
     this.flags = {
       shipHijacked: false,
