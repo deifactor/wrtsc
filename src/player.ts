@@ -24,6 +24,7 @@ export class Player {
         "progress",
         json?.stats.patrolRoutesObserved
       ),
+      qhLockout: new Stat("qhLockout", "progress", json?.stats.qhLockout),
     };
     this.resources = {
       ruinsBatteries: new Resource("ruinsBatteries", () =>
@@ -144,13 +145,18 @@ export class Player {
   }
 }
 
-export const STAT_IDS = ["ruinsExploration", "patrolRoutesObserved"] as const;
+export const STAT_IDS = [
+  "ruinsExploration",
+  "patrolRoutesObserved",
+  "qhLockout",
+] as const;
 export type StatId = typeof STAT_IDS[number];
 export type Stats = Record<StatId, Stat>;
 
 export const STAT_NAME: Record<StatId, string> = {
   ruinsExploration: "Ruins Exploration",
   patrolRoutesObserved: "Patrol Routes Observed",
+  qhLockout: "Ship Lockout Disabled",
 };
 
 export type StatKind = "normal" | "progress";

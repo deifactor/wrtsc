@@ -21,6 +21,9 @@ const defaults = {
   requiredResources: {},
 };
 
+// Some notes: at 1-1-1-1 2-2-2-2 etc task progression, it takes about 1300
+// repetitions to finish a task.
+
 /** A task, something that goes in the task queue. */
 export type Task = Readonly<{
   readonly kind: TaskKind;
@@ -121,7 +124,7 @@ export const HIJACK_SHIP: Task = {
     Math.max(
       20000 -
         player.combat * 1500 -
-        player.stats.patrolRoutesObserved.level * 150,
+        player.stats.patrolRoutesObserved.level * 100,
       8000
     ),
   description:
@@ -139,12 +142,14 @@ export const DISABLE_LOCKOUTS: Task = {
   ...defaults,
   kind: "disableLockouts",
   name: "Disable Lockouts",
-  cost: 2000,
+  cost: 3000,
   description:
     "Can only be performed 8 times in a loop. Requires Ship Hijacked.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
-  extraPerform: () => {},
+  extraPerform: (player: Player) => {
+    player.stats.qhLockout.addXp(1024 * 10);
+  },
   requiredStats: { patrolRoutesObserved: 10 },
   requiredFlags: { shipHijacked: true },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
@@ -158,6 +163,7 @@ export const LEAVE_RUINS: Task = {
   description: "Advance to the next zone.",
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
+  requiredStats: { qhLockout: 100 },
   extraPerform: () => {},
 };
 
