@@ -27,10 +27,10 @@ export class Player {
     };
     this.resources = {
       ruinsBatteries: new Resource("ruinsBatteries", () =>
-        Math.floor(Math.sqrt(this.stats.ruinsExploration.level))
+        Math.floor(this.stats.ruinsExploration.level / 4)
       ),
       ruinsWeapons: new Resource("ruinsWeapons", () =>
-        Math.floor(this.stats.ruinsExploration.level / 10)
+        Math.floor(this.stats.ruinsExploration.level / 8)
       ),
     };
     this.flags = {
