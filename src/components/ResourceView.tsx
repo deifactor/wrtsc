@@ -9,7 +9,7 @@ export const ResourceView = observer((props: Props) => {
   const { resource } = props;
   return (
     <div>
-      <strong>{resource.name}</strong>: {resource.current}/{resource.max}
+      <strong>{resource.name}</strong>: {resource.current}/{resource.max()}
     </div>
   );
 });

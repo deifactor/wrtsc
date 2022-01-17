@@ -25,11 +25,14 @@ export class Player {
       ),
     };
     this.resources = {
-      ruinsBatteries: new Resource("Wreckage Batteries"),
-      ruinsWeapons: new Resource("Salvageable Weaponry"),
+      ruinsBatteries: new Resource("Wreckage Batteries", () =>
+        Math.floor(Math.sqrt(this.stats.ruinsExploration.level))
+      ),
+      ruinsWeapons: new Resource("Salvageable Weaponry", () =>
+        Math.floor(this.stats.ruinsExploration.level / 10)
+      ),
     };
 
-    this.setResourceLimits();
     this.startLoop();
 
     makeAutoObservable(this);
@@ -74,19 +77,6 @@ export class Player {
   /** The 'stats' that are actually progress elements for the given zone. */
   zoneProgress(zone: Zone): Stat[] {
     return zone.progressStats.map((name) => this.stats[name]);
-  }
-
-  /**
-   * Updates the maximum limits on each resource. This should be called whenever
-   * a stat changes/could have changed.
-   */
-  setResourceLimits() {
-    this.resources.ruinsBatteries.max = Math.floor(
-      this.stats.ruinsExploration.level / 5
-    );
-    this.resources.ruinsWeapons.max = Math.floor(
-      this.stats.ruinsExploration.level / 10
-    );
   }
 }
 
@@ -171,14 +161,15 @@ export type Resources = Record<ResourceName, Resource>;
 export class Resource {
   readonly name: string;
   current: number = 0;
-  max: number = 0;
+  max: () => number;
 
-  constructor(name: string) {
+  constructor(name: string, max: () => number) {
     this.name = name;
+    this.max = max;
     makeAutoObservable(this);
   }
 
   startLoop() {
-    this.current = this.max;
+    this.current = this.max();
   }
 }
