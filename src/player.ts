@@ -81,7 +81,11 @@ export class Player {
   }
 
   canPerform(task: Task): boolean {
-    return task.extraCheck(this);
+    return (
+      STAT_NAMES.every(
+        (name) => this.stats[name].level >= (task.requiredStats[name] ?? 0)
+      ) && task.extraCheck(this)
+    );
   }
 }
 

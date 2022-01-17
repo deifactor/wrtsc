@@ -1,4 +1,4 @@
-import { Player } from "./player";
+import { Player, ResourceName, StatName } from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -10,6 +10,8 @@ export type TaskKind =
   | "leaveRuins";
 
 const always = () => true;
+
+const defaults = { visible: always, extraCheck: always, requiredStats: {} };
 
 /** A task, something that goes in the task queue. */
 export type Task = Readonly<{
@@ -24,6 +26,8 @@ export type Task = Readonly<{
    * Note that this doesn't mean the player can take it; see `enabled`.
    */
   visible: (player: Player) => boolean;
+  /** Requirements for the task to be able to be performed. */
+  requiredStats: Partial<Record<StatName, number>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
@@ -32,6 +36,7 @@ export type Task = Readonly<{
 }>;
 
 export const EXPLORE_RUINS: Task = {
+  ...defaults,
   kind: "exploreRuins",
   name: "Explore Ruins",
   baseCost: 2500,
@@ -40,11 +45,10 @@ export const EXPLORE_RUINS: Task = {
   perform: ({ stats }: Player) => {
     stats.ruinsExploration.addXp(1024);
   },
-  visible: () => true,
-  extraCheck: always,
 };
 
 export const SCAVENGE_BATTERIES: Task = {
+  ...defaults,
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
   baseCost: 1000,
@@ -54,11 +58,12 @@ export const SCAVENGE_BATTERIES: Task = {
     player.addEnergy(3500);
     player.resources.ruinsBatteries.current -= 1;
   },
+  requiredStats: { ruinsExploration: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  extraCheck: (player: Player) => player.resources.ruinsBatteries.current > 0,
 };
 
 export const SCAVENGE_WEAPONS: Task = {
+  ...defaults,
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
   baseCost: 1000,
@@ -67,11 +72,12 @@ export const SCAVENGE_WEAPONS: Task = {
   perform: (player: Player) => {
     player.stats.combat.addXp(1024);
   },
+  requiredStats: { ruinsExploration: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  extraCheck: (player: Player) => player.resources.ruinsWeapons.current > 0,
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
+  ...defaults,
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   baseCost: 4000,
@@ -80,41 +86,42 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   perform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024);
   },
+  requiredStats: { ruinsExploration: 10 },
   visible: (player) => player.stats.ruinsExploration.level >= 5,
-  extraCheck: (player) => player.stats.ruinsExploration.level >= 10,
 };
 
 export const HIJACK_SHIP: Task = {
+  ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
   baseCost: 20000,
   description:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   perform: () => {},
+  requiredStats: { patrolRoutesObserved: 10 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
-  extraCheck: (player) => player.stats.patrolRoutesObserved.level >= 10,
 };
 
 export const DISABLE_LOCKOUTS: Task = {
+  ...defaults,
   kind: "disableLockouts",
   name: "Disable Lockouts",
   baseCost: 2000,
   description:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   perform: () => {},
+  requiredStats: { patrolRoutesObserved: 10 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
-  extraCheck: (player) => player.stats.patrolRoutesObserved.level >= 10,
 };
 
 export const LEAVE_RUINS: Task = {
+  ...defaults,
   kind: "leaveRuins",
   name: "Leave Ruins",
   baseCost: 20000,
   description:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   perform: () => {},
-  visible: always,
-  extraCheck: always,
 };
 
 export const TASKS: Record<TaskKind, Task> = {
