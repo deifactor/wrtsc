@@ -1,15 +1,11 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
-import { TaskQueue } from "../taskQueue";
 import { TASKS } from "../task";
 import {
-  Player,
-  ResourceId,
-  RESOURCE_NAME,
   StatId,
   STAT_NAME,
 } from "../player";
-import { Engine, SimulationResult, SimulationStep } from "../engine";
+import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 
 interface Props {

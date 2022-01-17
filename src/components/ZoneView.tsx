@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
-import { Zone, ZoneKind } from "../zone";
+import { Zone } from "../zone";
 import { ResourceView } from "./ResourceView";
 import { StatView } from "./StatsView";
 

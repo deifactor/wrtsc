@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { Task } from "./task";
-import { Zone, ZoneKind } from "./zone";
+import { Zone } from "./zone";
 
 const INITIAL_ENERGY = 5000;
 
@@ -87,7 +87,7 @@ export class Player {
 
   perform(task: Task) {
     task.extraPerform(this);
-    Object.entries(task.requiredResources).map(([res, value]) => {
+    Object.entries(task.requiredResources).forEach(([res, value]) => {
       this.resources[res as ResourceId].current -= value;
     });
   }
@@ -101,7 +101,7 @@ export class Player {
         ([id, min]) => this.resources[id as ResourceId].current >= min
       ) &&
       Object.entries(task.requiredFlags).every(
-        ([id, value]) => this.flags[id as FlagId] == value
+        ([id, value]) => this.flags[id as FlagId] === value
       ) &&
       task.extraCheck(this)
     );
@@ -150,7 +150,7 @@ export class Stat {
   constructor(id: StatId, kind: StatKind, json?: StatJSON) {
     this.id = id;
     this.kind = kind;
-    this.maxLevel = kind == "normal" ? undefined : 100;
+    this.maxLevel = kind === "normal" ? undefined : 100;
     if (json) {
       this.xp = json.xp;
       this.level = json.level;

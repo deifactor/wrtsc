@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import { Schedule } from "../schedule";
-import { TASKS } from "../task";
 
 interface Props {
   schedule: Schedule;

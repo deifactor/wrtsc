@@ -2,7 +2,6 @@ import { Button } from "./common/Button";
 import { useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleView } from "./ScheduleView";
-import { StatView } from "./StatsView";
 import { ZoneView } from "./ZoneView";
 import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";

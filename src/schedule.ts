@@ -1,5 +1,4 @@
-import { action, makeAutoObservable } from "mobx";
-import { Task } from "./task";
+import { makeAutoObservable } from "mobx";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
 export interface Stats {
@@ -31,7 +30,7 @@ export class Schedule {
   }
 
   get taskDone(): boolean {
-    return Boolean(this.task && this.timeLeftOnTask == 0);
+    return Boolean(this.task && this.timeLeftOnTask === 0);
   }
 
   completions(index: number): number {
