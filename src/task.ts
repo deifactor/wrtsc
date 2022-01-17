@@ -66,7 +66,7 @@ export const EXPLORE_RUINS: Task = {
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   extraPerform: (player: Player) => {
-    const mult = player.flags.shipHijacked ? 8 : 1;
+    const mult = player.flags.shipHijacked ? 8 : 2;
     player.stats.ruinsExploration.addXp(mult * 1024);
   },
 };
@@ -110,7 +110,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   extraPerform: (player: Player) => {
-    player.stats.patrolRoutesObserved.addXp(1024 * 16);
+    player.stats.patrolRoutesObserved.addXp(1024 * 6);
   },
   requiredStats: { ruinsExploration: 10 },
   visible: (player) => player.stats.ruinsExploration.level >= 5,
@@ -122,10 +122,10 @@ export const HIJACK_SHIP: Task = {
   name: "Hijack Ship",
   cost: (player: Player) =>
     Math.max(
-      20000 -
+      24000 -
         player.combat * 1500 -
         player.stats.patrolRoutesObserved.level * 100,
-      8000
+      6000
     ),
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
@@ -134,7 +134,7 @@ export const HIJACK_SHIP: Task = {
   extraPerform: (player: Player) => {
     player.flags.shipHijacked = true;
   },
-  requiredStats: { patrolRoutesObserved: 10 },
+  requiredStats: { patrolRoutesObserved: 30 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
 };
 
@@ -152,7 +152,7 @@ export const DISABLE_LOCKOUTS: Task = {
   },
   requiredStats: { patrolRoutesObserved: 10 },
   requiredFlags: { shipHijacked: true },
-  visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
+  visible: (player) => player.stats.patrolRoutesObserved.level >= 20,
 };
 
 export const LEAVE_RUINS: Task = {
@@ -164,7 +164,7 @@ export const LEAVE_RUINS: Task = {
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   requiredStats: { qhLockout: 100 },
-  extraPerform: () => {},
+  visible: (player) => player.stats.patrolRoutesObserved.level >= 30,
 };
 
 export const TASKS: Record<TaskKind, Task> = {
