@@ -5,8 +5,8 @@ import { Zone, ZoneKind } from "./zone";
 const INITIAL_ENERGY = 5000;
 
 export class Player {
-  readonly stats: Record<StatName, Stat>;
-  readonly resources: Record<ResourceName, Resource>;
+  readonly stats: Record<StatId, Stat>;
+  readonly resources: Record<ResourceId, Resource>;
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
@@ -70,43 +70,43 @@ export class Player {
   }
 
   save(): PlayerJSON {
-    const stats: Partial<Record<StatName, StatJSON>> = {};
-    STAT_NAMES.map((name) => (stats[name] = this.stats[name]));
-    return { stats: stats as Record<StatName, StatJSON> };
+    const stats: Partial<Record<StatId, StatJSON>> = {};
+    STAT_IDS.map((id) => (stats[id] = this.stats[id]));
+    return { stats: stats as Record<StatId, StatJSON> };
   }
 
   /** The 'stats' that are actually progress elements for the given zone. */
   zoneProgress(zone: Zone): Stat[] {
-    return zone.progressStats.map((name) => this.stats[name]);
+    return zone.progressStats.map((id) => this.stats[id]);
   }
 
   perform(task: Task) {
     task.extraPerform(this);
     Object.entries(task.requiredResources).map(([res, value]) => {
-      this.resources[res as ResourceName].current -= value;
+      this.resources[res as ResourceId].current -= value;
     });
   }
 
   canPerform(task: Task): boolean {
     return (
       Object.entries(task.requiredStats).every(
-        ([name, min]) => this.stats[name as StatName].level >= min
+        ([id, min]) => this.stats[id as StatId].level >= min
       ) &&
       Object.entries(task.requiredResources).every(
-        ([name, min]) => this.resources[name as ResourceName].current >= min
+        ([id, min]) => this.resources[id as ResourceId].current >= min
       ) &&
       task.extraCheck(this)
     );
   }
 }
 
-export const STAT_NAMES = [
+export const STAT_IDS = [
   "combat",
   "ruinsExploration",
   "patrolRoutesObserved",
 ] as const;
-export type StatName = typeof STAT_NAMES[number];
-export type Stats = Record<StatName, Stat>;
+export type StatId = typeof STAT_IDS[number];
+export type Stats = Record<StatId, Stat>;
 
 export type StatKind = "normal" | "progress";
 
@@ -161,7 +161,7 @@ export class Stat {
 }
 
 export type PlayerJSON = {
-  stats: Record<StatName, StatJSON>;
+  stats: Record<StatId, StatJSON>;
 };
 
 export type StatJSON = {
@@ -169,9 +169,9 @@ export type StatJSON = {
   level: number;
 };
 
-export const RESOURCE_NAMES = ["ruinsBatteries", "ruinsWeapons"] as const;
-export type ResourceName = typeof RESOURCE_NAMES[number];
-export type Resources = Record<ResourceName, Resource>;
+export const RESOURCE_IDS = ["ruinsBatteries", "ruinsWeapons"] as const;
+export type ResourceId = typeof RESOURCE_IDS[number];
+export type Resources = Record<ResourceId, Resource>;
 
 /**
  * A Resource is something in the world that the player 'harvests' over the

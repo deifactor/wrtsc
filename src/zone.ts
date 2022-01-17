@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { StatName } from "./player";
+import { StatId } from "./player";
 import {
   Task,
   EXPLORE_RUINS,
@@ -13,7 +13,7 @@ export interface Zone {
   name: string;
   description: ReactNode;
   tasks: Task[];
-  progressStats: StatName[];
+  progressStats: StatId[];
 }
 
 export const RUINS: Zone = {

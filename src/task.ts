@@ -1,4 +1,4 @@
-import { Player, ResourceName, StatName } from "./player";
+import { Player, ResourceId, StatId } from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -32,12 +32,12 @@ export type Task = Readonly<{
    */
   visible: (player: Player) => boolean;
   /** Minimum stats for the action to be performable. */
-  requiredStats: Partial<Record<StatName, number>>;
+  requiredStats: Partial<Record<StatId, number>>;
   /**
    * Minimum resources for the action to be performable. This will also result
    * in the player consuming the resources on perform.
    */
-  requiredResources: Partial<Record<ResourceName, number>>;
+  requiredResources: Partial<Record<ResourceId, number>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
