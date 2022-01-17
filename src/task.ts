@@ -1,4 +1,3 @@
-import { makeAutoObservable, trace } from "mobx";
 import { FlagId, Player, ResourceId, StatId } from "./player";
 
 export type TaskKind =
