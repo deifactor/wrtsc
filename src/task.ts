@@ -27,7 +27,7 @@ export type Task = Readonly<{
   name: string;
   /** Cost in AEUs. */
   cost: number | ((player: Player) => number);
-  description: string;
+  flavor: string;
   extraPerform: (player: Player) => void;
   /**
    * Predicate that determines whether the action should be shown to the player.
@@ -55,7 +55,7 @@ export const EXPLORE_RUINS: Task = {
   kind: "exploreRuins",
   name: "Explore Ruins",
   cost: 2500,
-  description:
+  flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   extraPerform: (player: Player) => {
     const mult = player.flags.shipHijacked ? 8 : 1;
@@ -68,7 +68,7 @@ export const SCAVENGE_BATTERIES: Task = {
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
   cost: 1000,
-  description:
+  flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
   extraPerform: (player: Player) => {
     player.addEnergy(3500);
@@ -82,7 +82,7 @@ export const SCAVENGE_WEAPONS: Task = {
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
   cost: 800,
-  description:
+  flavor:
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   requiredResources: { ruinsWeapons: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
@@ -93,7 +93,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   cost: 3000,
-  description:
+  flavor:
     "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
   extraPerform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024);
@@ -113,7 +113,7 @@ export const HIJACK_SHIP: Task = {
         player.stats.patrolRoutesObserved.level * 150,
       8000
     ),
-  description:
+  flavor:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (player: Player) => {
     player.flags.shipHijacked = true;
@@ -127,7 +127,7 @@ export const DISABLE_LOCKOUTS: Task = {
   kind: "disableLockouts",
   name: "Disable Lockouts",
   cost: 2000,
-  description:
+  flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   extraPerform: () => {},
   requiredStats: { patrolRoutesObserved: 10 },
@@ -140,7 +140,7 @@ export const LEAVE_RUINS: Task = {
   kind: "leaveRuins",
   name: "Leave Ruins",
   cost: 20000,
-  description:
+  flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   extraPerform: () => {},
 };

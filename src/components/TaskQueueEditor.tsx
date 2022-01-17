@@ -62,7 +62,7 @@ const TaskQueueEditor = observer((props: Props) => {
             </p>
           )}
           <hr className="border-gray-700 my-3" />
-          <p className="text-sm mb-2 text-gray-400">{task.description}</p>
+          <p className="text-sm mb-2 text-gray-400">{task.flavor}</p>
         </div>
       );
       return (
