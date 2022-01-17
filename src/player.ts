@@ -139,7 +139,7 @@ export class Stat {
   }
 
   get totalToNextLevel(): number {
-    return (this.level + 1) * 1024;
+    return (Math.floor(this.level / 4) + 1) * 1024;
   }
 
   addXp(amount: number) {
