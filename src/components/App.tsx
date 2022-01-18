@@ -62,7 +62,7 @@ const App = observer(() => {
   }, 1000 / UPDATES_PER_SEC);
 
   const panelClass =
-    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px] h-full overflow-y-scroll";
+    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
 
   return (
     <div className="app flex space-x-10 p-4 h-full">
