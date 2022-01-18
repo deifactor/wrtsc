@@ -9,6 +9,7 @@ import { configure, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Switch } from "./common/Switch";
 import classNames from "classnames";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -61,11 +62,11 @@ const App = observer(() => {
   }, 1000 / UPDATES_PER_SEC);
 
   const panelClass =
-    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
+    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px] h-full overflow-y-scroll";
 
   return (
-    <div className="app flex space-x-10 p-4">
-      <div className={classNames("w-96", panelClass)}>
+    <div className="app flex space-x-10 p-4 h-full">
+      <div className={classNames("w-2/12", panelClass)}>
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
         <div>
@@ -82,10 +83,19 @@ const App = observer(() => {
           Background vector created by coolvector - www.freepik.com
         </a>
       </div>
-      <div className={classNames(panelClass)}>
-        <TaskQueueEditor engine={engine} />
+      <div className={classNames("w-4/12", panelClass)}>
+        <Tabs>
+          <TabList>
+            <Tab>Foo</Tab>
+            <Tab>Bar</Tab>
+          </TabList>
+          <TabPanel>
+            <TaskQueueEditor engine={engine} />
+          </TabPanel>
+          <TabPanel>hi</TabPanel>
+        </Tabs>
       </div>
-      <div className={classNames("w-[48rem]", panelClass)}>
+      <div className={classNames("w-3/12", panelClass)}>
         <ScheduleView
           className="h-[36rem]"
           schedule={engine.schedule}
@@ -94,12 +104,8 @@ const App = observer(() => {
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
-      <div className={classNames(panelClass)}>
-        <ZoneView
-          className="w-96 mb-12"
-          zone={engine.zone}
-          player={engine.player}
-        />
+      <div className={classNames("w-3/12", panelClass)}>
+        <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
       </div>
     </div>
   );
