@@ -7,9 +7,9 @@ import { Engine } from "../engine";
 import { PlayerView } from "./PlayerView";
 import { configure, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { Switch } from "./common/Switch";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { Settings, SettingsView } from "./SettingsView";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -59,9 +59,9 @@ const Panel = ({children, className}: PanelProps) => {
 
 const App = observer(() => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
+  const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
-  const [autoRestart, setAutoRestart] = useState(true);
 
   useInterval(() => {
     runInAction(() => {
@@ -69,7 +69,7 @@ const App = observer(() => {
       const multiplier = isDev ? 1 : 1;
       const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
       setLastUpdate(delta);
-      if (autoRestart && (!ok || !engine.schedule.task)) {
+      if (settings.autoRestart && (!ok || !engine.schedule.task)) {
         engine.startLoop();
       }
       engine.saveToStorage();
@@ -82,16 +82,6 @@ const App = observer(() => {
       <Panel className="w-2/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
-        <div>
-          <Button kind="danger" onClick={() => setEngine(new Engine())}>
-            Hard Reset
-          </Button>
-        </div>
-        <div>
-          <Switch checked={autoRestart} onChange={setAutoRestart}>
-            Auto-restart
-          </Switch>
-        </div>
         <a href="https://www.freepik.com/vectors/background">
           Background vector created by coolvector - www.freepik.com
         </a>
@@ -107,7 +97,8 @@ const App = observer(() => {
             <TaskQueueEditor engine={engine} />
           </TabPanel>
           <TabPanel>
-            <div>hello</div>
+            <SettingsView onHardReset={() => setEngine(new Engine())}
+                          settings={settings} />
           </TabPanel>
         </Tabs>
       </Panel>
