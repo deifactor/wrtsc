@@ -34,7 +34,6 @@ export const ZoneView = observer((props: Props) => {
 
   return (
     <div className={className}>
-      <h1>Location</h1>
       <h2>{zone.name}</h2>
       {body}
       <hr className="border-gray-800 mx-3 my-4" />

@@ -66,6 +66,7 @@ const App = observer(() => {
 
   return (
     <div className="app flex space-x-10 p-4 h-full">
+
       <div className={classNames("w-2/12", panelClass)}>
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
@@ -83,6 +84,7 @@ const App = observer(() => {
           Background vector created by coolvector - www.freepik.com
         </a>
       </div>
+
       <div className={classNames("w-4/12", panelClass)}>
         <Tabs>
           <TabList>
@@ -97,7 +99,9 @@ const App = observer(() => {
           </TabPanel>
         </Tabs>
       </div>
+
       <div className={classNames("w-3/12", panelClass)}>
+        <h1>Schedule</h1>
         <ScheduleView
           className="h-[36rem]"
           schedule={engine.schedule}
@@ -106,10 +110,13 @@ const App = observer(() => {
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </div>
+
       <div className={classNames("w-3/12", panelClass)}>
+        <h1>Location</h1>
         <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
       </div>
-    </div >
+
+    </div>
   );
 });
 

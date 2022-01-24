@@ -38,7 +38,6 @@ export const ScheduleView = observer((props: Props) => {
   });
   return (
     <div className={className}>
-      <h1>Schedule</h1>
       {entries}
     </div>
   );
