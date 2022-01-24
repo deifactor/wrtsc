@@ -102,7 +102,6 @@ const TaskQueueEditor = observer((props: Props) => {
   return (
     <div>
       <div className="h-[36rem]">
-        <h1>Queue</h1>
         {tasks}
       </div>
       <div className="flex flex-wrap">{addButtons}</div>

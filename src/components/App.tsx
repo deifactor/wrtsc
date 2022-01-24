@@ -86,13 +86,15 @@ const App = observer(() => {
       <div className={classNames("w-4/12", panelClass)}>
         <Tabs>
           <TabList>
-            <Tab>Foo</Tab>
-            <Tab>Bar</Tab>
+            <Tab><h1>Queue</h1></Tab>
+            <Tab><h1>Settings</h1></Tab>
           </TabList>
           <TabPanel>
             <TaskQueueEditor engine={engine} />
           </TabPanel>
-          <TabPanel>hi</TabPanel>
+          <TabPanel>
+            <div>hello</div>
+          </TabPanel>
         </Tabs>
       </div>
       <div className={classNames("w-3/12", panelClass)}>
@@ -107,7 +109,7 @@ const App = observer(() => {
       <div className={classNames("w-3/12", panelClass)}>
         <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
       </div>
-    </div>
+    </div >
   );
 });
 
