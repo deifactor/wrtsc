@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleView } from "./ScheduleView";
 import { ZoneView } from "./ZoneView";
@@ -42,6 +42,21 @@ configure({
   reactionRequiresObservable: true,
 });
 
+
+type PanelProps = {
+  children: ReactNode;
+  className: string
+}
+
+const Panel = ({children, className}: PanelProps) => {
+  const panelClass =
+    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
+
+  return <div className={classNames(panelClass, className)}>
+    {children}
+  </div>;
+};
+
 const App = observer(() => {
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   // XXX: not correct around leap seconds, tz changes, etc
@@ -61,13 +76,10 @@ const App = observer(() => {
     });
   }, 1000 / UPDATES_PER_SEC);
 
-  const panelClass =
-    "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
-
   return (
     <div className="app flex space-x-10 p-4 h-full">
 
-      <div className={classNames("w-2/12", panelClass)}>
+      <Panel className="w-2/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
         <div>
@@ -83,9 +95,9 @@ const App = observer(() => {
         <a href="https://www.freepik.com/vectors/background">
           Background vector created by coolvector - www.freepik.com
         </a>
-      </div>
+      </Panel>
 
-      <div className={classNames("w-4/12", panelClass)}>
+      <Panel className="w-4/12">
         <Tabs>
           <TabList>
             <Tab><h1>Queue</h1></Tab>
@@ -98,9 +110,9 @@ const App = observer(() => {
             <div>hello</div>
           </TabPanel>
         </Tabs>
-      </div>
+      </Panel>
 
-      <div className={classNames("w-3/12", panelClass)}>
+      <Panel className="w-3/12">
         <h1>Schedule</h1>
         <ScheduleView
           className="h-[36rem]"
@@ -109,12 +121,12 @@ const App = observer(() => {
         />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
-      </div>
+      </Panel>
 
-      <div className={classNames("w-3/12", panelClass)}>
+      <Panel className="w-3/12">
         <h1>Location</h1>
         <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
-      </div>
+      </Panel>
 
     </div>
   );
