@@ -26,12 +26,14 @@ const ICONS: Partial<Record<TaskKind, IconType>> = {
 };
 
 interface Props {
+  className?: string;
   engine: Engine;
 }
 
 const TaskQueueEditor = observer((props: Props) => {
   const {
     engine: { nextLoopTasks, player, simulation },
+    className
   } = props;
   const tasks = nextLoopTasks.entries.map((entry, idx) => {
     const incrementCount = (): void => nextLoopTasks.modifyCount(idx, 1);
@@ -100,11 +102,11 @@ const TaskQueueEditor = observer((props: Props) => {
   // For reasons I don't understand, without the flex having an icon messes with
   // vertical alignment.
   return (
-    <div>
-      <div className="h-[36rem]">
+    <div className={classNames("flex flex-col", className)}>
+      <div className="flex-1">
         {tasks}
       </div>
-      <div className="flex flex-wrap">{addButtons}</div>
+      <div>{addButtons}</div>
     </div>
   );
 });

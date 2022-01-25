@@ -77,7 +77,7 @@ const App = observer(() => {
   }, 1000 / UPDATES_PER_SEC);
 
   return (
-    <div className="app flex space-x-10 p-4 h-full">
+    <div className="app flex space-x-10 p-4 items-start h-full">
 
       <Panel className="w-2/12">
         <h1>Stats</h1>
@@ -87,14 +87,14 @@ const App = observer(() => {
         </a>
       </Panel>
 
-      <Panel className="w-4/12">
-        <Tabs>
+      <Panel className="w-4/12 h-full">
+        <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-1">
           <TabList>
             <Tab><h1>Queue</h1></Tab>
             <Tab><h1>Settings</h1></Tab>
           </TabList>
           <TabPanel>
-            <TaskQueueEditor engine={engine} />
+            <TaskQueueEditor className="h-full" engine={engine} />
           </TabPanel>
           <TabPanel>
             <SettingsView onHardReset={() => setEngine(new Engine())}
