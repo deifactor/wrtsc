@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
 import { Schedule } from "../schedule";
+import { TaskIcon } from "./common/TaskIcon";
 
 interface Props {
   schedule: Schedule;
@@ -29,9 +30,9 @@ export const ScheduleView = observer((props: Props) => {
     );
     // eslint-disable-next-line react/no-array-index-key
     return (
-      <div className="flex" key={idx}>
+      <div className="flex my-1" key={idx}>
         <span className="inline-block">
-          {entry.task.name} {schedule.completions(idx)}/{entry.count}{" "}
+          <TaskIcon className="inline align-sub" task={entry.task.kind} /> {schedule.completions(idx)}/{entry.count}{" "}
         </span>
         {progressSpan}
       </div>

@@ -1,29 +1,11 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
-import { TaskKind, TASKS } from "../task";
+import { TASKS } from "../task";
 import { StatId, STAT_NAME } from "../player";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { runInAction } from "mobx";
-import { IconType } from "react-icons";
-import {
-  GiBatteryPack,
-  GiJourney,
-  GiLaserBlast,
-  GiLockPicking,
-  GiSpaceship,
-  GiSpyglass,
-  GiTargeting,
-} from "react-icons/gi";
-const ICONS: Partial<Record<TaskKind, IconType>> = {
-  exploreRuins: GiTargeting,
-  scavengeBatteries: GiBatteryPack,
-  scavengeWeapons: GiLaserBlast,
-  observePatrolRoutes: GiSpyglass,
-  hijackShip: GiSpaceship,
-  disableLockouts: GiLockPicking,
-  leaveRuins: GiJourney,
-};
+import { ICONS, TaskIcon } from "./common/TaskIcon";
 
 interface Props {
   className?: string;
@@ -43,12 +25,12 @@ const TaskQueueEditor = observer((props: Props) => {
       // eslint-disable-next-line react/no-array-index-key
       <div
         key={idx}
-        className={classNames("flex items-center", {
+        className={classNames("flex items-center my-1", {
           "text-red-300": !step?.ok,
         })}
       >
         <div className="flex-grow">
-          {entry.task.name} x{entry.count}
+          <TaskIcon className="inline align-sub" task={entry.task.kind} /> x{entry.count}
         </div>
         <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>
         <Button size="sm" onClick={incrementCount}>
