@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
 import { Schedule } from "../schedule";
@@ -37,7 +38,7 @@ export const ScheduleView = observer((props: Props) => {
     );
   });
   return (
-    <div className={className}>
+    <div className={classNames("flex flex-col h-full", className)}>
       {entries}
     </div>
   );

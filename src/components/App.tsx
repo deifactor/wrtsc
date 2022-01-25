@@ -49,7 +49,7 @@ type PanelProps = {
   className: string
 }
 
-const Panel = ({children, className}: PanelProps) => {
+const Panel = ({ children, className }: PanelProps) => {
   const panelClass =
     "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
 
@@ -87,9 +87,11 @@ const App = observer(() => {
       <Panel className="w-2/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
+        <Button onClick={() => engine.startLoop()}>Start</Button>
+        <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
 
-      <Panel className="w-4/12 h-full">
+      <Panel className="w-8/12 h-full">
         <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-auto overflow-auto">
           <TabList>
             <Tab><h1>Queue</h1></Tab>
@@ -97,27 +99,23 @@ const App = observer(() => {
             <Tab><h1>Credits</h1></Tab>
           </TabList>
           <TabPanel>
-            <TaskQueueEditor className="h-full" engine={engine} />
+            <div className="flex flex-row h-full">
+            <TaskQueueEditor className="h-full w-3/5" engine={engine} />
+            <ScheduleView
+              className="h-full w-2/5"
+              schedule={engine.schedule}
+              player={engine.player}
+            />
+            </div>
           </TabPanel>
           <TabPanel>
             <SettingsView onHardReset={() => setEngine(new Engine())}
-                          settings={settings} />
+              settings={settings} />
           </TabPanel>
           <TabPanel>
             <Credits />
           </TabPanel>
         </Tabs>
-      </Panel>
-
-      <Panel className="w-3/12">
-        <h1>Schedule</h1>
-        <ScheduleView
-          className="h-[36rem]"
-          schedule={engine.schedule}
-          player={engine.player}
-        />
-        <Button onClick={() => engine.startLoop()}>Start</Button>
-        <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
 
       <Panel className="w-3/12">
