@@ -42,3 +42,4 @@ export const ScheduleView = observer((props: Props) => {
     </div>
   );
 });
+ScheduleView.displayName = "ScheduleView";

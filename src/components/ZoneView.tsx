@@ -41,3 +41,4 @@ export const ZoneView = observer((props: Props) => {
     </div>
   );
 });
+ZoneView.displayName = "ZoneView";

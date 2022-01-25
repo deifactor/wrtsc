@@ -25,5 +25,5 @@ export const SettingsView = observer(({ onHardReset, settings }: Props) => {
       Auto-restart
     </Switch>
   </div>
-
 });
+SettingsView.displayName = "SettingsView";

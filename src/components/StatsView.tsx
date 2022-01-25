@@ -22,3 +22,4 @@ export const StatView = observer((props: Props) => {
     </div>
   );
 });
+StatView.displayName = "StatView";

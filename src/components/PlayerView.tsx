@@ -18,3 +18,4 @@ export const PlayerView = observer((props: Props) => {
     </div>
   );
 });
+PlayerView.displayName = "PlayerView";

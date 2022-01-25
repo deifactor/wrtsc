@@ -110,5 +110,6 @@ const TaskQueueEditor = observer((props: Props) => {
     </div>
   );
 });
+TaskQueueEditor.displayName = "TaskQueueEditor";
 
 export default TaskQueueEditor;

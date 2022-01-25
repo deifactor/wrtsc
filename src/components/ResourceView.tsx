@@ -13,3 +13,4 @@ export const ResourceView = observer((props: Props) => {
     </div>
   );
 });
+ResourceView.displayName = "ResourceView";
