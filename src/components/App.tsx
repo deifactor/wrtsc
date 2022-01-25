@@ -84,7 +84,7 @@ const App = observer(() => {
   return (
     <div className="app flex space-x-10 p-4 items-start h-full">
 
-      <Panel className="w-2/12">
+      <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
@@ -101,7 +101,7 @@ const App = observer(() => {
           </TabList>
           <hr className="border-gray-400 my-4" />
           <TabPanel>
-            <div className="flex flex-row h-full">
+            <div className="flex flex-row h-full space-x-12">
               <TaskQueueEditor className="h-full w-3/5" engine={engine} />
               <ScheduleView
                 className="h-full w-2/5"
