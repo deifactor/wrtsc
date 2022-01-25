@@ -11,6 +11,7 @@ interface Props {
   kind?: "normal" | "danger";
   size?: "sm" | "md";
   children: ReactNode;
+  className?: string;
   tooltip?: ReactNode;
 }
 
@@ -21,6 +22,7 @@ export const Button = ({
   kind = "normal",
   size = "md",
   children,
+  className,
   tooltip,
 }: Props) => {
   const {
@@ -53,6 +55,7 @@ export const Button = ({
         "inline-flex items-center",
         "outline outline-1 outline-offset-1 outline-gray-500",
         "m-1",
+        className,
         sizeClass[size],
         stateClass[state],
         kindClass[kind]

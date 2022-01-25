@@ -55,7 +55,8 @@ const TaskQueueEditor = observer((props: Props) => {
       );
       const tooltip = (
         <div className="w-96 p-2 text-sm">
-          <p className="mb-2">{task.description}</p>
+          <p className="font-bold">{task.name}</p>
+          <p className="my-2">{task.description}</p>
           <p>
             <strong>Cost:</strong> {player.cost(task)}
           </p>
@@ -71,13 +72,14 @@ const TaskQueueEditor = observer((props: Props) => {
       );
       return (
         <Button
+          className="font-mono whitespace-pre"
           key={task.kind}
           icon={ICONS[task.kind]}
           onClick={() => runInAction(() => nextLoopTasks.push(task.kind))}
           tooltip={tooltip}
           state={player.canAddToQueue(task) ? "active" : "locked"}
         >
-          {task.name}
+          {task.shortName.padEnd(8)}
         </Button>
       );
     });

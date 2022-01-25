@@ -27,6 +27,7 @@ const defaults = {
 export type Task = Readonly<{
   readonly kind: TaskKind;
   name: string;
+  shortName: string;
   /** Cost in AEUs. */
   cost: number | ((player: Player) => number);
   /** The description of the task itself, as read by the player. */
@@ -59,6 +60,7 @@ export const EXPLORE_RUINS: Task = {
   ...defaults,
   kind: "exploreRuins",
   name: "Explore Ruins",
+  shortName: "XPL_RUIN",
   cost: 2500,
   description:
     "Increases amount of weapons and batteries that can be scavenged. 8x progress with Ship Hijacked.",
@@ -76,6 +78,7 @@ export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
+  shortName: "SCAV_BAT",
   cost: 1000,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
@@ -91,6 +94,7 @@ export const SCAVENGE_WEAPONS: Task = {
   ...defaults,
   kind: "scavengeWeapons",
   name: "Scavenge Weapons",
+  shortName: "SCAV_WPN",
   cost: 800,
   description:
     "Increases your Combat stat by 1. Does not persist across resets.",
@@ -104,6 +108,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   ...defaults,
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
+  shortName: "OBS_PTRL",
   cost: 3000,
   description: "Search for vessels to hijack. Decreases cost of Hijack Ship.",
   flavor:
@@ -119,6 +124,7 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
+  shortName: "HIJACK",
   cost: (player: Player) =>
     Math.max(
       24000 -
@@ -141,6 +147,7 @@ export const DISABLE_LOCKOUTS: Task = {
   ...defaults,
   kind: "disableLockouts",
   name: "Disable Lockouts",
+  shortName: "DIS_LOCK",
   cost: 3000,
   description:
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
@@ -159,6 +166,7 @@ export const LEAVE_RUINS: Task = {
   ...defaults,
   kind: "leaveRuins",
   name: "Leave Ruins",
+  shortName: "LEAVE",
   cost: 20000,
   description: "Advance to the next zone.",
   flavor:
