@@ -10,6 +10,7 @@ import { observer } from "mobx-react-lite";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsView } from "./SettingsView";
+import { Credits } from "./Credits";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -86,9 +87,6 @@ const App = observer(() => {
       <Panel className="w-2/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
-        <a href="https://www.freepik.com/vectors/background">
-          Background vector created by coolvector - www.freepik.com
-        </a>
       </Panel>
 
       <Panel className="w-4/12 h-full">
@@ -96,6 +94,7 @@ const App = observer(() => {
           <TabList>
             <Tab><h1>Queue</h1></Tab>
             <Tab><h1>Settings</h1></Tab>
+            <Tab><h1>Credits</h1></Tab>
           </TabList>
           <TabPanel>
             <TaskQueueEditor className="h-full" engine={engine} />
@@ -103,6 +102,9 @@ const App = observer(() => {
           <TabPanel>
             <SettingsView onHardReset={() => setEngine(new Engine())}
                           settings={settings} />
+          </TabPanel>
+          <TabPanel>
+            <Credits />
           </TabPanel>
         </Tabs>
       </Panel>
