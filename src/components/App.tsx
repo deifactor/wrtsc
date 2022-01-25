@@ -93,7 +93,7 @@ const App = observer(() => {
 
       <Panel className="w-8/12 h-full">
         <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-auto overflow-auto"
-              selectedTabClassName="text-white font-bold">
+          selectedTabClassName="text-white font-bold">
           <TabList className="flex flex-row text-xl justify-evenly text-gray-400">
             <Tab>Queue</Tab>
             <Tab>Settings</Tab>
@@ -102,12 +102,12 @@ const App = observer(() => {
           <hr className="border-gray-400 my-4" />
           <TabPanel>
             <div className="flex flex-row h-full">
-            <TaskQueueEditor className="h-full w-3/5" engine={engine} />
-            <ScheduleView
-              className="h-full w-2/5"
-              schedule={engine.schedule}
-              player={engine.player}
-            />
+              <TaskQueueEditor className="h-full w-3/5" engine={engine} />
+              <ScheduleView
+                className="h-full w-2/5"
+                schedule={engine.schedule}
+                player={engine.player}
+              />
             </div>
           </TabPanel>
           <TabPanel>
