@@ -103,7 +103,7 @@ const TaskQueueEditor = observer((props: Props) => {
   // vertical alignment.
   return (
     <div className={classNames("flex flex-col", className)}>
-      <div className="flex-1">
+      <div className="flex-auto overflow-y-scroll">
         {tasks}
       </div>
       <div>{addButtons}</div>

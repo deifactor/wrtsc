@@ -76,6 +76,10 @@ const App = observer(() => {
     });
   }, 1000 / UPDATES_PER_SEC);
 
+  // The overflow-auto on the tabs is necessary for some CSS reason I don't
+  // understand. See
+  // https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content
+
   return (
     <div className="app flex space-x-10 p-4 items-start h-full">
 
@@ -88,7 +92,7 @@ const App = observer(() => {
       </Panel>
 
       <Panel className="w-4/12 h-full">
-        <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-1">
+        <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-auto overflow-auto">
           <TabList>
             <Tab><h1>Queue</h1></Tab>
             <Tab><h1>Settings</h1></Tab>
