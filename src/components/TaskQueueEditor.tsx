@@ -6,6 +6,8 @@ import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { runInAction } from "mobx";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
+import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
+import { RiDeleteBackFill } from "react-icons/ri";
 
 interface Props {
   className?: string;
@@ -15,11 +17,14 @@ interface Props {
 const TaskQueueEditor = observer((props: Props) => {
   const {
     engine: { nextLoopTasks, player, simulation },
-    className
+    className,
   } = props;
   const tasks = nextLoopTasks.entries.map((entry, idx) => {
     const incrementCount = (): void => nextLoopTasks.modifyCount(idx, 1);
     const decrementCount = (): void => nextLoopTasks.modifyCount(idx, -1);
+    const moveUp = (): void => nextLoopTasks.move(idx, idx - 1);
+    const moveDown = (): void => nextLoopTasks.move(idx, idx + 1);
+    const remove = (): void => nextLoopTasks.remove(idx);
     const step: SimulationStep | undefined = simulation[idx];
     return (
       // eslint-disable-next-line react/no-array-index-key
@@ -30,14 +35,24 @@ const TaskQueueEditor = observer((props: Props) => {
         })}
       >
         <div className="flex-grow">
-          <TaskIcon className="inline align-sub" task={entry.task.kind} /> x{entry.count}
+          <TaskIcon className="inline align-sub" task={entry.task.kind} /> x
+          {entry.count}
         </div>
         <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>
         <Button size="sm" onClick={incrementCount}>
-          +1
+          <FaPlus />
         </Button>
         <Button size="sm" onClick={decrementCount}>
-          -1
+          <FaMinus />
+        </Button>
+        <Button size="sm" onClick={moveUp}>
+          <FaArrowUp />
+        </Button>
+        <Button size="sm" onClick={moveDown}>
+          <FaArrowDown />
+        </Button>
+        <Button size="sm" onClick={remove}>
+          <RiDeleteBackFill />
         </Button>
       </div>
     );
@@ -87,9 +102,7 @@ const TaskQueueEditor = observer((props: Props) => {
   // vertical alignment.
   return (
     <div className={classNames("flex flex-col", className)}>
-      <div className="flex-auto overflow-y-scroll">
-        {tasks}
-      </div>
+      <div className="flex-auto overflow-y-scroll">{tasks}</div>
       <div>{addButtons}</div>
     </div>
   );

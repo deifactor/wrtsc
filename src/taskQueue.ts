@@ -111,6 +111,32 @@ export class TaskQueue {
     }
   }
 
+  move(idx: number, to: number): void {
+    if (to < 0 || to >= this.length) {
+      return;
+    }
+    const entry = this.entry(idx);
+    if (entry == null) {
+      throw Error(
+        `Tried to modify count of ${idx}, which is >= length ${this.length}`
+      );
+    }
+    // Yes, this works no matter what `idx` and `to` are. Unit test it anyway
+    // though.
+    this.entries.splice(idx, 1);
+    this.entries.splice(to, 0, entry);
+  }
+
+  remove(idx: number): void {
+    const entry = this.entry(idx);
+    if (entry == null) {
+      throw Error(
+        `Tried to modify count of ${idx}, which is >= length ${this.length}`
+      );
+    }
+    this.modifyCount(idx, -entry.count);
+  }
+
   get length(): number {
     return this.entries.length;
   }
