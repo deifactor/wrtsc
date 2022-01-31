@@ -34,8 +34,8 @@ export const Button = ({
   } = usePopperTooltip();
 
   const sizeClass = {
-    sm: "py-1 px-2",
-    md: "py-2 px-2",
+    sm: "py-1 px-1 h-7",
+    md: "py-2 px-2 h-10",
   };
   const stateClass = {
     locked: "text-red-600",
