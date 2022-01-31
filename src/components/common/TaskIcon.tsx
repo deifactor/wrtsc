@@ -1,4 +1,3 @@
-import { observer } from "mobx-react-lite";
 import { TaskKind } from "../../task";
 import { IconType } from "react-icons";
 import {
@@ -27,9 +26,8 @@ type Props = {
   className?: string;
 };
 
-export const TaskIcon = observer((props: Props) => {
+export const TaskIcon = (props: Props) => {
   const { task, size, className} = props;
   const Icon = ICONS[task]!;
   return <Icon className={className} size={size || "1.5em"} />;
-});
-TaskIcon.displayName = "TaskIcon";
+};
