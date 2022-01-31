@@ -128,6 +128,10 @@ export class Engine {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.save()));
   }
 
+  static hasSave(): boolean {
+    return Boolean(localStorage.getItem(STORAGE_KEY));
+  }
+
   static loadFromStorage(): Engine {
     const stringified = localStorage.getItem(STORAGE_KEY);
     if (stringified) {

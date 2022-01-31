@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleView } from "./ScheduleView";
 import { ZoneView } from "./ZoneView";
@@ -11,6 +11,7 @@ import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsView } from "./SettingsView";
 import { Credits } from "./Credits";
+import { Intro } from "./Intro";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -43,28 +44,29 @@ configure({
   reactionRequiresObservable: true,
 });
 
-
 type PanelProps = {
   children: ReactNode;
-  className: string
-}
+  className: string;
+};
 
 const Panel = ({ children, className }: PanelProps) => {
   const panelClass =
     "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
 
-  return <div className={classNames(panelClass, className)}>
-    {children}
-  </div>;
+  return <div className={classNames(panelClass, className)}>{children}</div>;
 };
 
 const App = observer(() => {
+  const [inIntro, setInIntro] = useState(!Engine.hasSave());
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
 
   useInterval(() => {
+    if (inIntro) {
+      return;
+    }
     runInAction(() => {
       const delta = new Date().getTime();
       const multiplier = isDev ? 1 : 1;
@@ -77,13 +79,17 @@ const App = observer(() => {
     });
   }, 1000 / UPDATES_PER_SEC);
 
+  const introFinished = useCallback(() => setInIntro(false), []);
+  if (inIntro) {
+    return <Intro onFinished={introFinished} />;
+  }
+
   // The overflow-auto on the tabs is necessary for some CSS reason I don't
   // understand. See
   // https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content
 
   return (
     <div className="app flex space-x-10 p-4 items-start h-full">
-
       <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerView player={engine.player} />
@@ -92,8 +98,11 @@ const App = observer(() => {
       </Panel>
 
       <Panel className="w-8/12 h-full">
-        <Tabs className="flex flex-col h-full" selectedTabPanelClassName="flex-auto overflow-auto"
-          selectedTabClassName="text-white font-bold">
+        <Tabs
+          className="flex flex-col h-full"
+          selectedTabPanelClassName="flex-auto overflow-auto"
+          selectedTabClassName="text-white font-bold"
+        >
           <TabList className="flex flex-row text-xl justify-evenly text-gray-400">
             <Tab>Queue</Tab>
             <Tab>Settings</Tab>
@@ -111,8 +120,10 @@ const App = observer(() => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SettingsView onHardReset={() => setEngine(new Engine())}
-              settings={settings} />
+            <SettingsView
+              onHardReset={() => setEngine(new Engine())}
+              settings={settings}
+            />
           </TabPanel>
           <TabPanel>
             <Credits />
@@ -124,7 +135,6 @@ const App = observer(() => {
         <h1>Location</h1>
         <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
       </Panel>
-
     </div>
   );
 });
