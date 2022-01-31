@@ -146,8 +146,8 @@ export const HIJACK_SHIP: Task = {
 export const DISABLE_LOCKOUTS: Task = {
   ...defaults,
   kind: "disableLockouts",
-  name: "Disable Lockouts",
-  shortName: "DIS_LOCK",
+  name: "Override Lockouts",
+  shortName: "OVR_LOCK",
   cost: 3000,
   description:
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
