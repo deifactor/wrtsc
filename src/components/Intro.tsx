@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   onFinished: () => void;
@@ -15,15 +15,22 @@ export const Intro = ({ onFinished }: Props) => {
     lineNumber: 0,
     length: 0,
   });
+  // XXX: hack to allow cancellation on rerender
+  const cancelRef = useRef(false);
   useEffect(() => {
     async function doLoop() {
       for (const state of states()) {
         setCurrent(state);
         await wait(state.delay);
+        if (cancelRef.current) {
+          cancelRef.current = false;
+          return;
+        }
       }
       onFinished();
     }
     doLoop();
+    return () => {cancelRef.current = true};
   }, [onFinished]);
 
   const paras = LINES.slice(0, current.lineNumber + 1).map((line, idx) => {
@@ -37,7 +44,7 @@ export const Intro = ({ onFinished }: Props) => {
       </div>
     );
   });
-  return <div>{paras}</div>;
+  return <div className="h-96">{paras}</div>;
 };
 
 type Line = {
