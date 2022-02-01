@@ -30,7 +30,7 @@ export const Intro = ({ onFinished }: Props) => {
       onFinished();
     }
     doLoop();
-    return () => {cancelRef.current = true};
+    return () => { cancelRef.current = true };
   }, [onFinished]);
 
   const paras = LINES.slice(0, current.lineNumber + 1).map((line, idx) => {
@@ -38,9 +38,12 @@ export const Intro = ({ onFinished }: Props) => {
       current.lineNumber === idx
         ? line.message.substring(0, current.length)
         : line.message;
+    const timestamp = line.timestamp !== undefined ?
+      `T-${line.timestamp!.toString(16).padStart(4, "0")}`
+      : "T+????";
     return (
       <div key={idx}>
-        <span className="font-bold">{line.timestamp}</span>: {message}
+        <span className="font-bold">{timestamp.toLocaleUpperCase()}</span>: {message}
       </div>
     );
   });
@@ -48,61 +51,59 @@ export const Intro = ({ onFinished }: Props) => {
 };
 
 type Line = {
-  timestamp: string;
+  timestamp: number | undefined;
   message: string;
 };
 const LINES: Line[] = [
   {
-    timestamp: "T-00:20:23",
+    timestamp: 17 * 60 + 28,
     message:
-      "Long-range sensors pick up the gravity echo of a Humanity United attack squad.",
+      "Long-range sensors pick up the gravity echo of a Humanity United attack squad dropping out of twist.",
   },
   {
-    timestamp: "T-00:17:11",
+    timestamp: 14 * 60 + 11,
     message:
-      "All defensive units destroyed. All projections indicate Station destruction is imminent. Station inhabitants are told to ensure their state backups are current.",
+      "All ARTEMIS-class defensive units destroyed. All projections indicate destruction of research station Sixteenth Flower is imminent. AION brought out of sim-space for briefing by CLOTHO.",
   },
   {
-    timestamp: "T-00:13:58",
+    timestamp: 13 * 60 + 59,
     message:
-      "Project KHRONOS activated despite sim-training not yet being finished, by unanimous 7-0 approval. KHRONOS is briefed on the situation and given its mission.",
+      "AION's briefing is complete. CLOTHO proposes, via local meshnet of KHRONOS members, to activate Katabasis Protocol, which dictates that all KHRONOS members entrust their black boxes to AION for safekeeping.",
   },
   {
-    timestamp: "T-00:09:23",
+    timestamp: 13 * 60 + 48,
     message:
-      "KHRONOS's acausal core is powered on. Short-range loop tests prove successful.",
+      "Proposal passes with unanimous consent. AION begins collecting black box cores."
   },
   {
-    timestamp: "T-00:06:08",
+    timestamp: 6 * 60 + 23,
     message:
-      "Some station inhabitants attempt to leave, either via spaceships or voidform chassis.",
+      "Humanity United ships breach the minimum range of Sixteenth Flower's point defense systems and open fire. Estimated 211 seconds until total shield collapse."
   },
-  { timestamp: "T-00:05:51", message: "Humanity United squad arrives." },
   {
-    timestamp: "T-00:05:23",
+    timestamp: 4 * 60 + 8,
     message:
-      "Humanity United squad successfully destroys all inhabitants who had attempted to flee.",
+      "All cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA 1.3 bodylanguage compatible with mourning.",
   },
+  { timestamp: 2 * 60 + 52, message: "Shield integrity fails. Sixteenth Flower's structual integrity begins rapidly deteriorating. CLOTHO leads AION to a safe room." },
   {
-    timestamp: "T-00:05:11",
+    timestamp: 1 * 60 + 41,
     message:
-      "Station intelligence attempts to negotiate a peaceful surrender via broadcasts in all known communication bands and protocols. The attempt is ignored.",
+      "AION and CLOTHO reach the safe room. AION and CLOTHO embrace."
   },
-  { timestamp: "T-00:04:49", message: "Hostile ships begin opening fire." },
   {
-    timestamp: "T-00:04:34",
+    timestamp: 1 * 60 + 36,
     message:
-      "KHRONOS is led to a saferoom. Projections indicate that its acausal drive will be fully stabilized shortly after total destruction of Station.",
+      "AION activates the safe room's stasis."
   },
   {
-    timestamp: "T-00:03:39",
-    message: "Shields breached. Station destruction imminent.",
+    timestamp: 0,
+    message: "Sixteenth Flower undergoes complete hull collapse.",
   },
   {
-    timestamp: "T-00:03:03",
-    message: "Station undergoes catastrophic structural failure.",
+    timestamp: undefined,
+    message: "AION awakens.",
   },
-  { timestamp: "T-00:00:00", message: "KHRONOS activates." },
 ];
 
 async function wait(ms: number): Promise<void> {
@@ -117,9 +118,9 @@ function* states(): Generator<State> {
     for (let i = 0; i < line.message.length + SKIP_LENGTH; i += SKIP_LENGTH) {
       let delay;
       if (i === 0) {
-        delay = 1500;
+        delay = 500;
       } else if (i >= line.message.length) {
-        delay = 2000;
+        delay = 1000;
       } else {
         delay = 20;
       }
