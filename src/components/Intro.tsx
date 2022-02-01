@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   onFinished: () => void;
@@ -15,22 +15,24 @@ export const Intro = ({ onFinished }: Props) => {
     lineNumber: 0,
     length: 0,
   });
-  // XXX: hack to allow cancellation on rerender
-  const cancelRef = useRef(false);
+
   useEffect(() => {
+    // We set up a cancellation variable so that when we rerender we can stop
+    // the previous effect.
+    let cancel = false;
     async function doLoop() {
       for (const state of states()) {
         setCurrent(state);
-        await wait(state.delay);
-        if (cancelRef.current) {
-          cancelRef.current = false;
+        await new Promise(resolve => setTimeout(resolve, state.delay));
+        if (cancel) {
+          // return, not break, so onFinished doesn't run
           return;
         }
       }
       onFinished();
     }
     doLoop();
-    return () => { cancelRef.current = true };
+    return () => { cancel = true; };
   }, [onFinished]);
 
   const paras = LINES.slice(0, current.lineNumber + 1).map((line, idx) => {
@@ -105,10 +107,6 @@ const LINES: Line[] = [
     message: "AION awakens.",
   },
 ];
-
-async function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 const SKIP_LENGTH = 1;
 
