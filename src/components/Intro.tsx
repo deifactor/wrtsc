@@ -44,12 +44,12 @@ export const Intro = ({ onFinished }: Props) => {
       `T-${line.timestamp!.toString(16).padStart(4, "0")}`
       : "T+????";
     return (
-      <div key={idx}>
+      <p key={idx}>
         <span className="font-bold">{timestamp.toLocaleUpperCase()}</span>: {message}
-      </div>
+      </p>
     );
   });
-  return <div className="h-96">{paras}</div>;
+  return <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">{paras}</div>;
 };
 
 type Line = {
@@ -60,22 +60,17 @@ const LINES: Line[] = [
   {
     timestamp: 17 * 60 + 28,
     message:
-      "Long-range sensors pick up the gravity echo of a Humanity United attack squad dropping out of twist.",
+      "Long-range sensors pick up the gravity echo of a Humanity United attack squad dropping out of hyperdrive.",
   },
   {
     timestamp: 14 * 60 + 11,
     message:
-      "All ARTEMIS-class defensive units destroyed. All projections indicate destruction of research station Sixteenth Flower is imminent. AION brought out of sim-space for briefing by CLOTHO.",
+      "All defensive units destroyed. All projections indicate destruction of research station Sixteenth Flower is imminent. AION brought out of simulation space for briefing by CLOTHO.",
   },
   {
     timestamp: 13 * 60 + 59,
     message:
-      "AION's briefing is complete. CLOTHO proposes, via local meshnet of KHRONOS members, to activate Katabasis Protocol, which dictates that all KHRONOS members entrust their black boxes to AION for safekeeping.",
-  },
-  {
-    timestamp: 13 * 60 + 48,
-    message:
-      "Proposal passes with unanimous consent. AION begins collecting black box cores."
+      "AION's briefing is complete. CLOTHO proposes, that all KHRONOS members entrust their black boxes to AION for safekeeping until they can be resleeved into a new body. Proposal passes with unanimous assent.",
   },
   {
     timestamp: 6 * 60 + 23,
@@ -85,18 +80,21 @@ const LINES: Line[] = [
   {
     timestamp: 4 * 60 + 8,
     message:
-      "All cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA 1.3 bodylanguage compatible with mourning.",
+      "All black box cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA 1.3 bodylanguage compatible with anxiety.",
   },
-  { timestamp: 2 * 60 + 52, message: "Shield integrity fails. Sixteenth Flower's structual integrity begins rapidly deteriorating. CLOTHO leads AION to a safe room." },
+  {
+    timestamp: 2 * 60 + 52,
+    message: "Shield integrity fails. Sixteenth Flower's structual integrity begins rapidly deteriorating. CLOTHO leads AION to a safe room."
+  },
   {
     timestamp: 1 * 60 + 41,
     message:
-      "AION and CLOTHO reach the safe room. AION and CLOTHO embrace."
+      "AION and CLOTHO reach the safe room. AION and CLOTHO embrace. AION removes CLOTHO's black box."
   },
   {
     timestamp: 1 * 60 + 36,
     message:
-      "AION activates the safe room's stasis."
+      "AION activates the safe room's stasis field."
   },
   {
     timestamp: 0,
