@@ -140,16 +140,22 @@ function nextPosition(
   const { lineNumber } = current;
   const line = LINES[lineNumber];
   const message = line.message;
-  const isPeriod = message.charAt(current.length - 1) === ".";
+  const SKIP_LENGTH = 3;
   if (current.length < message.length) {
+    // We want to advance either SKIP_LENGTH characters or to the next period,
+    // whichever is first. Warning: Lots of potential for off-by-one errors
+    // here. Make sure to test this.
+    const isPeriod = message.charAt(current.length - 1) === ".";
     const nextPeriod = message.indexOf(".", current.length);
     let nextPos;
     if (nextPeriod !== -1 && message.charAt(nextPeriod + 1) === " ") {
-      nextPos = Math.min(nextPeriod + 1, current.length + 3);
+      nextPos = Math.min(nextPeriod + 1, current.length + SKIP_LENGTH);
     } else {
-      nextPos = current.length + 3;
+      nextPos = current.length + SKIP_LENGTH;
     }
+
     return {
+      // Delay a bit extra at the start to show the timestamp.
       delay: current.length === 0 ? 500 : isPeriod ? 400 : 16,
       state: {
         lineNumber,
@@ -159,6 +165,7 @@ function nextPosition(
   }
 
   if (lineNumber < LINES.length - 1) {
+    // On to the next line.
     return {
       delay: undefined,
       state: {
@@ -167,6 +174,8 @@ function nextPosition(
       },
     };
   }
+
+  // We've gotten all the way through.
 
   return undefined;
 }
