@@ -145,9 +145,9 @@ function nextPosition(
     const nextPeriod = message.indexOf(".", current.length);
     let nextPos;
     if (nextPeriod !== -1 && message.charAt(nextPeriod + 1) === " ") {
-      nextPos = Math.min(nextPeriod + 1, current.length + 2);
+      nextPos = Math.min(nextPeriod + 1, current.length + 3);
     } else {
-      nextPos = current.length + 2;
+      nextPos = current.length + 3;
     }
     return {
       delay: current.length === 0 ? 500 : isPeriod ? 400 : 16,
