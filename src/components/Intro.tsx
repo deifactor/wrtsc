@@ -7,49 +7,42 @@ type Props = {
 type State = {
   lineNumber: number;
   length: number;
-  delay: number;
 };
 
 export const Intro = ({ onFinished }: Props) => {
-  const [current, setCurrent] = useState({
-    lineNumber: 0,
-    length: 0,
-  });
+  const [current, setCurrent] = useState(nextState(undefined)!.state);
 
   useEffect(() => {
     // We set up a cancellation variable so that when we rerender we can stop
     // the previous effect.
-    let cancel = false;
-    async function doLoop() {
-      for (const state of states()) {
-        setCurrent(state);
-        await new Promise(resolve => setTimeout(resolve, state.delay));
-        if (cancel) {
-          // return, not break, so onFinished doesn't run
-          return;
-        }
-      }
-      onFinished();
+    const next = nextState(current);
+    if (next) {
+      const handle = setTimeout(() => setCurrent(next.state), next.delay);
+      return () => clearTimeout(handle);
     }
-    doLoop();
-    return () => { cancel = true; };
-  }, [onFinished]);
+  }, [onFinished, current]);
 
   const paras = LINES.slice(0, current.lineNumber + 1).map((line, idx) => {
     const message =
       current.lineNumber === idx
         ? line.message.substring(0, current.length)
         : line.message;
-    const timestamp = line.timestamp !== undefined ?
-      `T-${line.timestamp!.toString(16).padStart(4, "0")}`
-      : "T+????";
+    const timestamp =
+      line.timestamp !== undefined
+        ? `T-${line.timestamp!.toString(16).padStart(4, "0")}`
+        : "T+????";
     return (
       <p key={idx}>
-        <span className="font-bold">{timestamp.toLocaleUpperCase()}</span>: {message}
+        <span className="font-bold">{timestamp.toLocaleUpperCase()}</span>:{" "}
+        {message}
       </p>
     );
   });
-  return <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">{paras}</div>;
+  return (
+    <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">
+      {paras}
+    </div>
+  );
 };
 
 type Line = {
@@ -75,7 +68,7 @@ const LINES: Line[] = [
   {
     timestamp: 6 * 60 + 23,
     message:
-      "Humanity United ships breach the minimum range of Sixteenth Flower's point defense systems and open fire. Estimated 211 seconds until total shield collapse."
+      "Humanity United ships breach the minimum range of Sixteenth Flower's point defense systems and open fire. Estimated 211 seconds until total shield collapse.",
   },
   {
     timestamp: 4 * 60 + 8,
@@ -84,17 +77,17 @@ const LINES: Line[] = [
   },
   {
     timestamp: 2 * 60 + 52,
-    message: "Shield integrity fails. Sixteenth Flower's structual integrity begins rapidly deteriorating. CLOTHO leads AION to a safe room."
+    message:
+      "Shield integrity fails. Sixteenth Flower's structual integrity begins rapidly deteriorating. CLOTHO leads AION to a safe room.",
   },
   {
     timestamp: 1 * 60 + 41,
     message:
-      "AION and CLOTHO reach the safe room. AION and CLOTHO embrace. AION removes CLOTHO's black box."
+      "AION and CLOTHO reach the safe room. AION and CLOTHO embrace. AION removes CLOTHO's black box.",
   },
   {
     timestamp: 1 * 60 + 36,
-    message:
-      "AION activates the safe room's stasis field."
+    message: "AION activates the safe room's stasis field.",
   },
   {
     timestamp: 0,
@@ -106,25 +99,50 @@ const LINES: Line[] = [
   },
 ];
 
-const SKIP_LENGTH = 1;
-
-function* states(): Generator<State> {
-  for (let lineNumber = 0; lineNumber < LINES.length; lineNumber++) {
-    const line = LINES[lineNumber];
-    for (let i = 0; i < line.message.length + SKIP_LENGTH; i += SKIP_LENGTH) {
-      let delay;
-      if (i === 0) {
-        delay = 500;
-      } else if (i >= line.message.length) {
-        delay = 1000;
-      } else {
-        delay = 20;
-      }
-      yield {
-        lineNumber,
-        length: i,
-        delay,
-      };
-    }
+/** The next state to move to, and how long after it to delay before advancing again. */
+function nextState(
+  current: State | undefined
+): { delay: number; state: State } | undefined {
+  if (!current) {
+    return {
+      delay: 0,
+      state: {
+        lineNumber: 0,
+        length: 0,
+      },
+    };
   }
+
+  const { lineNumber } = current;
+  const line = LINES[lineNumber];
+  const message = line.message;
+  const isPeriod = message.charAt(current.length - 1) === ".";
+  if (current.length < message.length) {
+    const nextPeriod = message.indexOf(".", current.length);
+    let nextPos;
+    if (nextPeriod !== -1 && message.charAt(nextPeriod + 1) === " ") {
+      nextPos = Math.min(nextPeriod + 1, current.length + 2);
+    } else {
+      nextPos = current.length + 2;
+    }
+    return {
+      delay: current.length === 0 ? 500 : isPeriod ? 400 : 16,
+      state: {
+        lineNumber,
+        length: nextPos,
+      },
+    };
+  }
+
+  if (lineNumber < LINES.length - 1) {
+    return {
+      delay: 1000,
+      state: {
+        lineNumber: lineNumber + 1,
+        length: 0,
+      },
+    };
+  }
+
+  return undefined;
 }
