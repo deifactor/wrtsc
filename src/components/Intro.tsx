@@ -1,24 +1,39 @@
 import { useEffect, useState } from "react";
+import { Button } from "./common/Button";
 
 type Props = {
   onFinished: () => void;
 };
 
-type State = {
+/**
+ * Whether we're advancing through a dialog entry, paused waiting for the user
+ * to hit next, or done with the entire thing.
+ */
+type State = "advancing" | "paused" | "done";
+
+type Position = {
   lineNumber: number;
   length: number;
 };
 
 export const Intro = ({ onFinished }: Props) => {
-  const [current, setCurrent] = useState(nextState(undefined)!.state);
+  const [current, setCurrent] = useState(nextPosition(undefined)!.state);
+  const [state, setState] = useState<State>("advancing");
 
   useEffect(() => {
     // We set up a cancellation variable so that when we rerender we can stop
     // the previous effect.
-    const next = nextState(current);
-    if (next) {
+    const next = nextPosition(current);
+    if (!next) {
+      setState("done");
+      return;
+    }
+    if (next.delay) {
+      setState("advancing");
       const handle = setTimeout(() => setCurrent(next.state), next.delay);
       return () => clearTimeout(handle);
+    } else {
+      setState("paused");
     }
   }, [onFinished, current]);
 
@@ -41,6 +56,12 @@ export const Intro = ({ onFinished }: Props) => {
   return (
     <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">
       {paras}
+      <Button
+        onClick={() => setCurrent(nextPosition(current)!.state)}
+        state={state === "advancing" ? "locked" : "active"}
+      >
+        Next
+      </Button>
     </div>
   );
 };
@@ -99,10 +120,13 @@ const LINES: Line[] = [
   },
 ];
 
-/** The next state to move to, and how long after it to delay before advancing again. */
-function nextState(
-  current: State | undefined
-): { delay: number; state: State } | undefined {
+/**
+ * The next state to move to, and how long after it to delay before advancing
+ * again. A delay of `undefined` indicates that we expect the user to continue.
+ */
+function nextPosition(
+  current: Position | undefined
+): { delay: number | undefined; state: Position } | undefined {
   if (!current) {
     return {
       delay: 0,
@@ -136,7 +160,7 @@ function nextState(
 
   if (lineNumber < LINES.length - 1) {
     return {
-      delay: 1000,
+      delay: undefined,
       state: {
         lineNumber: lineNumber + 1,
         length: 0,
