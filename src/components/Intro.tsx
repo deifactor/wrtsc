@@ -37,25 +37,18 @@ export const Intro = ({ onFinished }: Props) => {
     }
   }, [onFinished, current]);
 
-  const paras = LINES.slice(0, current.lineNumber + 1).map((line, idx) => {
-    const message =
-      current.lineNumber === idx
-        ? line.message.substring(0, current.length)
-        : line.message;
-    const timestamp =
-      line.timestamp !== undefined
-        ? `T-${line.timestamp!.toString(16).padStart(4, "0")}`
-        : "T+????";
-    return (
-      <p key={idx}>
-        <span className="font-bold">{timestamp.toLocaleUpperCase()}</span>:{" "}
-        {message}
-      </p>
-    );
-  });
+  const line = LINES[current.lineNumber];
+  const { message } = line;
+  const timestamp =
+    line.timestamp !== undefined
+      ? `T-${line.timestamp!.toString(16).padStart(4, "0")}`
+      : "T+????";
   return (
     <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">
-      {paras}
+      <p className="h-32 overflow-y-auto">
+        <span className="font-bold">{timestamp}</span>:{" "}
+        {message.substring(0, current.length)}
+      </p>
       <Button
         onClick={() => setCurrent(nextPosition(current)!.state)}
         state={state === "advancing" ? "locked" : "active"}
