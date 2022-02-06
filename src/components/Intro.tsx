@@ -44,8 +44,8 @@ export const Intro = ({ onFinished }: Props) => {
       ? `T-${line.timestamp!.toString(16).padStart(4, "0").toUpperCase()}`
       : "T+????";
   return (
-    <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">
-      <p className="h-32 overflow-y-auto">
+    <div className="font-mono w-[60rem] space-y-4 p-8 m-8 bg-black/80">
+      <p className="h-32 overflow-y-auto text-lg">
         <span className="font-bold">{timestamp}</span>:{" "}
         {message.substring(0, current.length)}
       </p>
@@ -92,7 +92,7 @@ const LINES: Line[] = [
   {
     timestamp: 4 * 60 + 8,
     message:
-      "All black box cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA 1.3 bodylanguage compatible with anxiety.",
+      "All black box cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA Γ bodylanguage compatible with anxiety.",
   },
   {
     timestamp: 2 * 60 + 52,
@@ -138,7 +138,7 @@ function nextPosition(
   const { lineNumber } = current;
   const line = LINES[lineNumber];
   const message = line.message;
-  const SKIP_LENGTH = 3;
+  const skipLength = lineNumber === LINES.length - 1 ? 1 : 3;
   if (current.length < message.length) {
     // We want to advance either SKIP_LENGTH characters or to the next period,
     // whichever is first. Warning: Lots of potential for off-by-one errors
@@ -147,14 +147,16 @@ function nextPosition(
     const nextPeriod = message.indexOf(".", current.length);
     let nextPos;
     if (nextPeriod !== -1 && message.charAt(nextPeriod + 1) === " ") {
-      nextPos = Math.min(nextPeriod + 1, current.length + SKIP_LENGTH);
+      nextPos = Math.min(nextPeriod + 1, current.length + skipLength);
     } else {
-      nextPos = current.length + SKIP_LENGTH;
+      nextPos = current.length + skipLength;
     }
+
+    const normalDelay = lineNumber === LINES.length - 1 ? 100 : 16;
 
     return {
       // Delay a bit extra at the start to show the timestamp.
-      delay: current.length === 0 ? 500 : isPeriod ? 400 : 16,
+      delay: current.length === 0 ? 500 : isPeriod ? 400 : normalDelay,
       state: {
         lineNumber,
         length: nextPos,
