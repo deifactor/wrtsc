@@ -41,7 +41,7 @@ export const Intro = ({ onFinished }: Props) => {
   const { message } = line;
   const timestamp =
     line.timestamp !== undefined
-      ? `T-${line.timestamp!.toString(16).padStart(4, "0")}`
+      ? `T-${line.timestamp!.toString(16).padStart(4, "0").toUpperCase()}`
       : "T+????";
   return (
     <div className="font-mono text-lg w-[60rem] space-y-4 p-8 m-8 bg-black/80">
@@ -49,12 +49,17 @@ export const Intro = ({ onFinished }: Props) => {
         <span className="font-bold">{timestamp}</span>:{" "}
         {message.substring(0, current.length)}
       </p>
-      <Button
-        onClick={() => setCurrent(nextPosition(current)!.state)}
-        state={state === "advancing" ? "locked" : "active"}
-      >
-        Next
-      </Button>
+      <div className="flex justify-between">
+        <Button onClick={() => setCurrent(previousPosition(current))}>
+          Previous
+        </Button>
+        <Button
+          onClick={() => setCurrent(nextPosition(current)!.state)}
+          state={state === "advancing" ? "locked" : "active"}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 };
@@ -114,8 +119,8 @@ const LINES: Line[] = [
 ];
 
 /**
- * The next state to move to, and how long after it to delay before advancing
- * again. A delay of `undefined` indicates that we expect the user to continue.
+ * The next state to move to, and how long to delay before moving to it. A delay
+ * of `undefined` indicates that we expect the user to continue.
  */
 function nextPosition(
   current: Position | undefined
@@ -169,6 +174,12 @@ function nextPosition(
   }
 
   // We've gotten all the way through.
-
   return undefined;
+}
+
+function previousPosition({ lineNumber, length }: Position): Position {
+  return {
+    lineNumber: Math.max(0, lineNumber - 1),
+    length: 0,
+  };
 }
