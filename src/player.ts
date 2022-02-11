@@ -1,6 +1,5 @@
 import { makeAutoObservable } from "mobx";
 import { Task } from "./task";
-import { Zone } from "./zone";
 
 const INITIAL_ENERGY = 5000;
 
@@ -92,11 +91,6 @@ export class Player {
     const stats: Partial<Record<StatId, StatJSON>> = {};
     STAT_IDS.map((id) => (stats[id] = this.stats[id]));
     return { stats: stats as Record<StatId, StatJSON> };
-  }
-
-  /** The 'stats' that are actually progress elements for the given zone. */
-  zoneProgress(zone: Zone): Stat[] {
-    return zone.progressStats.map((id) => this.stats[id]);
   }
 
   cost(task: Task): number {
