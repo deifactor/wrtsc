@@ -1,4 +1,4 @@
-import { FlagId, Player, ResourceId, StatId } from "./player";
+import { LoopFlagId, Player, ResourceId, StatId } from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -16,7 +16,7 @@ const defaults = {
   extraCheck: always,
   extraPerform: () => {},
   requiredStats: {},
-  requiredFlags: {},
+  requiredLoopFlags: {},
   requiredResources: {},
 };
 
@@ -48,7 +48,7 @@ export type Task = Readonly<{
    */
   requiredResources: Partial<Record<ResourceId, number>>;
   /** These flags must be present with the given values. */
-  requiredFlags: Partial<Record<FlagId, boolean>>;
+  requiredLoopFlags: Partial<Record<LoopFlagId, boolean>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
@@ -158,7 +158,7 @@ export const DISABLE_LOCKOUTS: Task = {
   },
   requiredStats: { patrolRoutesObserved: 10 },
   requiredResources: { qhLockoutAttempts: 1 },
-  requiredFlags: { shipHijacked: true },
+  requiredLoopFlags: { shipHijacked: true },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 20,
 };
 
