@@ -3,11 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11",
-    "@emotion/styled": "^11",
     "autoprefixer": "^10.4.0",
     "classnames": "^2.3.1",
-    "framer-motion": "^4",
     "mobx": "^6.3.8",
     "mobx-react-lite": "^3.2.2",
     "postcss": "^8.4.4",
@@ -17,9 +14,7 @@
     "react-popper-tooltip": "^4.3.1",
     "react-switch": "^6.0.0",
     "react-tabs": "^3.2.3",
-    "react-tooltip": "^4.2.21",
-    "tailwindcss": "^3.0.1",
-    "web-vitals": "^1.0.1"
+    "tailwindcss": "^3.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
