@@ -179,7 +179,7 @@ function nextPosition(
   return undefined;
 }
 
-function previousPosition({ lineNumber, length }: Position): Position {
+function previousPosition({ lineNumber }: Position): Position {
   return {
     lineNumber: Math.max(0, lineNumber - 1),
     length: 0,
