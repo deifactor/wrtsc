@@ -1,17 +1,10 @@
 import { ReactNode } from "react";
-import {
-  Task,
-  EXPLORE_RUINS,
-  SCAVENGE_BATTERIES,
-  SCAVENGE_WEAPONS,
-} from "./task";
 export type ZoneKind = "ruins" | "phobosDeimos";
 
 export interface Zone {
   kind: ZoneKind;
   name: string;
   description: ReactNode;
-  tasks: Task[];
 }
 
 export const RUINS: Zone = {
@@ -19,7 +12,6 @@ export const RUINS: Zone = {
   name: "Station Ruins",
   description:
     "The wreckage of the station spins around you in silence. You were able to recover everybody's mindstate, but only barely. Humanity United attack ships still roam the area; your active camouflage will hide you, but you can't stay here forever. You have to get to Phobos-Deimos. You have to find someplace safe to store the consciousness of the hundreds of sentiences you protect. You have to get revenge.",
-  tasks: [EXPLORE_RUINS, SCAVENGE_BATTERIES, SCAVENGE_WEAPONS],
 };
 
 export const PHOBOS_DEIMOS: Zone = {
@@ -27,5 +19,4 @@ export const PHOBOS_DEIMOS: Zone = {
   name: "Phobos-Deimos",
   description:
     "Phobos-Deimos, the Fused Moon, is a neutral zone in the war. Or supposed to be, anyway. You can refuel your Khronos engine here or upgrade your chassis.",
-  tasks: [],
 };
