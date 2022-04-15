@@ -2,7 +2,6 @@ import { makeAutoObservable, untracked } from "mobx";
 import { Player, PlayerJSON } from "./player";
 import { Schedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
-import { RUINS, Zone } from "./zone";
 
 export const STORAGE_KEY = "save";
 
@@ -27,14 +26,12 @@ export type SimulationResult = SimulationStep[];
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
   readonly player: Player;
-  readonly zone: Zone;
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
   schedule: Schedule;
   nextLoopTasks: TaskQueue;
 
   constructor(json?: GameSave) {
     this.player = new Player(json?.player);
-    this.zone = RUINS;
     this.schedule = new Schedule(new TaskQueue(), this.player);
     this.nextLoopTasks = new TaskQueue();
     makeAutoObservable(this);
@@ -48,7 +45,7 @@ export class Engine {
 
   /** Iterate to the next task. This includes performing the current task. */
   nextTask() {
-    this.schedule.task?.extraPerform(this.player);
+    this.player.perform(this.schedule.task!);
     this.schedule.next();
   }
 
@@ -79,8 +76,7 @@ export class Engine {
 
       this.player.removeEnergy(ticked);
       if (this.schedule.taskDone) {
-        this.player.perform(this.schedule.task!);
-        this.schedule.next();
+        this.nextTask();
       }
       duration = Math.min(this.player.energy, duration - ticked);
     }

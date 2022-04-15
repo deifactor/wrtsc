@@ -133,7 +133,7 @@ const App = observer(() => {
 
       <Panel className="w-3/12">
         <h1>Location</h1>
-        <ZoneView className="mb-12" zone={engine.zone} player={engine.player} />
+        <ZoneView className="mb-12" player={engine.player} />
       </Panel>
     </div>
   );

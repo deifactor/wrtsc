@@ -1,4 +1,5 @@
 import { LoopFlagId, Player, ResourceId, StatId } from "./player";
+import { PHOBOS_DEIMOS } from "./zone";
 
 export type TaskKind =
   | "exploreRuins"
@@ -34,6 +35,7 @@ export type Task = Readonly<{
   description: string;
   /** Flavor text. Not game-relevant. Generally written in a `robotic` tone. */
   flavor: string;
+  /** Any actions to take that aren't described by the other fields. */
   extraPerform: (player: Player) => void;
   /**
    * Predicate that determines whether the action should be shown to the player.
@@ -172,6 +174,9 @@ export const LEAVE_RUINS: Task = {
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   requiredStats: { qhLockout: 100 },
+  extraPerform: (player) => {
+    player.zone = PHOBOS_DEIMOS;
+  },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 30,
 };
 

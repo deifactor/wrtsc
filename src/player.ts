@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { Task } from "./task";
+import { RUINS, Zone } from "./zone";
 
 const INITIAL_ENERGY = 5000;
 
@@ -7,6 +8,7 @@ export class Player {
   readonly stats: Record<StatId, Stat>;
   readonly resources: Record<ResourceId, Resource>;
   readonly flags: Record<LoopFlagId, boolean>;
+  zone: Zone;
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
@@ -37,6 +39,7 @@ export class Player {
     this.flags = {
       shipHijacked: false,
     };
+    this.zone = RUINS;
 
     this.startLoop();
 
@@ -85,6 +88,7 @@ export class Player {
     this.flags.shipHijacked = false;
     this._energy = INITIAL_ENERGY;
     this._totalEnergy = INITIAL_ENERGY;
+    this.zone = RUINS;
   }
 
   save(): PlayerJSON {

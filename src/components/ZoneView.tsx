@@ -1,19 +1,16 @@
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
-import { Zone } from "../zone";
 import { ResourceView } from "./ResourceView";
 import { StatView } from "./StatsView";
 
 type Props = {
-  zone: Zone;
   player: Player;
   className?: string;
 };
 
 export const ZoneView = observer((props: Props) => {
   const {
-    zone,
-    player: { stats, resources },
+    player: { stats, resources, zone },
     className,
   } = props;
 
