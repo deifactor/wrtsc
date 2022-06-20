@@ -201,6 +201,14 @@ export class Stat {
     }
   }
 
+  setToMaxLevel() {
+    if (!this.maxLevel) {
+      throw new Error(`Can't set stat ${this.kind} to max level`);
+    }
+    this.level = this.maxLevel;
+    this.xp = 0;
+  }
+
   get atMaxLevel(): boolean {
     return this.maxLevel !== undefined && this.level >= this.maxLevel;
   }
@@ -250,6 +258,10 @@ export class Resource {
     this.id = id;
     this.max = max;
     makeAutoObservable(this);
+  }
+
+  setToMax() {
+    this.current = this.max();
   }
 
   get name(): string {

@@ -8,7 +8,8 @@ export type TaskKind =
   | "observePatrolRoutes"
   | "hijackShip"
   | "disableLockouts"
-  | "leaveRuins";
+  | "leaveRuins"
+  | "completeRuins";
 
 const always = () => true;
 
@@ -180,6 +181,22 @@ export const LEAVE_RUINS: Task = {
   visible: (player) => player.stats.patrolRoutesObserved.level >= 30,
 };
 
+export const COMPLETE_RUINS: Task = {
+  ...defaults,
+  kind: "completeRuins",
+  name: "Debug Complete Ruins",
+  shortName: "CMP_RUIN",
+  cost: 1,
+  description: "Instantly complete everything in the Ruins.",
+  flavor: "Existential debugger engaged.",
+  extraPerform: (player) => {
+    player.stats.ruinsExploration.setToMaxLevel();
+    player.stats.patrolRoutesObserved.setToMaxLevel();
+    player.stats.qhLockout.setToMaxLevel();
+  },
+  visible: always,
+};
+
 export const TASKS: Record<TaskKind, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
@@ -188,4 +205,5 @@ export const TASKS: Record<TaskKind, Task> = {
   hijackShip: HIJACK_SHIP,
   disableLockouts: DISABLE_LOCKOUTS,
   leaveRuins: LEAVE_RUINS,
+  completeRuins: COMPLETE_RUINS,
 };
