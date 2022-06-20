@@ -144,6 +144,82 @@ export class Player {
   }
 }
 
+export const SKILL_IDS = [
+  "lethality",
+  "ergodicity",
+  "evasion",
+  "metacognition",
+  "energyTransfer",
+] as const;
+export type SkillId = typeof SKILL_IDS[number];
+export type Skills = Record<SkillId, Skill>;
+
+export const SKILL_NAME: Record<SkillId, string> = {
+  lethality: "Lethality",
+  ergodicity: "Ergodicity",
+  evasion: "Evasion",
+  metacognition: "Metacognition",
+  energyTransfer: "Energy Transfer",
+};
+
+export class Skill {
+  id: SkillId;
+  xp: number = 0;
+  level: number = 0;
+  maxLevel?: number;
+
+  constructor(id: SkillId, json?: SkillJSON) {
+    this.id = id;
+    if (json) {
+      this.xp = json.xp;
+      this.level = json.level;
+    }
+    makeAutoObservable(this);
+  }
+
+  get name(): string {
+    return SKILL_NAME[this.id];
+  }
+
+  get totalToNextLevel(): number {
+    return (Math.floor(this.level / 4) + 1) * 1024;
+  }
+
+  addXp(amount: number) {
+    if (this.atMaxLevel) {
+      return;
+    }
+    this.xp += amount;
+    while (this.xp >= this.totalToNextLevel) {
+      this.xp -= this.totalToNextLevel;
+      this.level++;
+      if (this.atMaxLevel) {
+        this.xp = 0;
+        return;
+      }
+    }
+  }
+
+  setToMaxLevel() {
+    if (!this.maxLevel) {
+      throw new Error(`Can't set skill ${this.id} to max level`);
+    }
+    this.level = this.maxLevel;
+    this.xp = 0;
+  }
+
+  get atMaxLevel(): boolean {
+    return this.maxLevel !== undefined && this.level >= this.maxLevel;
+  }
+
+  save(): SkillJSON {
+    return {
+      xp: this.xp,
+      level: this.level,
+    };
+  }
+}
+
 export const STAT_IDS = [
   "ruinsExploration",
   "patrolRoutesObserved",
@@ -226,6 +302,11 @@ export type PlayerJSON = {
 };
 
 export type StatJSON = {
+  xp: number;
+  level: number;
+};
+
+export type SkillJSON = {
   xp: number;
   level: number;
 };
