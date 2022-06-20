@@ -1,4 +1,4 @@
-import { LoopFlagId, Player, ResourceId, StatId } from "./player";
+import { LoopFlagId, Player, ResourceId, SkillId, StatId } from "./player";
 import { PHOBOS_DEIMOS } from "./zone";
 
 export type TaskKind =
@@ -20,6 +20,7 @@ const defaults = {
   requiredStats: {},
   requiredLoopFlags: {},
   requiredResources: {},
+  trainedSkills: [],
 };
 
 // Some notes: at 1-1-1-1 2-2-2-2 etc task progression, it takes about 1300
@@ -46,8 +47,14 @@ export type Task = Readonly<{
   /** Minimum stats for the action to be performable. */
   requiredStats: Partial<Record<StatId, number>>;
   /**
-   * Minimum resources for the action to be performable. This will also result
-   * in the player consuming the resources on perform.
+   * Skills that performing this task trains. This is an array and not a set,
+   * even though it's unique, because the type inference works better this way.
+   */
+  trainedSkills: SkillId[];
+  /**
+   * Skills that tsh skills: SkillId[]; /** Minimum resources for the action to
+   * be performable. This will also result in the player consuming the resources
+   * on perform.
    */
   requiredResources: Partial<Record<ResourceId, number>>;
   /** These flags must be present with the given values. */
@@ -73,6 +80,7 @@ export const EXPLORE_RUINS: Task = {
     const mult = player.flags.shipHijacked ? 8 : 2;
     player.stats.ruinsExploration.addXp(mult * 1024);
   },
+  trainedSkills: ["ergodicity"],
 };
 
 const BATTERY_AMOUNT = 3500;
@@ -105,6 +113,7 @@ export const SCAVENGE_WEAPONS: Task = {
     "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
   requiredResources: { ruinsWeapons: 1 },
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
+  trainedSkills: ["lethality"],
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -121,6 +130,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   },
   requiredStats: { ruinsExploration: 10 },
   visible: (player) => player.stats.ruinsExploration.level >= 5,
+  trainedSkills: ["ergodicity"],
 };
 
 export const HIJACK_SHIP: Task = {
@@ -144,6 +154,7 @@ export const HIJACK_SHIP: Task = {
   },
   requiredStats: { patrolRoutesObserved: 30 },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
+  trainedSkills: ["lethality"],
 };
 
 export const DISABLE_LOCKOUTS: Task = {

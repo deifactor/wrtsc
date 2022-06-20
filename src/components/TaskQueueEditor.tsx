@@ -1,7 +1,7 @@
 import { Button } from "./common/Button";
 import { observer } from "mobx-react-lite";
 import { TASKS } from "../task";
-import { StatId, STAT_NAME } from "../player";
+import { SKILL_NAME, StatId, STAT_NAME } from "../player";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { runInAction } from "mobx";
@@ -68,6 +68,12 @@ const TaskQueueEditor = observer((props: Props) => {
           </span>
         )
       );
+      const trainingSection = task.trainedSkills.length !== 0 && (
+        <p>
+          <strong>Trains:</strong>{" "}
+          {task.trainedSkills.map((s) => SKILL_NAME[s]).join(", ")}
+        </p>
+      );
       const tooltip = (
         <div className="w-96 p-2 text-sm">
           <p className="font-bold">{task.name}</p>
@@ -81,6 +87,7 @@ const TaskQueueEditor = observer((props: Props) => {
               {requirements}
             </p>
           )}
+          {trainingSection}
           <hr className="border-gray-700 my-3" />
           <p className="text-xs mb-2 text-gray-400">{task.flavor}</p>
         </div>

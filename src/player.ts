@@ -148,7 +148,11 @@ export const SKILL_IDS = [
   "lethality",
   "ergodicity",
   "evasion",
+  // Note that this is not explicitly trained; anything that trains any skill
+  // trains it.
   "metacognition",
+  // Note that this is not explicitly trained; anything that recharges energy
+  // implicitly trains it.
   "energyTransfer",
 ] as const;
 export type SkillId = typeof SKILL_IDS[number];
