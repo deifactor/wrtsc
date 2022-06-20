@@ -43,6 +43,7 @@ export const Intro = ({ onFinished }: Props) => {
     line.timestamp !== undefined
       ? `T-${line.timestamp!.toString(16).padStart(4, "0").toUpperCase()}`
       : "T+????";
+  const next = nextPosition(current);
   return (
     <div className="font-mono w-[60rem] space-y-4 p-8 m-8 bg-black/80">
       <p className="h-32 overflow-y-auto text-lg">
@@ -54,7 +55,7 @@ export const Intro = ({ onFinished }: Props) => {
           Previous
         </Button>
         <Button
-          onClick={() => setCurrent(nextPosition(current)!.state)}
+          onClick={() => (next ? setCurrent(next.state) : onFinished())}
           state={state === "advancing" ? "locked" : "active"}
         >
           Next

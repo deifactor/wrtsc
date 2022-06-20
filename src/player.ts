@@ -1,53 +1,46 @@
+import { Exclude, instanceToInstance, Type } from "class-transformer";
 import { makeAutoObservable } from "mobx";
 import { Task } from "./task";
-import { RUINS, Zone } from "./zone";
-
+import { RUINS, Zone, ZoneKind, ZONES } from "./zone";
 const INITIAL_ENERGY = 5000;
 
 export class Player {
-  readonly stats: Record<StatId, Stat>;
-  readonly resources: Record<ResourceId, Resource>;
-  readonly flags: Record<LoopFlagId, boolean>;
-  zone: Zone;
+  @Type(() => Level)
+  readonly stats: Record<StatId, Level>;
+  resources: Record<ResourceId, number>;
+  flags: Record<LoopFlagId, boolean>;
+  zoneKind: ZoneKind = RUINS.kind;
+  @Exclude()
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
+  @Exclude()
   private _totalEnergy: number = INITIAL_ENERGY;
 
-  constructor(json?: PlayerJSON) {
+  constructor() {
     this.stats = {
-      ruinsExploration: new Stat(
-        "ruinsExploration",
-        "progress",
-        json?.stats.ruinsExploration
-      ),
-      patrolRoutesObserved: new Stat(
-        "patrolRoutesObserved",
-        "progress",
-        json?.stats.patrolRoutesObserved
-      ),
-      qhLockout: new Stat("qhLockout", "progress", json?.stats.qhLockout),
+      ruinsExploration: new Level(),
+      patrolRoutesObserved: new Level(),
+      qhLockout: new Level(),
     };
     this.resources = {
-      ruinsBatteries: new Resource("ruinsBatteries", () =>
-        Math.floor(this.stats.ruinsExploration.level / 4)
-      ),
-      ruinsWeapons: new Resource("ruinsWeapons", () =>
-        Math.floor(this.stats.ruinsExploration.level / 8)
-      ),
-      qhLockoutAttempts: new Resource("qhLockoutAttempts", () => 12),
+      ruinsBatteries: 0,
+      ruinsWeapons: 0,
+      qhLockoutAttempts: 0,
     };
     this.flags = {
       shipHijacked: false,
     };
-    this.zone = RUINS;
-
     this.startLoop();
 
     makeAutoObservable(this);
   }
 
   clone(): Player {
-    return new Player(this.save());
+    return instanceToInstance(this);
+  }
+
+  get zone(): Zone {
+    return ZONES[this.zoneKind];
   }
 
   get energy(): number {
@@ -59,9 +52,7 @@ export class Player {
   }
 
   get combat(): number {
-    return (
-      this.resources.ruinsWeapons.max() - this.resources.ruinsWeapons.current
-    );
+    return this.maxResource("ruinsWeapons") - this.resources.ruinsWeapons;
   }
 
   addEnergy(amount: number) {
@@ -75,26 +66,17 @@ export class Player {
 
   /** Invoked whenevew the time loop restarts. */
   startLoop() {
-    for (const resource of Object.values(this.resources)) {
-      resource.startLoop();
-    }
-    for (const stat of Object.values(this.stats)) {
-      if (stat.kind === "normal") {
-        // XXX: gross hack
-        stat.level = 0;
-        stat.xp = 0;
-      }
-    }
-    this.flags.shipHijacked = false;
+    this.resources = {
+      ruinsBatteries: this.maxResource("ruinsBatteries"),
+      ruinsWeapons: this.maxResource("ruinsWeapons"),
+      qhLockoutAttempts: this.maxResource("qhLockoutAttempts"),
+    };
+    this.flags = {
+      shipHijacked: false,
+    };
     this._energy = INITIAL_ENERGY;
     this._totalEnergy = INITIAL_ENERGY;
-    this.zone = RUINS;
-  }
-
-  save(): PlayerJSON {
-    const stats: Partial<Record<StatId, StatJSON>> = {};
-    STAT_IDS.map((id) => (stats[id] = this.stats[id]));
-    return { stats: stats as Record<StatId, StatJSON> };
+    this.zoneKind = RUINS.kind;
   }
 
   cost(task: Task): number {
@@ -108,7 +90,7 @@ export class Player {
   perform(task: Task) {
     task.extraPerform(this);
     Object.entries(task.requiredResources).forEach(([res, value]) => {
-      this.resources[res as ResourceId].current -= value;
+      this.resources[res as ResourceId] -= value;
     });
   }
 
@@ -118,7 +100,7 @@ export class Player {
         ([id, min]) => this.stats[id as StatId].level >= min
       ) &&
       Object.entries(task.requiredResources).every(
-        ([id, min]) => this.resources[id as ResourceId].current >= min
+        ([id, min]) => this.resources[id as ResourceId] >= min
       ) &&
       Object.entries(task.requiredLoopFlags).every(
         ([id, value]) => this.flags[id as LoopFlagId] === value
@@ -138,9 +120,20 @@ export class Player {
         ([id, min]) => this.stats[id as StatId].level >= min
       ) &&
       Object.entries(task.requiredResources).every(
-        ([id, min]) => this.resources[id as ResourceId].max() >= min
+        ([id, min]) => this.maxResource(id as ResourceId) >= min
       )
     );
+  }
+
+  maxResource(resource: ResourceId): number {
+    switch (resource) {
+      case "ruinsBatteries":
+        return Math.floor(this.stats.ruinsExploration.level / 4);
+      case "ruinsWeapons":
+        return Math.floor(this.stats.ruinsExploration.level / 8);
+      case "qhLockoutAttempts":
+        return 12;
+    }
   }
 }
 
@@ -166,153 +159,18 @@ export const SKILL_NAME: Record<SkillId, string> = {
   energyTransfer: "Energy Transfer",
 };
 
-export class Skill {
-  id: SkillId;
-  xp: number = 0;
-  level: number = 0;
-  maxLevel?: number;
-
-  constructor(id: SkillId, json?: SkillJSON) {
-    this.id = id;
-    if (json) {
-      this.xp = json.xp;
-      this.level = json.level;
-    }
-    makeAutoObservable(this);
-  }
-
-  get name(): string {
-    return SKILL_NAME[this.id];
-  }
-
-  get totalToNextLevel(): number {
-    return (Math.floor(this.level / 4) + 1) * 1024;
-  }
-
-  addXp(amount: number) {
-    if (this.atMaxLevel) {
-      return;
-    }
-    this.xp += amount;
-    while (this.xp >= this.totalToNextLevel) {
-      this.xp -= this.totalToNextLevel;
-      this.level++;
-      if (this.atMaxLevel) {
-        this.xp = 0;
-        return;
-      }
-    }
-  }
-
-  setToMaxLevel() {
-    if (!this.maxLevel) {
-      throw new Error(`Can't set skill ${this.id} to max level`);
-    }
-    this.level = this.maxLevel;
-    this.xp = 0;
-  }
-
-  get atMaxLevel(): boolean {
-    return this.maxLevel !== undefined && this.level >= this.maxLevel;
-  }
-
-  save(): SkillJSON {
-    return {
-      xp: this.xp,
-      level: this.level,
-    };
-  }
-}
-
+type Skill = { xp: number; level: number };
 export const STAT_IDS = [
   "ruinsExploration",
   "patrolRoutesObserved",
   "qhLockout",
 ] as const;
 export type StatId = typeof STAT_IDS[number];
-export type Stats = Record<StatId, Stat>;
 
 export const STAT_NAME: Record<StatId, string> = {
   ruinsExploration: "Ruins Exploration",
   patrolRoutesObserved: "Patrol Routes Observed",
   qhLockout: "Ship Lockout Disabled",
-};
-
-export type StatKind = "normal" | "progress";
-
-export class Stat {
-  id: StatId;
-  xp: number = 0;
-  level: number = 0;
-  kind: StatKind;
-  maxLevel?: number;
-
-  constructor(id: StatId, kind: StatKind, json?: StatJSON) {
-    this.id = id;
-    this.kind = kind;
-    this.maxLevel = kind === "normal" ? undefined : 100;
-    if (json) {
-      this.xp = json.xp;
-      this.level = json.level;
-    }
-    makeAutoObservable(this);
-  }
-
-  get name(): string {
-    return STAT_NAME[this.id];
-  }
-
-  get totalToNextLevel(): number {
-    return (Math.floor(this.level / 4) + 1) * 1024;
-  }
-
-  addXp(amount: number) {
-    if (this.atMaxLevel) {
-      return;
-    }
-    this.xp += amount;
-    while (this.xp >= this.totalToNextLevel) {
-      this.xp -= this.totalToNextLevel;
-      this.level++;
-      if (this.atMaxLevel) {
-        this.xp = 0;
-        return;
-      }
-    }
-  }
-
-  setToMaxLevel() {
-    if (!this.maxLevel) {
-      throw new Error(`Can't set stat ${this.kind} to max level`);
-    }
-    this.level = this.maxLevel;
-    this.xp = 0;
-  }
-
-  get atMaxLevel(): boolean {
-    return this.maxLevel !== undefined && this.level >= this.maxLevel;
-  }
-
-  save(): StatJSON {
-    return {
-      xp: this.xp,
-      level: this.level,
-    };
-  }
-}
-
-export type PlayerJSON = {
-  stats: Record<StatId, StatJSON>;
-};
-
-export type StatJSON = {
-  xp: number;
-  level: number;
-};
-
-export type SkillJSON = {
-  xp: number;
-  level: number;
 };
 
 export const RESOURCE_IDS = [
@@ -321,7 +179,6 @@ export const RESOURCE_IDS = [
   "qhLockoutAttempts",
 ] as const;
 export type ResourceId = typeof RESOURCE_IDS[number];
-export type Resources = Record<ResourceId, Resource>;
 
 export const RESOURCE_NAME: Record<ResourceId, string> = {
   ruinsBatteries: "Ruins Batteries",
@@ -329,38 +186,30 @@ export const RESOURCE_NAME: Record<ResourceId, string> = {
   qhLockoutAttempts: "QH Lockout Attempts",
 };
 
-/**
- * A Resource is something in the world that the player 'harvests' over the
- * course of the loop. The current count of each resource resets on loop start,
- * but the maximum doesn't.
- */
-export class Resource {
-  readonly id: ResourceId;
-  current: number = 0;
-  max: () => number;
-
-  constructor(id: ResourceId, max: () => number) {
-    this.id = id;
-    this.max = max;
-    makeAutoObservable(this);
-  }
-
-  setToMax() {
-    this.current = this.max();
-  }
-
-  get name(): string {
-    return RESOURCE_NAME[this.id];
-  }
-
-  startLoop() {
-    this.current = this.max();
-  }
-}
-
 export const LOOP_FLAG_IDS = ["shipHijacked"];
 /**
  * A LoopFlag is basically a status that the player may or may not have. Flags
  * can be positive or negative.
  */
 export type LoopFlagId = typeof LOOP_FLAG_IDS[number];
+
+export class Level {
+  public xp: number = 0;
+  public level: number = 0;
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  get totalToNextLevel(): number {
+    return (Math.floor(this.level / 4) + 1) * 1024;
+  }
+
+  addXp(xp: number) {
+    this.xp += xp;
+    while (this.xp >= this.totalToNextLevel) {
+      this.xp -= this.totalToNextLevel;
+      this.level++;
+    }
+  }
+}

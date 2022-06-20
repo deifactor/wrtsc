@@ -1,15 +1,17 @@
 import { observer } from "mobx-react-lite";
-import { Resource } from "../player";
+import { Player, ResourceId, RESOURCE_NAME } from "../player";
 
 type Props = {
-  resource: Resource;
+  kind: ResourceId;
+  player: Player;
 };
 
 export const ResourceView = observer((props: Props) => {
-  const { resource } = props;
+  const { kind, player } = props;
   return (
     <div>
-      <strong>{resource.name}</strong>: {resource.current}/{resource.max()}
+      <strong>{RESOURCE_NAME[kind]}</strong>: {player.resources[kind]}/
+      {player.maxResource(kind)}
     </div>
   );
 });

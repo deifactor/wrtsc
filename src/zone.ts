@@ -20,3 +20,8 @@ export const PHOBOS_DEIMOS: Zone = {
   description:
     "Phobos-Deimos, the Fused Moon, is a neutral zone in the war. Or supposed to be, anyway. You can refuel your Khronos engine here or upgrade your chassis.",
 };
+
+export const ZONES: Record<ZoneKind, Zone> = {
+  ruins: RUINS,
+  phobosDeimos: PHOBOS_DEIMOS,
+};

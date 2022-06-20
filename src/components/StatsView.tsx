@@ -1,24 +1,20 @@
 import { observer } from "mobx-react-lite";
-import { Stat } from "../player";
+import { Player, StatId, STAT_NAME } from "../player";
 
 type Props = {
-  stat: Stat;
+  kind: StatId;
+  player: Player;
 };
 
 export const StatView = observer((props: Props) => {
-  const { stat } = props;
-  let levelDisplay;
-  switch (stat.kind) {
-    case "normal":
-      levelDisplay = stat.level.toString();
-      break;
-    case "progress":
-      levelDisplay = stat.level.toString() + "%";
-  }
+  const { kind, player } = props;
+  const stat = player.stats[kind];
+  let levelDisplay = stat.level.toString() + "%";
+  debugger;
   const statPercent = Math.floor((100 * stat.xp) / stat.totalToNextLevel);
   return (
     <div>
-      <strong>{stat.name}</strong>: {levelDisplay} ({statPercent}%)
+      <strong>{STAT_NAME[kind]}</strong>: {levelDisplay} ({statPercent}%)
     </div>
   );
 });

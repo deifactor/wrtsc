@@ -42,6 +42,6 @@ describe("Engine#tickTime", () => {
     expect(engine.tickTime(2 * engine.player.cost(SCAVENGE_WEAPONS))).toEqual({
       ok: true,
     });
-    expect(engine.player.resources.ruinsWeapons.current).toBe(1);
+    expect(engine.player.resources.ruinsWeapons).toBe(1);
   });
 });

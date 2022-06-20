@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Button } from "./common/Button";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
@@ -57,7 +58,7 @@ const Panel = ({ children, className }: PanelProps) => {
 };
 
 const App = observer(() => {
-  const [inIntro, setInIntro] = useState(!Engine.hasSave());
+  const [inIntro, setInIntro] = useState(false);
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc

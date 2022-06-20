@@ -9,21 +9,19 @@ type Props = {
 };
 
 export const ZoneView = observer((props: Props) => {
-  const {
-    player: { stats, resources, zone },
-    className,
-  } = props;
+  const { player, className } = props;
+  const { zone } = player;
 
   const body = (() => {
     switch (zone.kind) {
       case "ruins":
         return (
           <div>
-            <StatView stat={stats.ruinsExploration}></StatView>
-            <StatView stat={stats.patrolRoutesObserved}></StatView>
-            <ResourceView resource={resources.ruinsBatteries}></ResourceView>
-            <ResourceView resource={resources.ruinsWeapons}></ResourceView>
-            <StatView stat={stats.qhLockout}></StatView>
+            <StatView kind="ruinsExploration" player={player} />
+            <StatView kind="patrolRoutesObserved" player={player} />
+            <ResourceView kind="ruinsBatteries" player={player} />
+            <ResourceView kind="ruinsWeapons" player={player} />
+            <StatView kind="qhLockout" player={player} />
           </div>
         );
     }

@@ -1,5 +1,12 @@
+import {
+  Exclude,
+  instanceToInstance,
+  instanceToPlain,
+  plainToInstance,
+  Type,
+} from "class-transformer";
 import { makeAutoObservable, untracked } from "mobx";
-import { Player, PlayerJSON } from "./player";
+import { Player } from "./player";
 import { Schedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
 
@@ -25,13 +32,16 @@ export type SimulationResult = SimulationStep[];
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
+  @Type(() => Player)
   readonly player: Player;
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
+  @Exclude()
   schedule: Schedule;
+  @Exclude()
   nextLoopTasks: TaskQueue;
 
-  constructor(json?: GameSave) {
-    this.player = new Player(json?.player);
+  constructor() {
+    this.player = new Player();
     this.schedule = new Schedule(new TaskQueue(), this.player);
     this.nextLoopTasks = new TaskQueue();
     makeAutoObservable(this);
@@ -88,7 +98,7 @@ export class Engine {
 
   get simulation(): SimulationResult {
     // Deep-copy the engine into a new state
-    const sim = new Engine(JSON.parse(JSON.stringify(this.save())));
+    const sim = instanceToInstance(this);
     const queue = this.nextLoopTasks.clone();
     return untracked(() => {
       sim.nextLoopTasks = queue;
@@ -117,7 +127,7 @@ export class Engine {
   }
 
   save(): GameSave {
-    return { player: this.player.save() };
+    return instanceToPlain(this);
   }
 
   saveToStorage() {
@@ -131,13 +141,11 @@ export class Engine {
   static loadFromStorage(): Engine {
     const stringified = localStorage.getItem(STORAGE_KEY);
     if (stringified) {
-      return new Engine(JSON.parse(stringified));
+      return plainToInstance(Engine, JSON.parse(stringified));
     } else {
       return new Engine();
     }
   }
 }
 
-type GameSave = {
-  player: PlayerJSON;
-};
+type GameSave = Record<string, any>;

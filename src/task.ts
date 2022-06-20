@@ -1,5 +1,4 @@
 import { LoopFlagId, Player, ResourceId, SkillId, StatId } from "./player";
-import { PHOBOS_DEIMOS } from "./zone";
 
 export type TaskKind =
   | "exploreRuins"
@@ -187,7 +186,7 @@ export const LEAVE_RUINS: Task = {
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   requiredStats: { qhLockout: 100 },
   extraPerform: (player) => {
-    player.zone = PHOBOS_DEIMOS;
+    player.zoneKind = "phobosDeimos";
   },
   visible: (player) => player.stats.patrolRoutesObserved.level >= 30,
 };
@@ -201,9 +200,15 @@ export const COMPLETE_RUINS: Task = {
   description: "Instantly complete everything in the Ruins.",
   flavor: "Existential debugger engaged.",
   extraPerform: (player) => {
-    player.stats.ruinsExploration.setToMaxLevel();
-    player.stats.patrolRoutesObserved.setToMaxLevel();
-    player.stats.qhLockout.setToMaxLevel();
+    for (const kind of [
+      "ruinsExploration",
+      "patrolRoutesObserved",
+      "qhLockout",
+    ] as const) {
+      const stat = player.stats[kind];
+      stat.level = 100;
+      stat.xp = 0;
+    }
   },
   visible: always,
 };
