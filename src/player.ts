@@ -1,11 +1,48 @@
-import { Exclude, instanceToInstance, Type } from "class-transformer";
+import {
+  ClassConstructor,
+  Exclude,
+  instanceToInstance,
+  plainToInstance,
+  Transform,
+} from "class-transformer";
 import { makeAutoObservable } from "mobx";
 import { Task } from "./task";
 import { RUINS, Zone, ZoneKind, ZONES } from "./zone";
 const INITIAL_ENERGY = 5000;
 
+function _convertRecord<T>(cls: ClassConstructor<T>) {
+  return function (params: { value: any }): Record<string, T> {
+    const obj = params.value;
+    Object.keys(obj).forEach((key) => {
+      obj[key] = plainToInstance(cls, obj[key]);
+    });
+    return obj as Record<string, T>;
+  };
+}
+
+export class Level {
+  public xp: number = 0;
+  public level: number = 0;
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  get totalToNextLevel(): number {
+    return (Math.floor(this.level / 4) + 1) * 1024;
+  }
+
+  addXp(xp: number) {
+    this.xp += xp;
+    while (this.xp >= this.totalToNextLevel) {
+      this.xp -= this.totalToNextLevel;
+      this.level++;
+    }
+  }
+}
+
 export class Player {
-  @Type(() => Level)
+  @Transform(_convertRecord(Level), { toClassOnly: true })
   readonly stats: Record<StatId, Level>;
   resources: Record<ResourceId, number>;
   flags: Record<LoopFlagId, boolean>;
@@ -192,24 +229,3 @@ export const LOOP_FLAG_IDS = ["shipHijacked"];
  * can be positive or negative.
  */
 export type LoopFlagId = typeof LOOP_FLAG_IDS[number];
-
-export class Level {
-  public xp: number = 0;
-  public level: number = 0;
-
-  constructor() {
-    makeAutoObservable(this);
-  }
-
-  get totalToNextLevel(): number {
-    return (Math.floor(this.level / 4) + 1) * 1024;
-  }
-
-  addXp(xp: number) {
-    this.xp += xp;
-    while (this.xp >= this.totalToNextLevel) {
-      this.xp -= this.totalToNextLevel;
-      this.level++;
-    }
-  }
-}
