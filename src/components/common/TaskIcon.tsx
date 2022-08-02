@@ -3,7 +3,6 @@ import { IconType } from "react-icons";
 import {
   GiBatteryPack,
   GiJourney,
-  GiLaserBlast,
   GiLockPicking,
   GiSpaceship,
   GiSpyglass,
@@ -17,7 +16,6 @@ const DEBUG_ICON = FaVenusDouble;
 export const ICONS: Partial<Record<TaskKind, IconType>> = {
   exploreRuins: GiTargeting,
   scavengeBatteries: GiBatteryPack,
-  scavengeWeapons: GiLaserBlast,
   observePatrolRoutes: GiSpyglass,
   hijackShip: GiSpaceship,
   disableLockouts: GiLockPicking,

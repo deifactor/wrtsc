@@ -3,10 +3,13 @@ import { LoopFlagId, Player, ResourceId, SkillId, StatId } from "./player";
 export type TaskKind =
   | "exploreRuins"
   | "scavengeBatteries"
-  | "scavengeWeapons"
+  | "linkSensorDrones"
   | "observePatrolRoutes"
+  | "eradicateScout"
   | "hijackShip"
   | "disableLockouts"
+  | "strafingRun"
+  | "dismantleSensorDrones"
   | "leaveRuins"
   | "completeRuins";
 
@@ -100,19 +103,15 @@ export const SCAVENGE_BATTERIES: Task = {
   visible: (player: Player) => player.stats.ruinsExploration.level > 0,
 };
 
-export const SCAVENGE_WEAPONS: Task = {
+export const LINK_SENSOR_DRONES: Task = {
   ...defaults,
-  kind: "scavengeWeapons",
-  name: "Scavenge Weapons",
-  shortName: "SCAV_WPN",
-  cost: 800,
-  description:
-    "Increases your Combat stat by 1. Does not persist across resets.",
+  kind: "linkSensorDrones",
+  name: "Link Sensor Drones",
+  shortName: "LINK_DRN",
+  cost: 1500,
+  description: `Increases progress for ${EXPLORE_RUINS.name}.`,
   flavor:
-    "Onboard weaponry has suffered critical damage and requires repair from locally-available components.",
-  requiredResources: { ruinsWeapons: 1 },
-  visible: (player: Player) => player.stats.ruinsExploration.level > 0,
-  trainedSkills: ["lethality"],
+    "Long-range sensors are still responding to pings. Superresolution routines loaded.",
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -121,15 +120,24 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
   cost: 3000,
-  description: "Search for vessels to hijack. Decreases cost of Hijack Ship.",
+  description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
-    "Transit will require a ship. Humanity United patrol vessels appear to be searching for survivors. Recommend route observation to determine optimal hijack strategy.",
+    "Tactical planning substrate suggests attacking during moments of isolation.",
   extraPerform: (player: Player) => {
     player.stats.patrolRoutesObserved.addXp(1024 * 6);
   },
-  requiredStats: { ruinsExploration: 10 },
-  visible: (player) => player.stats.ruinsExploration.level >= 5,
-  trainedSkills: ["ergodicity"],
+};
+
+export const KILL_SCOUT: Task = {
+  ...defaults,
+  kind: "eradicateScout",
+  name: "Kill Scout",
+  shortName: "KILL_SCT",
+  cost: 3000,
+  description:
+    "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
+  flavor:
+    "Simulations predict >99.99% kill rate with minimal retaliatory damage.",
 };
 
 export const HIJACK_SHIP: Task = {
@@ -152,7 +160,7 @@ export const HIJACK_SHIP: Task = {
     player.flags.shipHijacked = true;
   },
   requiredStats: { patrolRoutesObserved: 30 },
-  visible: (player) => player.stats.patrolRoutesObserved.level >= 1,
+  visible: (player: Player) => player.stats.patrolRoutesObserved.level >= 1,
   trainedSkills: ["lethality"],
 };
 
@@ -172,7 +180,28 @@ export const DISABLE_LOCKOUTS: Task = {
   requiredStats: { patrolRoutesObserved: 10 },
   requiredResources: { qhLockoutAttempts: 1 },
   requiredLoopFlags: { shipHijacked: true },
-  visible: (player) => player.stats.patrolRoutesObserved.level >= 20,
+  visible: (player: Player) => player.stats.patrolRoutesObserved.level >= 20,
+};
+
+export const STRAFING_RUN: Task = {
+  ...defaults,
+  kind: "strafingRun",
+  name: "Strafing Run",
+  shortName: "STRAFE",
+  cost: 3000,
+  description: "Clean up the remaining Preservers.",
+  flavor:
+    "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
+};
+
+export const DISMANTLE_SENSOR_DRONES: Task = {
+  ...defaults,
+  kind: "dismantleSensorDrones",
+  name: "Dismantle Sensor Drones",
+  shortName: "DSMNTL",
+  cost: 3000,
+  description: "Extract remaining energy from sensor drones.",
+  flavor: "There is nothing left for them to monitor.",
 };
 
 export const LEAVE_RUINS: Task = {
@@ -216,10 +245,13 @@ export const COMPLETE_RUINS: Task = {
 export const TASKS: Record<TaskKind, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
-  scavengeWeapons: SCAVENGE_WEAPONS,
+  linkSensorDrones: LINK_SENSOR_DRONES,
   observePatrolRoutes: OBSERVE_PATROL_ROUTES,
+  eradicateScout: KILL_SCOUT,
   hijackShip: HIJACK_SHIP,
   disableLockouts: DISABLE_LOCKOUTS,
+  strafingRun: STRAFING_RUN,
+  dismantleSensorDrones: DISMANTLE_SENSOR_DRONES,
   leaveRuins: LEAVE_RUINS,
   completeRuins: COMPLETE_RUINS,
 };

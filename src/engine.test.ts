@@ -1,5 +1,5 @@
 import { Engine } from "./engine";
-import { EXPLORE_RUINS, SCAVENGE_BATTERIES, SCAVENGE_WEAPONS } from "./task";
+import { EXPLORE_RUINS, SCAVENGE_BATTERIES } from "./task";
 
 describe("Engine#tickTime", () => {
   it("should succeed when the task queue is empty", () => {
@@ -31,17 +31,5 @@ describe("Engine#tickTime", () => {
         reason: "taskFailed",
       });
     });
-  });
-
-  it("should split the tick if a task completes in the middle", () => {
-    const engine = new Engine();
-    engine.player.stats.ruinsExploration.level = 10;
-    engine.nextLoopTasks.push(SCAVENGE_WEAPONS.kind);
-    engine.nextLoopTasks.push(SCAVENGE_WEAPONS.kind);
-    engine.startLoop();
-    expect(engine.tickTime(2 * engine.player.cost(SCAVENGE_WEAPONS))).toEqual({
-      ok: true,
-    });
-    expect(engine.player.resources.ruinsWeapons).toBe(1);
   });
 });
