@@ -10,7 +10,6 @@ export const StatView = observer((props: Props) => {
   const { kind, player } = props;
   const stat = player.stats[kind];
   let levelDisplay = stat.level.toString() + "%";
-  debugger;
   const statPercent = Math.floor((100 * stat.xp) / stat.totalToNextLevel);
   return (
     <div>
