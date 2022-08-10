@@ -37,10 +37,10 @@ export class Schedule {
   completions(index: number): number {
     const { task } = this;
     if (task == null) {
-      return this.queue.entry(index)!.count;
+      return this.queue[index].count;
     }
     if (index < task.index) {
-      return this.queue.entry(index)!.count;
+      return this.queue[index].count;
     }
     if (index === task.index) {
       return task.iteration;

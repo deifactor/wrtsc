@@ -37,18 +37,15 @@ export class Engine {
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
   @Exclude()
   schedule: Schedule;
-  @Exclude()
-  nextLoopTasks: TaskQueue;
 
   constructor() {
     this.player = new Player();
-    this.schedule = new Schedule(new TaskQueue(), this.player);
-    this.nextLoopTasks = new TaskQueue();
+    this.schedule = new Schedule([], this.player);
   }
 
   /** Restart the time loop. */
-  startLoop() {
-    this.schedule = new Schedule(this.nextLoopTasks.clone(), this.player);
+  startLoop(queue: TaskQueue) {
+    this.schedule = new Schedule(queue, this.player);
     this.player.startLoop();
   }
 
@@ -95,18 +92,16 @@ export class Engine {
     return { ok: true };
   }
 
-  get simulation(): SimulationResult {
+  simulation(tasks: TaskQueue): SimulationResult {
     // Deep-copy the engine into a new state
     const sim = instanceToInstance(this);
-    const queue = this.nextLoopTasks.clone();
-    sim.nextLoopTasks = queue;
-    return sim.simulationImpl();
+    return sim.simulationImpl(tasks);
   }
 
   /** Simulates the entire task queue. This mutates everything, so clone before running it! */
-  private simulationImpl(): SimulationResult {
+  private simulationImpl(tasks: TaskQueue): SimulationResult {
     const result: SimulationResult = [];
-    this.startLoop();
+    this.startLoop(tasks);
     while (this.schedule.task) {
       const task = this.schedule.task;
       const { ok } = this.tickTime(

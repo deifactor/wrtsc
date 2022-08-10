@@ -4,7 +4,7 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
-import { Engine } from "../engine";
+import { Engine, TaskQueue } from "../engine";
 import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -53,6 +53,7 @@ const Panel = ({ children, className }: PanelProps) => {
 const App = () => {
   const [inIntro, setInIntro] = useState(false);
   const [engine, setEngine] = useState(Engine.loadFromStorage);
+  const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc
   const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
@@ -66,7 +67,7 @@ const App = () => {
     const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
     setLastUpdate(delta);
     if (settings.autoRestart && (!ok || !engine.schedule.task)) {
-      engine.startLoop();
+      engine.startLoop(nextQueue);
     }
     engine.saveToStorage();
   }, 1000 / UPDATES_PER_SEC);
@@ -85,7 +86,7 @@ const App = () => {
       <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerDisplay player={engine.player} />
-        <Button onClick={() => engine.startLoop()}>Start</Button>
+        <Button onClick={() => engine.startLoop(nextQueue)}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
 
@@ -103,7 +104,11 @@ const App = () => {
           <hr className="border-gray-400 my-4" />
           <TabPanel>
             <div className="flex flex-row h-full space-x-12">
-              <TaskQueueEditor className="h-full w-3/5" engine={engine} />
+              <TaskQueueEditor
+                className="h-full w-3/5"
+                queue={nextQueue}
+                setQueue={setNextQueue}
+              />
               <ScheduleDisplay
                 className="h-full w-2/5"
                 schedule={engine.schedule}

@@ -1,33 +1,40 @@
 import { Button } from "./common/Button";
-import { TASKS } from "../engine";
-import { SKILL_NAME, StatId, STAT_NAME } from "../engine";
-import { Engine, SimulationStep } from "../engine";
+import {
+  SimulationStep,
+  TASKS,
+  SKILL_NAME,
+  StatId,
+  STAT_NAME,
+} from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBackFill } from "react-icons/ri";
+import * as q from "../engine/taskQueue";
 
 interface Props {
   className?: string;
-  engine: Engine;
+  queue: q.TaskQueue;
+  setQueue: (queue: q.TaskQueue) => void;
 }
 
 const TaskQueueEditor = (props: Props) => {
-  const {
-    engine: { nextLoopTasks, player, simulation },
-    className,
-  } = props;
-  const tasks = nextLoopTasks.entries.map((entry, idx) => {
-    const incrementCount = (): void => nextLoopTasks.modifyCount(idx, 1);
-    const decrementCount = (): void => nextLoopTasks.modifyCount(idx, -1);
-    const moveUp = (): void => nextLoopTasks.move(idx, idx - 1);
-    const moveDown = (): void => nextLoopTasks.move(idx, idx + 1);
-    const remove = (): void => nextLoopTasks.remove(idx);
-    const step: SimulationStep | undefined = simulation[idx];
+  const { queue, setQueue, className } = props;
+  const tasks = queue.map((entry, index) => {
+    const incrementCount = (): void =>
+      setQueue(q.adjustTaskCount(queue, { index, amount: 1 }));
+    const decrementCount = (): void =>
+      setQueue(q.adjustTaskCount(queue, { index, amount: -1 }));
+    const moveUp = (): void =>
+      setQueue(q.moveTask(queue, { from: index, to: index - 1 }));
+    const moveDown = (): void =>
+      setQueue(q.moveTask(queue, { from: index, to: index + 1 }));
+    const remove = (): void => setQueue(q.removeTask(queue, index));
+    const step: SimulationStep | undefined = { ok: true, energy: 100 };
     return (
       // eslint-disable-next-line react/no-array-index-key
       <div
-        key={idx}
+        key={index}
         className={classNames("flex items-center my-1", {
           "text-red-300": !step?.ok,
         })}
@@ -57,7 +64,7 @@ const TaskQueueEditor = (props: Props) => {
   });
 
   const addButtons = Object.values(TASKS)
-    .filter((task) => task.visible(player))
+    .filter((task) => true)
     .map((task) => {
       const requirements = Object.entries(task.requiredStats).map(
         ([id, min]) => (
@@ -77,7 +84,7 @@ const TaskQueueEditor = (props: Props) => {
           <p className="font-bold">{task.name}</p>
           <p className="my-2">{task.description}</p>
           <p>
-            <strong>Cost:</strong> {player.cost(task)}
+            <strong>Cost:</strong> OOPS
           </p>
           {Object.keys(task.requiredStats).length !== 0 && (
             <p>
@@ -95,9 +102,9 @@ const TaskQueueEditor = (props: Props) => {
           className="font-mono whitespace-pre"
           key={task.kind}
           icon={ICONS[task.kind]}
-          onClick={() => nextLoopTasks.push(task.kind)}
+          onClick={() => setQueue(q.pushTaskToQueue(queue, task.kind))}
           tooltip={tooltip}
-          state={player.canAddToQueue(task) ? "active" : "locked"}
+          state={true ? "active" : "locked"}
         >
           {task.shortName.padEnd(8)}
         </Button>

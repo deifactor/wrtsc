@@ -18,7 +18,7 @@ export const ScheduleDisplay = (props: Props) => {
   const completionFraction =
     schedule.task && 1 - schedule.timeLeftOnTask / player.cost(schedule.task);
 
-  const entries = schedule.queue.entries.map((entry, idx) => {
+  const entries = schedule.queue.map((entry, idx) => {
     const isCurrent = idx === schedule.task?.index;
     // We need whitespace-pre here because we pad with spaces.
     const progressSpan = isCurrent && (
