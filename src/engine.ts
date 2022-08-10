@@ -5,7 +5,7 @@ import {
   plainToInstance,
   Type,
 } from "class-transformer";
-import { makeAutoObservable, untracked } from "mobx";
+
 import { Player } from "./player";
 import { Schedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
@@ -44,7 +44,6 @@ export class Engine {
     this.player = new Player();
     this.schedule = new Schedule(new TaskQueue(), this.player);
     this.nextLoopTasks = new TaskQueue();
-    makeAutoObservable(this);
   }
 
   /** Restart the time loop. */
@@ -100,10 +99,8 @@ export class Engine {
     // Deep-copy the engine into a new state
     const sim = instanceToInstance(this);
     const queue = this.nextLoopTasks.clone();
-    return untracked(() => {
-      sim.nextLoopTasks = queue;
-      return sim.simulationImpl();
-    });
+    sim.nextLoopTasks = queue;
+    return sim.simulationImpl();
   }
 
   /** Simulates the entire task queue. This mutates everything, so clone before running it! */

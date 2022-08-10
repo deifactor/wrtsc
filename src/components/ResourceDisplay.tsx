@@ -1,4 +1,3 @@
-import { observer } from "mobx-react-lite";
 import { Player, ResourceId, RESOURCE_NAME } from "../player";
 
 type Props = {
@@ -6,7 +5,7 @@ type Props = {
   player: Player;
 };
 
-export const ResourceDisplay = observer((props: Props) => {
+export const ResourceDisplay = (props: Props) => {
   const { kind, player } = props;
   return (
     <div>
@@ -14,5 +13,5 @@ export const ResourceDisplay = observer((props: Props) => {
       {player.maxResource(kind)}
     </div>
   );
-});
+};
 ResourceDisplay.displayName = "ResourceDisplay";

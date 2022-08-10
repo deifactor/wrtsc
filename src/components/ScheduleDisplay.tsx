@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { observer } from "mobx-react-lite";
+
 import { Player } from "../player";
 import { Schedule } from "../schedule";
 import { TaskIcon } from "./common/TaskIcon";
@@ -15,7 +15,7 @@ function formatCompletion(frac: number): string {
   return `[${percent}%]`;
 }
 
-export const ScheduleDisplay = observer((props: Props) => {
+export const ScheduleDisplay = (props: Props) => {
   const { className, schedule, player } = props;
   const completionFraction =
     schedule.task && 1 - schedule.timeLeftOnTask / player.cost(schedule.task);
@@ -44,5 +44,5 @@ export const ScheduleDisplay = observer((props: Props) => {
       {entries}
     </div>
   );
-});
+};
 ScheduleDisplay.displayName = "ScheduleDisplay";

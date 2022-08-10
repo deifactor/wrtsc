@@ -6,8 +6,6 @@ import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
 import { Engine } from "../engine";
 import { PlayerDisplay } from "./PlayerDisplay";
-import { configure, runInAction } from "mobx";
-import { observer } from "mobx-react-lite";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsEditor } from "./SettingsEditor";
@@ -40,11 +38,6 @@ function useInterval(callback: () => void, delay: number) {
 const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 12;
 
-configure({
-  observableRequiresReaction: true,
-  reactionRequiresObservable: true,
-});
-
 type PanelProps = {
   children: ReactNode;
   className: string;
@@ -57,7 +50,7 @@ const Panel = ({ children, className }: PanelProps) => {
   return <div className={classNames(panelClass, className)}>{children}</div>;
 };
 
-const App = observer(() => {
+const App = () => {
   const [inIntro, setInIntro] = useState(false);
   const [engine, setEngine] = useState(Engine.loadFromStorage);
   const [settings] = useState(new Settings());
@@ -68,16 +61,14 @@ const App = observer(() => {
     if (inIntro) {
       return;
     }
-    runInAction(() => {
-      const delta = new Date().getTime();
-      const multiplier = isDev ? 1 : 1;
-      const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
-      setLastUpdate(delta);
-      if (settings.autoRestart && (!ok || !engine.schedule.task)) {
-        engine.startLoop();
-      }
-      engine.saveToStorage();
-    });
+    const delta = new Date().getTime();
+    const multiplier = isDev ? 1 : 1;
+    const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
+    setLastUpdate(delta);
+    if (settings.autoRestart && (!ok || !engine.schedule.task)) {
+      engine.startLoop();
+    }
+    engine.saveToStorage();
   }, 1000 / UPDATES_PER_SEC);
 
   const introFinished = useCallback(() => setInIntro(false), []);
@@ -138,6 +129,6 @@ const App = observer(() => {
       </Panel>
     </div>
   );
-});
+};
 
 export default App;

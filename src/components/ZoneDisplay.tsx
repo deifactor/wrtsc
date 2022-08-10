@@ -1,4 +1,3 @@
-import { observer } from "mobx-react-lite";
 import { Player } from "../player";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { StatsDisplay } from "./StatsDisplay";
@@ -8,7 +7,7 @@ type Props = {
   className?: string;
 };
 
-export const ZoneDisplay = observer((props: Props) => {
+export const ZoneDisplay = (props: Props) => {
   const { player, className } = props;
   const { zone } = player;
 
@@ -35,5 +34,5 @@ export const ZoneDisplay = observer((props: Props) => {
       <p className="text-gray-400">{zone.description}</p>
     </div>
   );
-});
+};
 ZoneDisplay.displayName = "ZoneDisplay";

@@ -1,11 +1,10 @@
-import { observer } from "mobx-react-lite";
 import { Player } from "../player";
 
 type Props = {
   player: Player;
 };
 
-export const PlayerDisplay = observer((props: Props) => {
+export const PlayerDisplay = (props: Props) => {
   const { player } = props;
   return (
     <div>
@@ -17,5 +16,5 @@ export const PlayerDisplay = observer((props: Props) => {
       </p>
     </div>
   );
-});
+};
 PlayerDisplay.displayName = "PlayerDisplay";

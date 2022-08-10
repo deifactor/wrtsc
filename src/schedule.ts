@@ -1,4 +1,3 @@
-import { makeAutoObservable } from "mobx";
 import { Player } from "./player";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
@@ -25,7 +24,6 @@ export class Schedule {
     this.player = player;
     this.iter = new TaskQueueIterator(this.queue);
     this.timeLeftOnTask = this.task ? player.cost(this.task) : 0;
-    makeAutoObservable(this);
   }
 
   get task(): TaskQueuePointer | undefined {

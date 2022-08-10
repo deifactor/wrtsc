@@ -1,4 +1,3 @@
-import { observer } from "mobx-react-lite";
 import { Player, StatId, STAT_NAME } from "../player";
 
 type Props = {
@@ -6,7 +5,7 @@ type Props = {
   player: Player;
 };
 
-export const StatsDisplay = observer((props: Props) => {
+export const StatsDisplay = (props: Props) => {
   const { kind, player } = props;
   const stat = player.stats[kind];
   let levelDisplay = stat.level.toString() + "%";
@@ -16,5 +15,5 @@ export const StatsDisplay = observer((props: Props) => {
       <strong>{STAT_NAME[kind]}</strong>: {levelDisplay} ({statPercent}%)
     </div>
   );
-});
+};
 StatsDisplay.displayName = "StatsDisplay";

@@ -1,10 +1,8 @@
 import { Button } from "./common/Button";
-import { observer } from "mobx-react-lite";
 import { TASKS } from "../task";
 import { SKILL_NAME, StatId, STAT_NAME } from "../player";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
-import { runInAction } from "mobx";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBackFill } from "react-icons/ri";
@@ -14,7 +12,7 @@ interface Props {
   engine: Engine;
 }
 
-const TaskQueueEditor = observer((props: Props) => {
+const TaskQueueEditor = (props: Props) => {
   const {
     engine: { nextLoopTasks, player, simulation },
     className,
@@ -97,7 +95,7 @@ const TaskQueueEditor = observer((props: Props) => {
           className="font-mono whitespace-pre"
           key={task.kind}
           icon={ICONS[task.kind]}
-          onClick={() => runInAction(() => nextLoopTasks.push(task.kind))}
+          onClick={() => nextLoopTasks.push(task.kind)}
           tooltip={tooltip}
           state={player.canAddToQueue(task) ? "active" : "locked"}
         >
@@ -113,7 +111,7 @@ const TaskQueueEditor = observer((props: Props) => {
       <div>{addButtons}</div>
     </div>
   );
-});
+};
 TaskQueueEditor.displayName = "TaskQueueEditor";
 
 export default TaskQueueEditor;

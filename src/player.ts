@@ -5,7 +5,7 @@ import {
   plainToInstance,
   Transform,
 } from "class-transformer";
-import { makeAutoObservable } from "mobx";
+
 import { Task } from "./task";
 import { RUINS, Zone, ZoneKind, ZONES } from "./zone";
 const INITIAL_ENERGY = 5000;
@@ -23,10 +23,6 @@ function _convertRecord<T>(cls: ClassConstructor<T>) {
 export class Level {
   public xp: number = 0;
   public level: number = 0;
-
-  constructor() {
-    makeAutoObservable(this);
-  }
 
   get totalToNextLevel(): number {
     return (Math.floor(this.level / 4) + 1) * 1024;
@@ -68,8 +64,6 @@ export class Player {
       shipHijacked: false,
     };
     this.startLoop();
-
-    makeAutoObservable(this);
   }
 
   clone(): Player {

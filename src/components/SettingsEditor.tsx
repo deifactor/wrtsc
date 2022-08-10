@@ -1,13 +1,8 @@
-import { makeAutoObservable } from "mobx";
-import { observer } from "mobx-react-lite";
 import { Button } from "./common/Button";
 import { Switch } from "./common/Switch";
 
 export class Settings {
   autoRestart: boolean = true;
-  constructor() {
-    makeAutoObservable(this);
-  }
 }
 
 type Props = {
@@ -15,7 +10,7 @@ type Props = {
   settings: Settings;
 };
 
-export const SettingsEditor = observer(({ onHardReset, settings }: Props) => {
+export const SettingsEditor = ({ onHardReset, settings }: Props) => {
   const setAutoRestart = (value: boolean) => {
     settings.autoRestart = value;
   };
@@ -29,5 +24,5 @@ export const SettingsEditor = observer(({ onHardReset, settings }: Props) => {
       </Switch>
     </div>
   );
-});
+};
 SettingsEditor.displayName = "SettingsEditor";
