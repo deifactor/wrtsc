@@ -1,4 +1,4 @@
-import { Player, ResourceId, RESOURCE_NAME } from "../player";
+import { Player, ResourceId, RESOURCE_NAME } from "../engine";
 
 type Props = {
   kind: ResourceId;

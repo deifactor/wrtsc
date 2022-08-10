@@ -1,6 +1,6 @@
 import { Button } from "./common/Button";
-import { TASKS } from "../task";
-import { SKILL_NAME, StatId, STAT_NAME } from "../player";
+import { TASKS } from "../engine";
+import { SKILL_NAME, StatId, STAT_NAME } from "../engine";
 import { Engine, SimulationStep } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";

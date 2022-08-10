@@ -1,7 +1,5 @@
 import classNames from "classnames";
-
-import { Player } from "../player";
-import { Schedule } from "../schedule";
+import { Player, Schedule } from "../engine";
 import { TaskIcon } from "./common/TaskIcon";
 
 interface Props {
