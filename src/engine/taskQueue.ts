@@ -1,16 +1,21 @@
 import { Task, TaskKind, TASKS } from "./task";
+import { produce } from "immer";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskBatch {
-  task: TaskKind;
-  count: number;
+  readonly task: TaskKind;
+  readonly count: number;
 }
 
-export type TaskQueuePointer = Task & {
-  index: number;
-  iteration: number;
-  count: number;
-};
+export type TaskQueuePointer = Readonly<
+  Task & {
+    index: number;
+    iteration: number;
+    count: number;
+  }
+>;
+
+export type TaskQueue = readonly TaskBatch[];
 
 /**
  * Iterates over the entries in a task queue.
@@ -32,8 +37,8 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
   }
 
   get peek(): TaskQueuePointer | undefined {
-    const entry = this.queue.entry(this.index);
-    if (entry == null) {
+    const entry = this.queue[this.index];
+    if (!entry) {
       return undefined;
     }
     return {
@@ -54,7 +59,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
       return { value, done: true };
     }
     this.iteration += 1;
-    if (this.iteration >= this.queue.entries[this.index].count) {
+    if (this.iteration >= this.queue[this.index].count) {
       this.index += 1;
       this.iteration = 0;
     }
@@ -62,79 +67,63 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
   }
 }
 
-export class TaskQueue {
-  entries: TaskBatch[];
+export function taskIterator(queue: TaskQueue): TaskQueueIterator {
+  return new TaskQueueIterator(queue);
+}
 
-  constructor() {
-    this.entries = [];
+/**
+ * Push a task to the end of the queue. If the last task in the queue is the
+ * given kind, increments its count by 1 instead.
+ */
+export const pushTaskToQueue = produce<TaskQueue, [TaskKind]>((queue, kind) => {
+  const len = queue.length;
+  if (len !== 0 && queue[len - 1].task === kind) {
+    queue[queue.length - 1].count++;
+  } else {
+    queue.push({ task: kind, count: 1 });
   }
+});
 
-  clone(): TaskQueue {
-    const cloned = new TaskQueue();
-    for (const { task, count } of this.entries) {
-      cloned.entries.push({ task, count });
-    }
-    return cloned;
+/**
+ * { Modify the task count of the index-th task by amount. If this would result
+ * in a negative amount, removes it.
+ */
+export const adjustTaskCount = produce<
+  TaskQueue,
+  [{ index: number; amount: number }]
+>((queue, { index, amount }) => {
+  checkBounds(queue, index);
+  const entry = queue[index];
+  entry.count += amount;
+  if (entry.count <= 0) {
+    queue.splice(index, 1);
   }
+});
 
-  /** An array accessor that will make MobX happy. */
-  entry(idx: number): TaskBatch | undefined {
-    return idx < this.entries.length ? this.entries[idx] : undefined;
-  }
-
-  taskIterator(): TaskQueueIterator {
-    return new TaskQueueIterator(this);
-  }
-
-  push(kind: TaskKind): void {
-    const lastEntry = this.entries[this.entries.length - 1];
-    if (lastEntry?.task === kind) {
-      lastEntry.count += 1;
-    } else {
-      this.entries.push({ task: kind, count: 1 });
-    }
-  }
-
-  modifyCount(idx: number, amount: number): void {
-    const entry = this.entry(idx);
-    if (entry == null) {
-      throw Error(
-        `Tried to modify count of ${idx}, which is >= length ${this.length}`
-      );
-    }
-    entry.count += amount;
-    if (entry.count <= 0) {
-      this.entries.splice(idx, 1);
-    }
-  }
-
-  move(idx: number, to: number): void {
-    if (to < 0 || to >= this.length) {
-      return;
-    }
-    const entry = this.entry(idx);
-    if (entry == null) {
-      throw Error(
-        `Tried to modify count of ${idx}, which is >= length ${this.length}`
-      );
-    }
-    // Yes, this works no matter what `idx` and `to` are. Unit test it anyway
+/**
+ * Move the task at `from` to the position `to`. Throws if either of those is
+ * out of bounds.
+ */
+export const moveTask = produce<TaskQueue, [{ from: number; to: number }]>(
+  (queue, { from, to }) => {
+    checkBounds(queue, from);
+    checkBounds(queue, to);
+    // Yes, this works no matter what `from` and `to` are. Unit test it anyway
     // though.
-    this.entries.splice(idx, 1);
-    this.entries.splice(to, 0, entry);
+    const entry = queue[from];
+    queue.splice(from, 1);
+    queue.splice(to, 0, entry);
   }
+);
 
-  remove(idx: number): void {
-    const entry = this.entry(idx);
-    if (entry == null) {
-      throw Error(
-        `Tried to modify count of ${idx}, which is >= length ${this.length}`
-      );
-    }
-    this.modifyCount(idx, -entry.count);
-  }
+/** Removes the task at index `index`. */
+export const removeTask = produce<TaskQueue, [number]>((queue, index) => {
+  checkBounds(queue, index);
+  queue.splice(index, 1);
+});
 
-  get length(): number {
-    return this.entries.length;
+function checkBounds(queue: TaskQueue, index: number) {
+  if (index < 0 || index >= queue.length) {
+    throw new Error(`Invalid index ${index} for queue ${queue}`);
   }
 }
