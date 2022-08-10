@@ -6,7 +6,7 @@ type Props = {
   player: Player;
 };
 
-export const ResourceView = observer((props: Props) => {
+export const ResourceDisplay = observer((props: Props) => {
   const { kind, player } = props;
   return (
     <div>
@@ -15,4 +15,4 @@ export const ResourceView = observer((props: Props) => {
     </div>
   );
 });
-ResourceView.displayName = "ResourceView";
+ResourceDisplay.displayName = "ResourceDisplay";

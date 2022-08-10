@@ -6,7 +6,7 @@ type Props = {
   player: Player;
 };
 
-export const StatView = observer((props: Props) => {
+export const StatsDisplay = observer((props: Props) => {
   const { kind, player } = props;
   const stat = player.stats[kind];
   let levelDisplay = stat.level.toString() + "%";
@@ -17,4 +17,4 @@ export const StatView = observer((props: Props) => {
     </div>
   );
 });
-StatView.displayName = "StatView";
+StatsDisplay.displayName = "StatsDisplay";

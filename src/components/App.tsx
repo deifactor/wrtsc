@@ -2,15 +2,15 @@ import "reflect-metadata";
 import { Button } from "./common/Button";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
-import { ScheduleView } from "./ScheduleView";
-import { ZoneView } from "./ZoneView";
+import { ScheduleDisplay } from "./ScheduleDisplay";
+import { ZoneDisplay } from "./ZoneDisplay";
 import { Engine } from "../engine";
-import { PlayerView } from "./PlayerView";
+import { PlayerDisplay } from "./PlayerDisplay";
 import { configure, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { Settings, SettingsView } from "./SettingsView";
+import { Settings, SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
 
@@ -93,7 +93,7 @@ const App = observer(() => {
     <div className="app flex space-x-10 p-4 items-start h-full">
       <Panel className="w-3/12">
         <h1>Stats</h1>
-        <PlayerView player={engine.player} />
+        <PlayerDisplay player={engine.player} />
         <Button onClick={() => engine.startLoop()}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
@@ -113,7 +113,7 @@ const App = observer(() => {
           <TabPanel>
             <div className="flex flex-row h-full space-x-12">
               <TaskQueueEditor className="h-full w-3/5" engine={engine} />
-              <ScheduleView
+              <ScheduleDisplay
                 className="h-full w-2/5"
                 schedule={engine.schedule}
                 player={engine.player}
@@ -121,7 +121,7 @@ const App = observer(() => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SettingsView
+            <SettingsEditor
               onHardReset={() => setEngine(new Engine())}
               settings={settings}
             />
@@ -134,7 +134,7 @@ const App = observer(() => {
 
       <Panel className="w-3/12">
         <h1>Location</h1>
-        <ZoneView className="mb-12" player={engine.player} />
+        <ZoneDisplay className="mb-12" player={engine.player} />
       </Panel>
     </div>
   );

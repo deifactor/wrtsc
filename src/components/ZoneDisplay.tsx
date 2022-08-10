@@ -1,14 +1,14 @@
 import { observer } from "mobx-react-lite";
 import { Player } from "../player";
-import { ResourceView } from "./ResourceView";
-import { StatView } from "./StatsView";
+import { ResourceDisplay } from "./ResourceDisplay";
+import { StatsDisplay } from "./StatsDisplay";
 
 type Props = {
   player: Player;
   className?: string;
 };
 
-export const ZoneView = observer((props: Props) => {
+export const ZoneDisplay = observer((props: Props) => {
   const { player, className } = props;
   const { zone } = player;
 
@@ -17,11 +17,11 @@ export const ZoneView = observer((props: Props) => {
       case "ruins":
         return (
           <div>
-            <StatView kind="ruinsExploration" player={player} />
-            <StatView kind="patrolRoutesObserved" player={player} />
-            <ResourceView kind="ruinsBatteries" player={player} />
-            <ResourceView kind="ruinsWeapons" player={player} />
-            <StatView kind="qhLockout" player={player} />
+            <StatsDisplay kind="ruinsExploration" player={player} />
+            <StatsDisplay kind="patrolRoutesObserved" player={player} />
+            <ResourceDisplay kind="ruinsBatteries" player={player} />
+            <ResourceDisplay kind="ruinsWeapons" player={player} />
+            <StatsDisplay kind="qhLockout" player={player} />
           </div>
         );
     }
@@ -36,4 +36,4 @@ export const ZoneView = observer((props: Props) => {
     </div>
   );
 });
-ZoneView.displayName = "ZoneView";
+ZoneDisplay.displayName = "ZoneDisplay";

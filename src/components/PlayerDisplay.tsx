@@ -5,7 +5,7 @@ type Props = {
   player: Player;
 };
 
-export const PlayerView = observer((props: Props) => {
+export const PlayerDisplay = observer((props: Props) => {
   const { player } = props;
   return (
     <div>
@@ -18,4 +18,4 @@ export const PlayerView = observer((props: Props) => {
     </div>
   );
 });
-PlayerView.displayName = "PlayerView";
+PlayerDisplay.displayName = "PlayerDisplay";

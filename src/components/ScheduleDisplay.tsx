@@ -15,7 +15,7 @@ function formatCompletion(frac: number): string {
   return `[${percent}%]`;
 }
 
-export const ScheduleView = observer((props: Props) => {
+export const ScheduleDisplay = observer((props: Props) => {
   const { className, schedule, player } = props;
   const completionFraction =
     schedule.task && 1 - schedule.timeLeftOnTask / player.cost(schedule.task);
@@ -32,7 +32,8 @@ export const ScheduleView = observer((props: Props) => {
     return (
       <div className="flex my-1" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline align-sub" task={entry.task.kind} /> {schedule.completions(idx)}/{entry.count}{" "}
+          <TaskIcon className="inline align-sub" task={entry.task.kind} />{" "}
+          {schedule.completions(idx)}/{entry.count}{" "}
         </span>
         {progressSpan}
       </div>
@@ -44,4 +45,4 @@ export const ScheduleView = observer((props: Props) => {
     </div>
   );
 });
-ScheduleView.displayName = "ScheduleView";
+ScheduleDisplay.displayName = "ScheduleDisplay";
