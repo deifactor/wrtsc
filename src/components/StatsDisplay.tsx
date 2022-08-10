@@ -1,15 +1,14 @@
-import { Player, StatId, STAT_NAME } from "../engine";
+import { Level, StatId, STAT_NAME } from "../engine";
 
 type Props = {
   kind: StatId;
-  player: Player;
+  level: Level;
 };
 
 export const StatsDisplay = (props: Props) => {
-  const { kind, player } = props;
-  const stat = player.stats[kind];
-  let levelDisplay = stat.level.toString() + "%";
-  const statPercent = Math.floor((100 * stat.xp) / stat.totalToNextLevel);
+  const { kind, level } = props;
+  let levelDisplay = level.level.toString() + "%";
+  const statPercent = Math.floor((100 * level.xp) / level.totalToNextLevel);
   return (
     <div>
       <strong>{STAT_NAME[kind]}</strong>: {levelDisplay} ({statPercent}%)

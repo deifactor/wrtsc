@@ -1,16 +1,16 @@
-import { Player, ResourceId, RESOURCE_NAME } from "../engine";
+import { ResourceId, RESOURCE_NAME } from "../engine";
 
 type Props = {
   kind: ResourceId;
-  player: Player;
+  amount: number;
+  max: number;
 };
 
 export const ResourceDisplay = (props: Props) => {
-  const { kind, player } = props;
+  const { kind, amount, max } = props;
   return (
     <div>
-      <strong>{RESOURCE_NAME[kind]}</strong>: {player.resources[kind]}/
-      {player.maxResource(kind)}
+      <strong>{RESOURCE_NAME[kind]}</strong>: {amount}/{max}
     </div>
   );
 };

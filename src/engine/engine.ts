@@ -1,14 +1,17 @@
 import {
+  ClassConstructor,
   Exclude,
   instanceToInstance,
   instanceToPlain,
   plainToInstance,
-  Type,
+  Transform,
 } from "class-transformer";
 
-import { Player } from "./player";
+import { Level, LoopFlagId, ResourceId, StatId } from "./player";
 import { Schedule } from "./schedule";
+import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
+import { RUINS, ZoneKind } from "./zone";
 
 export const STORAGE_KEY = "save";
 
@@ -30,28 +33,117 @@ export type SimulationStep = {
 
 export type SimulationResult = SimulationStep[];
 
+function _convertRecord<T>(cls: ClassConstructor<T>) {
+  return function (params: { value: any }): Record<string, T> {
+    const obj = params.value;
+    Object.keys(obj).forEach((key) => {
+      obj[key] = plainToInstance(cls, obj[key]);
+    });
+    return obj as Record<string, T>;
+  };
+}
+const INITIAL_ENERGY = 5000;
+
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
-  @Type(() => Player)
-  readonly player: Player;
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
-  @Exclude()
-  schedule: Schedule;
+  @Transform(_convertRecord(Level), { toClassOnly: true })
+  readonly stats: Record<StatId, Level> = {
+    ruinsExploration: new Level(),
+    patrolRoutesObserved: new Level(),
+    qhLockout: new Level(),
+  };
 
-  constructor() {
-    this.player = new Player();
-    this.schedule = new Schedule([], this.player);
+  resources: Record<ResourceId, number> = {
+    ruinsBatteries: 0,
+    ruinsWeapons: 0,
+    qhLockoutAttempts: 0,
+  };
+
+  flags: Record<LoopFlagId, boolean> = {
+    shipHijacked: false,
+  };
+
+  zoneKind: ZoneKind = RUINS.kind;
+
+  @Exclude()
+  schedule: Schedule = new Schedule([], this);
+
+  @Exclude()
+  private _energy: number = INITIAL_ENERGY;
+  /** The total amount of energy acquired in this loop. */
+  @Exclude()
+  private _totalEnergy: number = INITIAL_ENERGY;
+
+  get energy(): number {
+    return this._energy;
+  }
+
+  get totalEnergy(): number {
+    return this._totalEnergy;
   }
 
   /** Restart the time loop. */
   startLoop(queue: TaskQueue) {
-    this.schedule = new Schedule(queue, this.player);
-    this.player.startLoop();
+    this.schedule = new Schedule(queue, this);
+  }
+
+  perform(task: Task) {
+    task.extraPerform(this);
+    Object.entries(task.requiredResources).forEach(([res, value]) => {
+      this.resources[res as ResourceId] -= value;
+    });
+  }
+
+  canPerform(task: Task): boolean {
+    return (
+      Object.entries(task.requiredStats).every(
+        ([id, min]) => this.stats[id as StatId].level >= min
+      ) &&
+      Object.entries(task.requiredResources).every(
+        ([id, min]) => this.resources[id as ResourceId] >= min
+      ) &&
+      Object.entries(task.requiredLoopFlags).every(
+        ([id, value]) => this.flags[id as LoopFlagId] === value
+      ) &&
+      task.extraCheck(this)
+    );
+  }
+
+  /**
+   * Whether the task can be added to the queue. This is true if there's *some*
+   * conceivable world where the player can perform this task. So it skips over
+   * flag checks and only checks against *max* resources.
+   */
+  canAddToQueue(task: Task): boolean {
+    return (
+      Object.entries(task.requiredStats).every(
+        ([id, min]) => this.stats[id as StatId].level >= min
+      ) &&
+      Object.entries(task.requiredResources).every(
+        ([id, min]) => this.maxResource(id as ResourceId) >= min
+      )
+    );
+  }
+
+  maxResource(resource: ResourceId): number {
+    switch (resource) {
+      case "ruinsBatteries":
+        return Math.floor(this.stats.ruinsExploration.level / 4);
+      case "ruinsWeapons":
+        return Math.floor(this.stats.ruinsExploration.level / 8);
+      case "qhLockoutAttempts":
+        return 12;
+    }
+  }
+
+  get combat(): number {
+    return this.maxResource("ruinsWeapons") - this.resources.ruinsWeapons;
   }
 
   /** Iterate to the next task. This includes performing the current task. */
   nextTask() {
-    this.player.perform(this.schedule.task!);
+    this.perform(this.schedule.task!);
     this.schedule.next();
   }
 
@@ -73,20 +165,18 @@ export class Engine {
       if (!this.schedule.task) {
         return { ok: true };
       }
-      if (!this.player.canPerform(this.schedule.task)) {
+      if (!this.canPerform(this.schedule.task)) {
         return { ok: false, reason: "taskFailed" };
       }
-      const ticked = this.schedule.tickTime(
-        Math.min(this.player.energy, duration)
-      );
+      const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
 
-      this.player.removeEnergy(ticked);
+      this.removeEnergy(ticked);
       if (this.schedule.taskDone) {
         this.nextTask();
       }
-      duration = Math.min(this.player.energy, duration - ticked);
+      duration = Math.min(this.energy, duration - ticked);
     }
-    if (this.player.energy <= 0 && this.schedule.task) {
+    if (this.energy <= 0 && this.schedule.task) {
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
@@ -104,12 +194,10 @@ export class Engine {
     this.startLoop(tasks);
     while (this.schedule.task) {
       const task = this.schedule.task;
-      const { ok } = this.tickTime(
-        Math.max(this.player.cost(this.schedule.task), 1)
-      );
+      const { ok } = this.tickTime(Math.max(this.schedule.task.cost(this), 1));
       result[task.index] = {
         ok: ok,
-        energy: this.player.energy,
+        energy: this.energy,
       };
       if (!ok) {
         break;
@@ -137,6 +225,15 @@ export class Engine {
     } else {
       return new Engine();
     }
+  }
+
+  addEnergy(amount: number) {
+    this._energy += amount;
+    this._totalEnergy += amount;
+  }
+
+  removeEnergy(amount: number) {
+    this._energy -= amount;
   }
 }
 

@@ -85,7 +85,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4 items-start h-full">
       <Panel className="w-3/12">
         <h1>Stats</h1>
-        <PlayerDisplay player={engine.player} />
+        <PlayerDisplay engine={engine} />
         <Button onClick={() => engine.startLoop(nextQueue)}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
@@ -112,7 +112,7 @@ const App = () => {
               <ScheduleDisplay
                 className="h-full w-2/5"
                 schedule={engine.schedule}
-                player={engine.player}
+                engine={engine}
               />
             </div>
           </TabPanel>
@@ -130,7 +130,12 @@ const App = () => {
 
       <Panel className="w-3/12">
         <h1>Location</h1>
-        <ZoneDisplay className="mb-12" player={engine.player} />
+        <ZoneDisplay
+          className="mb-12"
+          zone={engine.zoneKind}
+          stats={engine.stats}
+          resources={engine.resources}
+        />
       </Panel>
     </div>
   );

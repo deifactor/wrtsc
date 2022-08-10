@@ -1,18 +1,18 @@
-import { Player } from "../engine";
+import { Engine } from "../engine";
 
 type Props = {
-  player: Player;
+  engine: Engine;
 };
 
 export const PlayerDisplay = (props: Props) => {
-  const { player } = props;
+  const { engine } = props;
   return (
     <div>
       <div>
-        <strong>AEU</strong>: {player.energy.toFixed(0)}
+        <strong>AEU</strong>: {engine.energy.toFixed(0)}
       </div>
       <p>
-        <strong>Combat:</strong> {player.combat}
+        <strong>Combat:</strong> {engine.combat}
       </p>
     </div>
   );

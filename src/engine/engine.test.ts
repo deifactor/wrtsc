@@ -14,7 +14,7 @@ describe("Engine#tickTime", () => {
     it("should fail when running out of energy", () => {
       const engine = new Engine();
       engine.startLoop([{ task: EXPLORE_RUINS.kind, count: 1 }]);
-      engine.player.removeEnergy(engine.player.energy - 100);
+      engine.removeEnergy(engine.energy - 100);
       expect(engine.tickTime(200)).toEqual({
         ok: false,
         reason: "outOfEnergy",

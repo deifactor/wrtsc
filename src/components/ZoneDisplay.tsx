@@ -1,26 +1,43 @@
-import { Player } from "../engine";
+import { Level, ResourceId, StatId } from "../engine";
+import { ZoneKind, ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { StatsDisplay } from "./StatsDisplay";
 
 type Props = {
-  player: Player;
+  zone: ZoneKind;
+  stats: Record<StatId, Level>;
+  resources: Record<ResourceId, number>;
   className?: string;
 };
 
 export const ZoneDisplay = (props: Props) => {
-  const { player, className } = props;
-  const { zone } = player;
+  const { stats, resources, className } = props;
+  const zone = ZONES[props.zone];
 
   const body = (() => {
     switch (zone.kind) {
       case "ruins":
         return (
           <div>
-            <StatsDisplay kind="ruinsExploration" player={player} />
-            <StatsDisplay kind="patrolRoutesObserved" player={player} />
-            <ResourceDisplay kind="ruinsBatteries" player={player} />
-            <ResourceDisplay kind="ruinsWeapons" player={player} />
-            <StatsDisplay kind="qhLockout" player={player} />
+            <StatsDisplay
+              kind="ruinsExploration"
+              level={stats.ruinsExploration}
+            />
+            <StatsDisplay
+              kind="patrolRoutesObserved"
+              level={stats.patrolRoutesObserved}
+            />
+            <ResourceDisplay
+              kind="ruinsBatteries"
+              amount={resources.ruinsBatteries}
+              max={9999}
+            />
+            <ResourceDisplay
+              kind="ruinsWeapons"
+              amount={resources.ruinsWeapons}
+              max={9999}
+            />
+            <StatsDisplay kind="qhLockout" level={stats.qhLockout} />
           </div>
         );
     }

@@ -1,4 +1,4 @@
-import { Player } from "./player";
+import { Engine } from "./engine";
 import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
 
 export interface Stats {
@@ -14,16 +14,16 @@ export interface Stats {
 export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
-  readonly player: Player;
+  readonly engine: Engine;
   timeLeftOnTask: number = 0;
 
   private readonly iter: TaskQueueIterator;
 
-  constructor(queue: TaskQueue, player: Player) {
+  constructor(queue: TaskQueue, engine: Engine) {
     this.queue = queue;
-    this.player = player;
+    this.engine = engine;
     this.iter = new TaskQueueIterator(this.queue);
-    this.timeLeftOnTask = this.task ? player.cost(this.task) : 0;
+    this.timeLeftOnTask = this.task ? this.task.cost(engine) : 0;
   }
 
   get task(): TaskQueuePointer | undefined {
@@ -64,6 +64,6 @@ export class Schedule {
    */
   next(): void {
     this.iter.next();
-    this.timeLeftOnTask = this.task ? this.player.cost(this.task) : 0;
+    this.timeLeftOnTask = this.task ? this.task.cost(this.engine) : 0;
   }
 }

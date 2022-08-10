@@ -1,10 +1,10 @@
 import classNames from "classnames";
-import { Player, Schedule } from "../engine";
+import { Engine, Schedule } from "../engine";
 import { TaskIcon } from "./common/TaskIcon";
 
 interface Props {
   schedule: Schedule;
-  player: Player;
+  engine: Engine;
   className?: string;
 }
 
@@ -14,9 +14,9 @@ function formatCompletion(frac: number): string {
 }
 
 export const ScheduleDisplay = (props: Props) => {
-  const { className, schedule, player } = props;
+  const { className, schedule, engine } = props;
   const completionFraction =
-    schedule.task && 1 - schedule.timeLeftOnTask / player.cost(schedule.task);
+    schedule.task && 1 - schedule.timeLeftOnTask / schedule.task.cost(engine);
 
   const entries = schedule.queue.map((entry, idx) => {
     const isCurrent = idx === schedule.task?.index;
