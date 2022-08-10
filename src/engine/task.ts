@@ -30,7 +30,7 @@ const defaults = {
 // repetitions to finish a task.
 
 /** A task, something that goes in the task queue. */
-export type Task = Readonly<{
+export type Task = {
   readonly kind: TaskKind;
   name: string;
   shortName: string;
@@ -67,7 +67,7 @@ export type Task = Readonly<{
    * top of any requirements.
    */
   extraCheck: (engine: Engine) => boolean;
-}>;
+};
 
 export const EXPLORE_RUINS: Task = {
   ...defaults,

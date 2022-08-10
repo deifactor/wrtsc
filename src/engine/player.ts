@@ -64,7 +64,7 @@ export const RESOURCE_NAME: Record<ResourceId, string> = {
   qhLockoutAttempts: "QH Lockout Attempts",
 };
 
-export const LOOP_FLAG_IDS = ["shipHijacked"];
+export const LOOP_FLAG_IDS = ["shipHijacked"] as const;
 /**
  * A LoopFlag is basically a status that the player may or may not have. Flags
  * can be positive or negative.
