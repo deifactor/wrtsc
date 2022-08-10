@@ -2,7 +2,7 @@ import { Task, TaskKind, TASKS } from "./task";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskBatch {
-  task: Task;
+  task: TaskKind;
   count: number;
 }
 
@@ -40,7 +40,7 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
       index: this.index,
       iteration: this.iteration,
       count: entry.count,
-      ...entry.task,
+      ...TASKS[entry.task],
     };
   }
 
@@ -88,10 +88,10 @@ export class TaskQueue {
 
   push(kind: TaskKind): void {
     const lastEntry = this.entries[this.entries.length - 1];
-    if (lastEntry?.task.kind === kind) {
+    if (lastEntry?.task === kind) {
       lastEntry.count += 1;
     } else {
-      this.entries.push({ task: TASKS[kind], count: 1 });
+      this.entries.push({ task: kind, count: 1 });
     }
   }
 

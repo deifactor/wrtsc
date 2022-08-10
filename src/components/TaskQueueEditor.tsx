@@ -33,7 +33,7 @@ const TaskQueueEditor = (props: Props) => {
         })}
       >
         <div className="flex-grow">
-          <TaskIcon className="inline align-sub" task={entry.task.kind} /> x
+          <TaskIcon className="inline align-sub" task={entry.task} /> x
           {entry.count}
         </div>
         <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>

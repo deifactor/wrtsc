@@ -30,7 +30,7 @@ export const ScheduleDisplay = (props: Props) => {
     return (
       <div className="flex my-1" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline align-sub" task={entry.task.kind} />{" "}
+          <TaskIcon className="inline align-sub" task={entry.task} />{" "}
           {schedule.completions(idx)}/{entry.count}{" "}
         </span>
         {progressSpan}
