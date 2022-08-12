@@ -85,6 +85,7 @@ export class Engine {
 
   /** Restart the time loop. */
   startLoop(queue: TaskQueue) {
+    this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new Schedule(queue, this);
   }
 
