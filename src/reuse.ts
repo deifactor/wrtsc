@@ -26,8 +26,11 @@ export type Reusable =
  * Returns the reused object. This may or may not be the same object as `target`.
  */
 export function reuse<T extends Reusable>(target: T, source: T): T {
-  if (typeof target !== "object" || skipReuse in target) {
-    return source;
+  if (typeof source !== typeof target) {
+    return target;
+  }
+  if (typeof source !== "object") {
+    return target;
   }
   if (Array.isArray(target)) {
     if (Array.isArray(source)) {
