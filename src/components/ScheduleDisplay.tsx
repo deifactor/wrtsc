@@ -1,9 +1,8 @@
 import classNames from "classnames";
-import { ScheduleView } from "../viewModel";
 import { TaskIcon } from "./common/TaskIcon";
+import { useEngineSelector } from "../engineStore";
 
 interface Props {
-  schedule: ScheduleView;
   className?: string;
 }
 
@@ -13,7 +12,9 @@ function formatCompletion(frac: number): string {
 }
 
 export const ScheduleDisplay = (props: Props) => {
-  const { className, schedule } = props;
+  const { className } = props;
+  const schedule = useEngineSelector((engine) => engine.schedule);
+
   const completionFraction =
     schedule.currentTask &&
     schedule.currentTask.progress / schedule.currentTask.cost;

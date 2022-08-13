@@ -1,14 +1,15 @@
 import { ProgressId, PROGRESS_NAME } from "../engine";
+import { useEngineSelector } from "../engineStore";
 
 type Props = {
   kind: ProgressId;
-  level: number;
-  xp: number;
-  totalToNextLevel: number;
 };
 
 export const ProgressDisplay = (props: Props) => {
-  const { kind, level, xp, totalToNextLevel } = props;
+  const { kind } = props;
+  const { level, xp, totalToNextLevel } = useEngineSelector(
+    (engine) => engine.progress[kind]
+  );
   let levelDisplay = level.toString() + "%";
   const progressPercent = Math.floor((100 * xp) / totalToNextLevel);
   return (

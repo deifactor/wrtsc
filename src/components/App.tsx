@@ -1,6 +1,13 @@
 import "reflect-metadata";
 import { Button } from "./common/Button";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
@@ -11,9 +18,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import { project } from "../viewModel";
-import { reuse } from "../reuse";
-import React from "react";
+import { EngineViewStore } from "../engineStore";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -54,28 +59,27 @@ const Panel = ({ children, className }: PanelProps) => {
 };
 
 const App = () => {
+  const engineStore = useContext(EngineViewStore);
+  const engine = engineStore.state;
   const [inIntro, setInIntro] = useState(false);
-  // The actual engine object. We only use setEngine when doing a hard reset.
-  const [engine, setEngine] = useState(Engine.loadFromStorage);
-  const [engineView, setEngineView] = useState(project(engine));
   const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc
-  const [lastUpdate, setLastUpdate] = useState(new Date().getTime());
+  const lastUpdate = useRef(new Date().getTime());
 
   useInterval(() => {
     if (inIntro) {
       return;
     }
-    const delta = new Date().getTime();
+    const now = new Date().getTime();
     const multiplier = isDev ? 1 : 1;
-    const { ok } = engine.tickTime(multiplier * (delta - lastUpdate));
-    setLastUpdate(delta);
+    const { ok } = engine.tickTime(multiplier * (now - lastUpdate.current));
+    lastUpdate.current = now;
     if (settings.autoRestart && (!ok || !engine.schedule.task)) {
       engine.startLoop(nextQueue);
     }
+    engineStore.notify();
     engine.saveToStorage();
-    setEngineView(reuse(project(engine), engineView));
   }, 1000 / UPDATES_PER_SEC);
 
   const restart = useCallback(
@@ -84,7 +88,10 @@ const App = () => {
   );
   const nextTask = useCallback(() => engine.nextTask, [engine]);
   const introFinished = useCallback(() => setInIntro(false), []);
-  const hardReset = useCallback(() => setEngine(new Engine()), []);
+  const hardReset = useCallback(
+    () => (engineStore.state = new Engine()),
+    [engineStore]
+  );
   if (inIntro) {
     return <Intro onFinished={introFinished} />;
   }
@@ -97,7 +104,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4 items-start h-full">
       <Panel className="w-3/12">
         <h1>Stats</h1>
-        <PlayerDisplay energy={engineView.energy} combat={engineView.combat} />
+        <PlayerDisplay />
         <Button onClick={restart}>Start</Button>
         <Button onClick={nextTask}>Next</Button>
       </Panel>
@@ -121,10 +128,7 @@ const App = () => {
                 queue={nextQueue}
                 setQueue={setNextQueue}
               />
-              <ScheduleDisplay
-                className="h-full w-2/5"
-                schedule={engineView.schedule}
-              />
+              <ScheduleDisplay className="h-full w-2/5" />
             </div>
           </TabPanel>
           <TabPanel>
@@ -138,12 +142,7 @@ const App = () => {
 
       <Panel className="w-3/12">
         <h1>Location</h1>
-        <ZoneDisplay
-          className="mb-12"
-          zone={engineView.zoneKind}
-          progress={engineView.progress}
-          resources={engineView.resources}
-        />
+        <ZoneDisplay className="mb-12" />
       </Panel>
     </div>
   );

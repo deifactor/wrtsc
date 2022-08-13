@@ -1,12 +1,9 @@
 import React from "react";
+import { useEngineSelector } from "../engineStore";
 
-type Props = {
-  energy: number;
-  combat: number;
-};
-
-export const PlayerDisplay = React.memo((props: Props) => {
-  const { energy, combat } = props;
+export const PlayerDisplay = React.memo(() => {
+  const energy = useEngineSelector((engine) => engine.energy);
+  const combat = useEngineSelector((engine) => engine.combat);
   return (
     <div>
       <div>

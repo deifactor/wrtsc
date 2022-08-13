@@ -1,39 +1,26 @@
-import { ZoneKind, ZONES } from "../engine/zone";
+import { ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressDisplay } from "./ProgressDisplay";
-import { ProgressView, ResourcesView } from "../viewModel";
-import React from "react";
+import { useEngineSelector } from "../engineStore";
 
 type Props = {
-  zone: ZoneKind;
-  progress: ProgressView;
-  resources: ResourcesView;
   className?: string;
 };
 
-export const ZoneDisplay = React.memo((props: Props) => {
-  const { progress: stats, resources, className } = props;
-  const zone = ZONES[props.zone];
+export const ZoneDisplay = (props: Props) => {
+  const zone = ZONES[useEngineSelector((engine) => engine.zoneKind)];
+  const { className } = props;
 
   const body = (() => {
     switch (zone.kind) {
       case "ruins":
         return (
           <div>
-            <ProgressDisplay
-              kind="ruinsExploration"
-              {...stats.ruinsExploration}
-            />
-            <ProgressDisplay
-              kind="patrolRoutesObserved"
-              {...stats.patrolRoutesObserved}
-            />
-            <ResourceDisplay
-              kind="ruinsBatteries"
-              {...resources.ruinsBatteries}
-            />
-            <ResourceDisplay kind="ruinsWeapons" {...resources.ruinsWeapons} />
-            <ProgressDisplay kind="qhLockout" {...stats.qhLockout} />
+            <ProgressDisplay kind="ruinsExploration" />
+            <ProgressDisplay kind="patrolRoutesObserved" />
+            <ResourceDisplay kind="ruinsBatteries" />
+            <ResourceDisplay kind="ruinsWeapons" />
+            <ProgressDisplay kind="qhLockout" />
           </div>
         );
     }
@@ -47,5 +34,5 @@ export const ZoneDisplay = React.memo((props: Props) => {
       <p className="text-gray-400">{zone.description}</p>
     </div>
   );
-});
+};
 ZoneDisplay.displayName = "ZoneDisplay";
