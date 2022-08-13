@@ -11,6 +11,7 @@ import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBackFill } from "react-icons/ri";
 import * as q from "../engine/taskQueue";
+import React from "react";
 
 interface Props {
   className?: string;
@@ -18,7 +19,7 @@ interface Props {
   setQueue: (queue: q.TaskQueue) => void;
 }
 
-const TaskQueueEditor = (props: Props) => {
+const TaskQueueEditor = React.memo((props: Props) => {
   const { queue, setQueue, className } = props;
   const tasks = queue.map((entry, index) => {
     const incrementCount = (): void =>
@@ -118,7 +119,7 @@ const TaskQueueEditor = (props: Props) => {
       <div>{addButtons}</div>
     </div>
   );
-};
+});
 TaskQueueEditor.displayName = "TaskQueueEditor";
 
 export default TaskQueueEditor;

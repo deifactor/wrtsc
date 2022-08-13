@@ -1,3 +1,4 @@
+import React from "react";
 import { ResourceId, RESOURCE_NAME } from "../engine";
 
 type Props = {
@@ -6,12 +7,12 @@ type Props = {
   max: number;
 };
 
-export const ResourceDisplay = (props: Props) => {
+export const ResourceDisplay = React.memo((props: Props) => {
   const { kind, amount, max } = props;
   return (
     <div>
       <strong>{RESOURCE_NAME[kind]}</strong>: {amount}/{max}
     </div>
   );
-};
+});
 ResourceDisplay.displayName = "ResourceDisplay";

@@ -1,9 +1,11 @@
+import React from "react";
+
 type Props = {
   energy: number;
   combat: number;
 };
 
-export const PlayerDisplay = (props: Props) => {
+export const PlayerDisplay = React.memo((props: Props) => {
   const { energy, combat } = props;
   return (
     <div>
@@ -15,5 +17,5 @@ export const PlayerDisplay = (props: Props) => {
       </p>
     </div>
   );
-};
+});
 PlayerDisplay.displayName = "PlayerDisplay";

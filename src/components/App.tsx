@@ -13,6 +13,7 @@ import { Credits } from "./Credits";
 import { Intro } from "./Intro";
 import { project } from "../viewModel";
 import { reuse } from "../reuse";
+import React from "react";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -77,7 +78,13 @@ const App = () => {
     setEngineView(reuse(project(engine), engineView));
   }, 1000 / UPDATES_PER_SEC);
 
+  const restart = useCallback(
+    () => engine.startLoop(nextQueue),
+    [engine, nextQueue]
+  );
+  const nextTask = useCallback(() => engine.nextTask, [engine]);
   const introFinished = useCallback(() => setInIntro(false), []);
+  const hardReset = useCallback(() => setEngine(new Engine()), []);
   if (inIntro) {
     return <Intro onFinished={introFinished} />;
   }
@@ -91,8 +98,8 @@ const App = () => {
       <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerDisplay energy={engineView.energy} combat={engineView.combat} />
-        <Button onClick={() => engine.startLoop(nextQueue)}>Start</Button>
-        <Button onClick={() => engine.nextTask()}>Next</Button>
+        <Button onClick={restart}>Start</Button>
+        <Button onClick={nextTask}>Next</Button>
       </Panel>
 
       <Panel className="w-8/12 h-full">
@@ -121,10 +128,7 @@ const App = () => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SettingsEditor
-              onHardReset={() => setEngine(new Engine())}
-              settings={settings}
-            />
+            <SettingsEditor onHardReset={hardReset} settings={settings} />
           </TabPanel>
           <TabPanel>
             <Credits />

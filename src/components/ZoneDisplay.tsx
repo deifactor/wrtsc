@@ -2,6 +2,7 @@ import { ZoneKind, ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressDisplay } from "./ProgressDisplay";
 import { ProgressView, ResourcesView } from "../viewModel";
+import React from "react";
 
 type Props = {
   zone: ZoneKind;
@@ -10,7 +11,7 @@ type Props = {
   className?: string;
 };
 
-export const ZoneDisplay = (props: Props) => {
+export const ZoneDisplay = React.memo((props: Props) => {
   const { progress: stats, resources, className } = props;
   const zone = ZONES[props.zone];
 
@@ -46,5 +47,5 @@ export const ZoneDisplay = (props: Props) => {
       <p className="text-gray-400">{zone.description}</p>
     </div>
   );
-};
+});
 ZoneDisplay.displayName = "ZoneDisplay";
