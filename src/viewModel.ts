@@ -2,13 +2,19 @@
  * A projection of the engine's state suitable for rendering by the UI. The APIs
  * defined here are guaranteed to *attempt* to not needlessly duplicate objects.
  */
-import { Engine, LoopFlagId, ResourceId, StatId, TaskKind } from "./engine";
+import {
+  Engine,
+  LoopFlagId,
+  ResourceId,
+  ProgressId,
+  TaskKind,
+} from "./engine";
 import { ZoneKind } from "./engine/zone";
 
 export type ResourcesView = Record<ResourceId, { amount: number; max: number }>;
 export type FlagsView = Record<LoopFlagId, boolean>;
-export type StatsView = Record<
-  StatId,
+export type ProgressView = Record<
+  ProgressId,
   { level: number; xp: number; totalToNextLevel: number }
 >;
 export type ScheduleView = {
@@ -25,7 +31,7 @@ export type ScheduleView = {
 export type EngineView = {
   resources: ResourcesView;
   flags: FlagsView;
-  stats: StatsView;
+  progress: ProgressView;
   zoneKind: ZoneKind;
   energy: number;
   totalEnergy: number;
@@ -42,7 +48,7 @@ export function project(engine: Engine): EngineView {
     }),
     // mapping the identity is just cloning
     flags: mapValues(engine.flags, (flag) => flag),
-    stats: mapValues(engine.stats, (level) => ({
+    progress: mapValues(engine.progress, (level) => ({
       level: level.level,
       xp: level.xp,
       totalToNextLevel: level.totalToNextLevel,

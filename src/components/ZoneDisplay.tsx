@@ -1,17 +1,17 @@
-import { Level, ResourceId, StatId } from "../engine";
+import { Level, ResourceId, ProgressId } from "../engine";
 import { ZoneKind, ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
-import { StatsDisplay } from "./StatsDisplay";
+import { ProgressDisplay } from "./ProgressDisplay";
 
 type Props = {
   zone: ZoneKind;
-  stats: Record<StatId, Level>;
+  progress: Record<ProgressId, Level>;
   resources: Record<ResourceId, number>;
   className?: string;
 };
 
 export const ZoneDisplay = (props: Props) => {
-  const { stats, resources, className } = props;
+  const { progress: stats, resources, className } = props;
   const zone = ZONES[props.zone];
 
   const body = (() => {
@@ -19,11 +19,11 @@ export const ZoneDisplay = (props: Props) => {
       case "ruins":
         return (
           <div>
-            <StatsDisplay
+            <ProgressDisplay
               kind="ruinsExploration"
               level={stats.ruinsExploration}
             />
-            <StatsDisplay
+            <ProgressDisplay
               kind="patrolRoutesObserved"
               level={stats.patrolRoutesObserved}
             />
@@ -37,7 +37,7 @@ export const ZoneDisplay = (props: Props) => {
               amount={resources.ruinsWeapons}
               max={9999}
             />
-            <StatsDisplay kind="qhLockout" level={stats.qhLockout} />
+            <ProgressDisplay kind="qhLockout" level={stats.qhLockout} />
           </div>
         );
     }

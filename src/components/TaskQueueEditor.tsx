@@ -3,8 +3,8 @@ import {
   SimulationStep,
   TASKS,
   SKILL_NAME,
-  StatId,
-  STAT_NAME,
+  ProgressId,
+  PROGRESS_NAME,
 } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
@@ -66,10 +66,10 @@ const TaskQueueEditor = (props: Props) => {
   const addButtons = Object.values(TASKS)
     .filter((task) => true)
     .map((task) => {
-      const requirements = Object.entries(task.requiredStats).map(
+      const requirements = Object.entries(task.requiredProgress).map(
         ([id, min]) => (
           <span key={id}>
-            {STAT_NAME[id as StatId]} {min}
+            {PROGRESS_NAME[id as ProgressId]} {min}
           </span>
         )
       );
@@ -86,7 +86,7 @@ const TaskQueueEditor = (props: Props) => {
           <p>
             <strong>Cost:</strong> OOPS
           </p>
-          {Object.keys(task.requiredStats).length !== 0 && (
+          {Object.keys(task.requiredProgress).length !== 0 && (
             <p>
               <strong>Requires: </strong>
               {requirements}

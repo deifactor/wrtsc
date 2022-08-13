@@ -38,14 +38,14 @@ export const SKILL_NAME: Record<SkillId, string> = {
 };
 
 type Skill = { xp: number; level: number };
-export const STAT_IDS = [
+export const PROGRESS_IDS = [
   "ruinsExploration",
   "patrolRoutesObserved",
   "qhLockout",
 ] as const;
-export type StatId = typeof STAT_IDS[number];
+export type ProgressId = typeof PROGRESS_IDS[number];
 
-export const STAT_NAME: Record<StatId, string> = {
+export const PROGRESS_NAME: Record<ProgressId, string> = {
   ruinsExploration: "Ruins Exploration",
   patrolRoutesObserved: "Patrol Routes Observed",
   qhLockout: "Ship Lockout Disabled",

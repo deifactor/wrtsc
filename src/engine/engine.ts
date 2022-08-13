@@ -7,7 +7,12 @@ import {
   Transform,
 } from "class-transformer";
 
-import { Level, LoopFlagId, ResourceId, StatId } from "./player";
+import {
+  Level,
+  LoopFlagId,
+  ResourceId,
+  ProgressId,
+} from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
@@ -48,7 +53,7 @@ const INITIAL_ENERGY = 5000;
 export class Engine {
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
   @Transform(_convertRecord(Level), { toClassOnly: true })
-  readonly stats: Record<StatId, Level> = {
+  readonly progress: Record<ProgressId, Level> = {
     ruinsExploration: new Level(),
     patrolRoutesObserved: new Level(),
     qhLockout: new Level(),
@@ -98,8 +103,8 @@ export class Engine {
 
   canPerform(task: Task): boolean {
     return (
-      Object.entries(task.requiredStats).every(
-        ([id, min]) => this.stats[id as StatId].level >= min
+      Object.entries(task.requiredProgress).every(
+        ([id, min]) => this.progress[id as ProgressId].level >= min
       ) &&
       Object.entries(task.requiredResources).every(
         ([id, min]) => this.resources[id as ResourceId] >= min
@@ -118,8 +123,8 @@ export class Engine {
    */
   canAddToQueue(task: Task): boolean {
     return (
-      Object.entries(task.requiredStats).every(
-        ([id, min]) => this.stats[id as StatId].level >= min
+      Object.entries(task.requiredProgress).every(
+        ([id, min]) => this.progress[id as ProgressId].level >= min
       ) &&
       Object.entries(task.requiredResources).every(
         ([id, min]) => this.maxResource(id as ResourceId) >= min
@@ -130,9 +135,9 @@ export class Engine {
   maxResource(resource: ResourceId): number {
     switch (resource) {
       case "ruinsBatteries":
-        return Math.floor(this.stats.ruinsExploration.level / 4);
+        return Math.floor(this.progress.ruinsExploration.level / 4);
       case "ruinsWeapons":
-        return Math.floor(this.stats.ruinsExploration.level / 8);
+        return Math.floor(this.progress.ruinsExploration.level / 8);
       case "qhLockoutAttempts":
         return 12;
     }

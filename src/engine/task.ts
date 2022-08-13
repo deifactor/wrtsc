@@ -1,5 +1,5 @@
 import { Engine } from "./engine";
-import { LoopFlagId, ResourceId, SkillId, StatId } from "./player";
+import { LoopFlagId, ResourceId, SkillId, ProgressId } from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -20,7 +20,7 @@ const defaults = {
   visible: always,
   extraCheck: always,
   extraPerform: () => {},
-  requiredStats: {},
+  requiredProgress: {},
   requiredLoopFlags: {},
   requiredResources: {},
   trainedSkills: [],
@@ -48,7 +48,7 @@ export type Task = {
    */
   visible: (engine: Engine) => boolean;
   /** Minimum stats for the action to be performable. */
-  requiredStats: Partial<Record<StatId, number>>;
+  requiredProgress: Partial<Record<ProgressId, number>>;
   /**
    * Skills that performing this task trains. This is an array and not a set,
    * even though it's unique, because the type inference works better this way.
@@ -81,7 +81,7 @@ export const EXPLORE_RUINS: Task = {
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   extraPerform: (engine) => {
     const mult = engine.flags.shipHijacked ? 8 : 2;
-    engine.stats.ruinsExploration.addXp(mult * 1024);
+    engine.progress.ruinsExploration.addXp(mult * 1024);
   },
   trainedSkills: ["ergodicity"],
 };
@@ -101,7 +101,7 @@ export const SCAVENGE_BATTERIES: Task = {
     engine.addEnergy(BATTERY_AMOUNT);
   },
   requiredResources: { ruinsBatteries: 1 },
-  visible: (engine) => engine.stats.ruinsExploration.level > 0,
+  visible: (engine) => engine.progress.ruinsExploration.level > 0,
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -125,7 +125,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
   extraPerform: (engine) => {
-    engine.stats.patrolRoutesObserved.addXp(1024 * 6);
+    engine.progress.patrolRoutesObserved.addXp(1024 * 6);
   },
 };
 
@@ -150,7 +150,7 @@ export const HIJACK_SHIP: Task = {
     Math.max(
       24000 -
         engine.combat * 1500 -
-        engine.stats.patrolRoutesObserved.level * 100,
+        engine.progress.patrolRoutesObserved.level * 100,
       6000
     ),
   description:
@@ -160,8 +160,8 @@ export const HIJACK_SHIP: Task = {
   extraPerform: (engine) => {
     engine.flags.shipHijacked = true;
   },
-  requiredStats: { patrolRoutesObserved: 30 },
-  visible: (engine) => engine.stats.patrolRoutesObserved.level >= 1,
+  requiredProgress: { patrolRoutesObserved: 30 },
+  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   trainedSkills: ["lethality"],
 };
 
@@ -176,12 +176,12 @@ export const DISABLE_LOCKOUTS: Task = {
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   extraPerform: (engine) => {
-    engine.stats.qhLockout.addXp(1024 * 10);
+    engine.progress.qhLockout.addXp(1024 * 10);
   },
-  requiredStats: { patrolRoutesObserved: 10 },
+  requiredProgress: { patrolRoutesObserved: 10 },
   requiredResources: { qhLockoutAttempts: 1 },
   requiredLoopFlags: { shipHijacked: true },
-  visible: (engine) => engine.stats.patrolRoutesObserved.level >= 20,
+  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 20,
 };
 
 export const STRAFING_RUN: Task = {
@@ -214,11 +214,11 @@ export const LEAVE_RUINS: Task = {
   description: "Advance to the next zone.",
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
-  requiredStats: { qhLockout: 100 },
+  requiredProgress: { qhLockout: 100 },
   extraPerform: (engine) => {
     engine.zoneKind = "phobosDeimos";
   },
-  visible: (engine) => engine.stats.patrolRoutesObserved.level >= 30,
+  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 30,
 };
 
 export const COMPLETE_RUINS: Task = {
@@ -235,9 +235,9 @@ export const COMPLETE_RUINS: Task = {
       "patrolRoutesObserved",
       "qhLockout",
     ] as const) {
-      const stat = engine.stats[kind];
-      stat.level = 100;
-      stat.xp = 0;
+      const progress = engine.progress[kind];
+      progress.level = 100;
+      progress.xp = 0;
     }
   },
   visible: always,

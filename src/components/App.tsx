@@ -133,7 +133,7 @@ const App = () => {
         <ZoneDisplay
           className="mb-12"
           zone={engine.zoneKind}
-          stats={engine.stats}
+          progress={engine.progress}
           resources={engine.resources}
         />
       </Panel>
