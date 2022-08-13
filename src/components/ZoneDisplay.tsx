@@ -1,12 +1,12 @@
-import { Level, ResourceId, ProgressId } from "../engine";
 import { ZoneKind, ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressDisplay } from "./ProgressDisplay";
+import { ProgressView, ResourcesView } from "../viewModel";
 
 type Props = {
   zone: ZoneKind;
-  progress: Record<ProgressId, Level>;
-  resources: Record<ResourceId, number>;
+  progress: ProgressView;
+  resources: ResourcesView;
   className?: string;
 };
 
@@ -21,23 +21,18 @@ export const ZoneDisplay = (props: Props) => {
           <div>
             <ProgressDisplay
               kind="ruinsExploration"
-              level={stats.ruinsExploration}
+              {...stats.ruinsExploration}
             />
             <ProgressDisplay
               kind="patrolRoutesObserved"
-              level={stats.patrolRoutesObserved}
+              {...stats.patrolRoutesObserved}
             />
             <ResourceDisplay
               kind="ruinsBatteries"
-              amount={resources.ruinsBatteries}
-              max={9999}
+              {...resources.ruinsBatteries}
             />
-            <ResourceDisplay
-              kind="ruinsWeapons"
-              amount={resources.ruinsWeapons}
-              max={9999}
-            />
-            <ProgressDisplay kind="qhLockout" level={stats.qhLockout} />
+            <ResourceDisplay kind="ruinsWeapons" {...resources.ruinsWeapons} />
+            <ProgressDisplay kind="qhLockout" {...stats.qhLockout} />
           </div>
         );
     }

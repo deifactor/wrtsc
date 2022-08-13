@@ -1,10 +1,9 @@
 import classNames from "classnames";
-import { Engine, Schedule } from "../engine";
+import { ScheduleView } from "../viewModel";
 import { TaskIcon } from "./common/TaskIcon";
 
 interface Props {
-  schedule: Schedule;
-  engine: Engine;
+  schedule: ScheduleView;
   className?: string;
 }
 
@@ -14,12 +13,13 @@ function formatCompletion(frac: number): string {
 }
 
 export const ScheduleDisplay = (props: Props) => {
-  const { className, schedule, engine } = props;
+  const { className, schedule } = props;
   const completionFraction =
-    schedule.task && 1 - schedule.timeLeftOnTask / schedule.task.cost(engine);
+    schedule.currentTask &&
+    schedule.currentTask.progress / schedule.currentTask.cost;
 
-  const entries = schedule.queue.map((entry, idx) => {
-    const isCurrent = idx === schedule.task?.index;
+  const entries = schedule.tasks.map((entry, idx) => {
+    const isCurrent = idx === schedule.currentTask?.index;
     // We need whitespace-pre here because we pad with spaces.
     const progressSpan = isCurrent && (
       <span className="inline-block ml-auto whitespace-pre">
@@ -30,8 +30,8 @@ export const ScheduleDisplay = (props: Props) => {
     return (
       <div className="flex my-1" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline align-sub" task={entry.task} />{" "}
-          {schedule.completions(idx)}/{entry.count}{" "}
+          <TaskIcon className="inline align-sub" task={entry.kind} />{" "}
+          {entry.completed}/{entry.count}{" "}
         </span>
         {progressSpan}
       </div>

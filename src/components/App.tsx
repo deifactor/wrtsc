@@ -11,6 +11,8 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
+import { project } from "../viewModel";
+import { reuse } from "../reuse";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -52,7 +54,9 @@ const Panel = ({ children, className }: PanelProps) => {
 
 const App = () => {
   const [inIntro, setInIntro] = useState(false);
+  // The actual engine object. We only use setEngine when doing a hard reset.
   const [engine, setEngine] = useState(Engine.loadFromStorage);
+  const [engineView, setEngineView] = useState(project(engine));
   const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
   // XXX: not correct around leap seconds, tz changes, etc
@@ -70,6 +74,7 @@ const App = () => {
       engine.startLoop(nextQueue);
     }
     engine.saveToStorage();
+    setEngineView(reuse(project(engine), engineView));
   }, 1000 / UPDATES_PER_SEC);
 
   const introFinished = useCallback(() => setInIntro(false), []);
@@ -85,7 +90,7 @@ const App = () => {
     <div className="app flex space-x-10 p-4 items-start h-full">
       <Panel className="w-3/12">
         <h1>Stats</h1>
-        <PlayerDisplay engine={engine} />
+        <PlayerDisplay energy={engineView.energy} combat={engineView.combat} />
         <Button onClick={() => engine.startLoop(nextQueue)}>Start</Button>
         <Button onClick={() => engine.nextTask()}>Next</Button>
       </Panel>
@@ -111,8 +116,7 @@ const App = () => {
               />
               <ScheduleDisplay
                 className="h-full w-2/5"
-                schedule={engine.schedule}
-                engine={engine}
+                schedule={engineView.schedule}
               />
             </div>
           </TabPanel>
@@ -132,9 +136,9 @@ const App = () => {
         <h1>Location</h1>
         <ZoneDisplay
           className="mb-12"
-          zone={engine.zoneKind}
-          progress={engine.progress}
-          resources={engine.resources}
+          zone={engineView.zoneKind}
+          progress={engineView.progress}
+          resources={engineView.resources}
         />
       </Panel>
     </div>
