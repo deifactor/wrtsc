@@ -1,13 +1,6 @@
 import "reflect-metadata";
 import { Button } from "./common/Button";
-import {
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
@@ -18,7 +11,8 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import { EngineViewStore } from "../engineStore";
+import { update, useAppDispatch } from "../engineStore";
+import { project } from "../viewModel";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -44,7 +38,7 @@ function useInterval(callback: () => void, delay: number) {
 }
 
 const isDev = process.env.NODE_ENV === "development";
-const UPDATES_PER_SEC = 12;
+const UPDATES_PER_SEC = 50;
 
 type PanelProps = {
   children: ReactNode;
@@ -59,8 +53,8 @@ const Panel = ({ children, className }: PanelProps) => {
 };
 
 const App = () => {
-  const engineStore = useContext(EngineViewStore);
-  const engine = engineStore.state;
+  const dispatch = useAppDispatch();
+  const engineRef = useRef(Engine.loadFromStorage());
   const [inIntro, setInIntro] = useState(false);
   const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
@@ -71,6 +65,7 @@ const App = () => {
     if (inIntro) {
       return;
     }
+    const engine = engineRef.current;
     const now = new Date().getTime();
     const multiplier = isDev ? 1 : 1;
     const { ok } = engine.tickTime(multiplier * (now - lastUpdate.current));
@@ -78,20 +73,19 @@ const App = () => {
     if (settings.autoRestart && (!ok || !engine.schedule.task)) {
       engine.startLoop(nextQueue);
     }
-    engineStore.notify();
+    dispatch(update(project(engine)));
     engine.saveToStorage();
   }, 1000 / UPDATES_PER_SEC);
 
   const restart = useCallback(
-    () => engine.startLoop(nextQueue),
-    [engine, nextQueue]
+    () => engineRef.current.startLoop(nextQueue),
+    [nextQueue]
   );
-  const nextTask = useCallback(() => engine.nextTask, [engine]);
+  const nextTask = useCallback(() => engineRef.current.nextTask(), []);
   const introFinished = useCallback(() => setInIntro(false), []);
-  const hardReset = useCallback(
-    () => (engineStore.state = new Engine()),
-    [engineStore]
-  );
+  const hardReset = useCallback(() => {
+    engineRef.current = new Engine();
+  }, []);
   if (inIntro) {
     return <Intro onFinished={introFinished} />;
   }
