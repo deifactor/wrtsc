@@ -2,13 +2,16 @@ import { TaskKind } from "../../engine";
 import { IconType } from "react-icons";
 import {
   GiBatteryPack,
+  GiHoodedAssassin,
   GiJourney,
   GiLockPicking,
   GiSpaceship,
   GiSpyglass,
+  GiStrafe,
   GiTargeting,
 } from "react-icons/gi";
-import { FaVenusDouble } from "react-icons/fa";
+import { SiDrone } from "react-icons/si";
+import { FaVenusDouble, FaWrench } from "react-icons/fa";
 import React from "react";
 
 // because it's funny to me
@@ -21,6 +24,10 @@ export const ICONS: Partial<Record<TaskKind, IconType>> = {
   hijackShip: GiSpaceship,
   disableLockouts: GiLockPicking,
   leaveRuins: GiJourney,
+  linkSensorDrones: SiDrone,
+  eradicateScout: GiHoodedAssassin,
+  strafingRun: GiStrafe,
+  dismantleSensorDrones: FaWrench,
   completeRuins: DEBUG_ICON,
 };
 
