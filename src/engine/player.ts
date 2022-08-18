@@ -1,4 +1,4 @@
-export class Level {
+export class Progress {
   public xp: number = 0;
   public level: number = 0;
 
@@ -11,6 +11,10 @@ export class Level {
     while (this.xp >= this.totalToNextLevel) {
       this.xp -= this.totalToNextLevel;
       this.level++;
+    }
+    if (this.level >= 100) {
+      this.level = 100;
+      this.xp = 0;
     }
   }
 }

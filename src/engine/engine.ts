@@ -7,12 +7,7 @@ import {
   Transform,
 } from "class-transformer";
 
-import {
-  Level,
-  LoopFlagId,
-  ResourceId,
-  ProgressId,
-} from "./player";
+import { Progress, LoopFlagId, ResourceId, ProgressId } from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
@@ -52,11 +47,11 @@ const INITIAL_ENERGY = 5000;
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine {
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
-  @Transform(_convertRecord(Level), { toClassOnly: true })
-  readonly progress: Record<ProgressId, Level> = {
-    ruinsExploration: new Level(),
-    patrolRoutesObserved: new Level(),
-    qhLockout: new Level(),
+  @Transform(_convertRecord(Progress), { toClassOnly: true })
+  readonly progress: Record<ProgressId, Progress> = {
+    ruinsExploration: new Progress(),
+    patrolRoutesObserved: new Progress(),
+    qhLockout: new Progress(),
   };
 
   resources: Record<ResourceId, number> = {
