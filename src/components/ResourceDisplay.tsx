@@ -1,5 +1,5 @@
 import React from "react";
-import { ResourceId, RESOURCE_NAME } from "../engine";
+import { ResourceId, RESOURCES } from "../engine";
 import { useEngineSelector } from "../engineStore";
 
 type Props = {
@@ -8,10 +8,10 @@ type Props = {
 
 export const ResourceDisplay = React.memo((props: Props) => {
   const { kind } = props;
-  const { amount, max } = useEngineSelector((engine) => engine.resources[kind]);
+  const { amount } = useEngineSelector((engine) => engine.resources[kind]);
   return (
     <div>
-      <strong>{RESOURCE_NAME[kind]}</strong>: {amount}/{max}
+      <strong>{RESOURCES[kind].name}</strong>: {amount}
     </div>
   );
 });

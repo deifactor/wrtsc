@@ -5,7 +5,7 @@
 import { Engine, LoopFlagId, ResourceId, ProgressId, TaskKind } from "./engine";
 import { ZoneKind } from "./engine/zone";
 
-export type ResourcesView = Record<ResourceId, { amount: number; max: number }>;
+export type ResourcesView = Record<ResourceId, { amount: number }>;
 export type FlagsView = Record<LoopFlagId, boolean>;
 export type ProgressView = Record<
   ProgressId,
@@ -35,10 +35,9 @@ export type EngineView = {
 
 export function project(engine: Engine): EngineView {
   return {
-    resources: mapValues(engine.resources, (amount, resource) => {
+    resources: mapValues(engine.resources, (amount) => {
       return {
         amount,
-        max: engine.maxResource(resource),
       };
     }),
     // mapping the identity is just cloning

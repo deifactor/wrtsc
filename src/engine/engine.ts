@@ -7,7 +7,14 @@ import {
   Transform,
 } from "class-transformer";
 
-import { Progress, LoopFlagId, ResourceId, ProgressId } from "./player";
+import {
+  Progress,
+  LoopFlagId,
+  ResourceId,
+  ProgressId,
+  RESOURCES,
+  RESOURCE_IDS,
+} from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
@@ -54,11 +61,7 @@ export class Engine {
     qhLockout: new Progress(),
   };
 
-  resources: Record<ResourceId, number> = {
-    ruinsBatteries: 0,
-    ruinsWeapons: 0,
-    qhLockoutAttempts: 0,
-  };
+  resources: Record<ResourceId, number>;
 
   flags: Record<LoopFlagId, boolean> = {
     shipHijacked: false,
@@ -75,6 +78,13 @@ export class Engine {
   @Exclude()
   private _totalEnergy: number = INITIAL_ENERGY;
 
+  constructor() {
+    this.resources = {} as any;
+    for (const resource of RESOURCE_IDS) {
+      this.resources[resource] = RESOURCES[resource].initial(this);
+    }
+  }
+
   get energy(): number {
     return this._energy;
   }
@@ -87,6 +97,9 @@ export class Engine {
   startLoop(queue: TaskQueue) {
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new Schedule(queue, this);
+    for (const resource of RESOURCE_IDS) {
+      this.resources[resource] = RESOURCES[resource].initial(this);
+    }
   }
 
   perform(task: Task) {
@@ -111,35 +124,8 @@ export class Engine {
     );
   }
 
-  /**
-   * Whether the task can be added to the queue. This is true if there's *some*
-   * conceivable world where the player can perform this task. So it skips over
-   * flag checks and only checks against *max* resources.
-   */
-  canAddToQueue(task: Task): boolean {
-    return (
-      Object.entries(task.requiredProgress).every(
-        ([id, min]) => this.progress[id as ProgressId].level >= min
-      ) &&
-      Object.entries(task.requiredResources).every(
-        ([id, min]) => this.maxResource(id as ResourceId) >= min
-      )
-    );
-  }
-
-  maxResource(resource: ResourceId): number {
-    switch (resource) {
-      case "ruinsBatteries":
-        return Math.floor(this.progress.ruinsExploration.level / 4);
-      case "ruinsWeapons":
-        return Math.floor(this.progress.ruinsExploration.level / 8);
-      case "qhLockoutAttempts":
-        return 12;
-    }
-  }
-
   get combat(): number {
-    return this.maxResource("ruinsWeapons") - this.resources.ruinsWeapons;
+    return this.resources.weaponSalvage;
   }
 
   /** Iterate to the next task. This includes performing the current task. */

@@ -1,3 +1,6 @@
+import { Engine } from "./engine";
+import { ZoneKind } from "./zone";
+
 export class Progress {
   public xp: number = 0;
   public level: number = 0;
@@ -57,15 +60,54 @@ export const PROGRESS_NAME: Record<ProgressId, string> = {
 
 export const RESOURCE_IDS = [
   "ruinsBatteries",
-  "ruinsWeapons",
+  "unlinkedSensorDrones",
+  "linkedSensorDrones",
+  "weaponSalvage",
   "qhLockoutAttempts",
 ] as const;
 export type ResourceId = typeof RESOURCE_IDS[number];
 
-export const RESOURCE_NAME: Record<ResourceId, string> = {
-  ruinsBatteries: "Ruins Batteries",
-  ruinsWeapons: "Ruins Weapons",
-  qhLockoutAttempts: "QH Lockout Attempts",
+export type Resource = {
+  id: ResourceId;
+  name: string;
+  /** The zone the resource is associated with. If null, associated with the player. */
+  zone: ZoneKind | null;
+  initial: (engine: Engine) => number;
+};
+
+export const RESOURCES: Record<ResourceId, Resource> = {
+  ruinsBatteries: {
+    id: "ruinsBatteries",
+    name: "Intact Batteries",
+    zone: "ruins",
+    initial: (engine) => Math.floor(engine.progress.ruinsExploration.level / 4),
+  },
+  unlinkedSensorDrones: {
+    id: "unlinkedSensorDrones",
+    name: "Unlinked Sensor Drones",
+    zone: "ruins",
+    initial: (engine) =>
+      Math.floor(engine.progress.ruinsExploration.level / 10),
+  },
+  linkedSensorDrones: {
+    id: "linkedSensorDrones",
+    name: "Linked Sensor Drones",
+    zone: "ruins",
+    initial: (engine) =>
+      Math.floor(engine.progress.ruinsExploration.level / 10),
+  },
+  weaponSalvage: {
+    id: "weaponSalvage",
+    name: "Weapon Salvage",
+    zone: null,
+    initial: () => 0,
+  },
+  qhLockoutAttempts: {
+    id: "qhLockoutAttempts",
+    name: "QH Lockout Attempts",
+    zone: "ruins",
+    initial: () => 0,
+  },
 };
 
 export const LOOP_FLAG_IDS = ["shipHijacked"] as const;
