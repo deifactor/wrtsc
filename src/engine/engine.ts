@@ -106,6 +106,15 @@ export class Engine {
     Object.entries(task.required.resources || {}).forEach(([res, value]) => {
       this.resources[res as ResourceId] -= value;
     });
+    Object.entries(task.rewards.resources || {}).forEach(([res, value]) => {
+      this.resources[res as ResourceId] += value;
+    });
+    Object.entries(task.rewards.progress || {}).forEach(([progress, xp]) => {
+      this.progress[progress as ProgressId].addXp(xp);
+    });
+    Object.entries(task.rewards.flags || {}).forEach(([flag, value]) => {
+      this.flags[flag as LoopFlagId] = value;
+    });
     task.extraPerform(this);
   }
 
