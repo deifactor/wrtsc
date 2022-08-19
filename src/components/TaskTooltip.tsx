@@ -33,7 +33,12 @@ export const TaskTooltip = React.memo(({ kind }: Props) => {
   const frags = [...progressFrags, ...resourceFrags];
   const requiresSection = frags.length !== 0 && (
     <p>
-      <strong>Requires</strong>: {frags}
+      <strong>Requires</strong>:
+      <ul>
+        {frags.map((frag) => (
+          <li>{frag}</li>
+        ))}
+      </ul>
     </p>
   );
   return (
