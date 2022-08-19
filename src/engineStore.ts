@@ -2,7 +2,7 @@ import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { original } from "immer";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { Engine, TaskQueue, TaskKind } from "./engine";
+import { Engine, TaskQueue, TaskKind, SimulationResult } from "./engine";
 
 export type Settings = {
   autoRestart: boolean;
@@ -14,6 +14,7 @@ export const engineSlice = createSlice({
     engine: Engine.loadFromStorage(),
     settings: { autoRestart: true },
     nextQueue: [] as TaskQueue,
+    simulation: [] as SimulationResult,
     /**
      * Note: this is "load-bearing" in that changing it forces Redux to think
      * that the store has changed. You need to update this every time you tick
@@ -27,11 +28,13 @@ export const engineSlice = createSlice({
         engine: new Engine(),
         settings: { autoRestart: true },
         nextQueue: [],
+        simulation: [],
         lastUpdate: new Date().getTime(),
       };
     },
     startLoop: (state) => {
       state.engine.startLoop(original(state.nextQueue)!);
+      state.simulation = state.engine.simulation(state.nextQueue);
       state.lastUpdate = new Date().getTime();
     },
     nextTask: (state) => {
@@ -44,6 +47,7 @@ export const engineSlice = createSlice({
         action.payload !== undefined ? action.payload : now - state.lastUpdate;
       state.engine.tickTime(dt);
       if (state.settings.autoRestart && !state.engine.schedule.task) {
+        state.simulation = state.engine.simulation(state.nextQueue);
         state.engine.startLoop(original(state.nextQueue)!);
       }
       state.lastUpdate = now;
@@ -63,6 +67,7 @@ export const engineSlice = createSlice({
       } else {
         queue.push({ task: kind, count: 1 });
       }
+      state.simulation = state.engine.simulation(state.nextQueue);
     },
 
     /**
@@ -81,6 +86,7 @@ export const engineSlice = createSlice({
       if (entry.count <= 0) {
         queue.splice(index, 1);
       }
+      state.simulation = state.engine.simulation(state.nextQueue);
     },
 
     /**
@@ -97,6 +103,7 @@ export const engineSlice = createSlice({
       const entry = queue[from];
       queue.splice(from, 1);
       queue.splice(to, 0, entry);
+      state.simulation = state.engine.simulation(state.nextQueue);
     },
 
     /** Removes a task entirely from the queue. */
@@ -105,6 +112,7 @@ export const engineSlice = createSlice({
       const index = action.payload;
       checkBounds(queue, index);
       queue.splice(index, 1);
+      state.simulation = state.engine.simulation(state.nextQueue);
     },
   },
 });

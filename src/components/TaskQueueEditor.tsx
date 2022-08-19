@@ -16,6 +16,7 @@ import {
   useEngineSelector,
 } from "../engineStore";
 import { entries } from "../records";
+import equal from "fast-deep-equal";
 
 /**
  * True if we should even consider adding this to the queue. This doesn't
@@ -34,6 +35,7 @@ interface Props {
 const TaskQueueEditor = React.memo((props: Props) => {
   const dispatch = useAppDispatch();
   const queue = useAppSelector((store) => store.engine.nextQueue);
+  const simulation = useAppSelector((store) => store.engine.simulation, equal);
   const { className } = props;
   const tasks = queue.map((entry, index) => {
     const incrementCount = () =>
@@ -43,7 +45,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
     const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
     const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
     const remove = () => dispatch(removeTask(index));
-    const step: SimulationStep | undefined = { ok: true, energy: 100 };
+    const step: SimulationStep | undefined = simulation[index];
     return (
       // eslint-disable-next-line react/no-array-index-key
       <div
