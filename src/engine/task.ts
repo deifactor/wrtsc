@@ -126,7 +126,10 @@ export const LINK_SENSOR_DRONES: Task = {
   flavor:
     "Long-range sensors are still responding to pings. Superresolution routines loaded.",
   extraPerform: (engine) => engine.resources.linkedSensorDrones++,
-  required: { resources: { unlinkedSensorDrones: 1 } },
+  required: {
+    resources: { unlinkedSensorDrones: 1 },
+    progress: { ruinsExploration: 10 },
+  },
   rewards: { resources: { linkedSensorDrones: 1 } },
   visible: (engine) => engine.progress.ruinsExploration.level > 5,
 };
@@ -140,8 +143,9 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
-  required: { progress: { ruinsExploration: 10 } },
+  required: { progress: { ruinsExploration: 30 } },
   rewards: { progress: { patrolRoutesObserved: 1024 * 6 } },
+  visible: (engine) => engine.progress.ruinsExploration.level > 20,
 };
 
 export const KILL_SCOUT: Task = {
@@ -199,6 +203,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
+  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   required: { resources: { qhLockoutAttempts: 1 } },
   rewards: { progress: { qhLockout: 1024 * 10 } },
 };
@@ -250,7 +255,7 @@ export const LEAVE_RUINS: Task = {
   extraPerform: (engine) => {
     engine.zoneKind = "phobosDeimos";
   },
-  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 30,
+  visible: (engine) => engine.progress.qhLockout.level >= 50,
 };
 
 export const COMPLETE_RUINS: Task = {

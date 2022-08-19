@@ -9,9 +9,10 @@ import {
   ProgressId,
   TaskKind,
   TASKS,
+  Task,
 } from "./engine";
 import { ZoneKind } from "./engine/zone";
-import { mapValues } from "./records";
+import { entries, mapValues } from "./records";
 
 export type ResourcesView = Record<ResourceId, { amount: number }>;
 export type FlagsView = Record<LoopFlagId, boolean>;
@@ -73,7 +74,7 @@ export function project(engine: Engine): EngineView {
       kind: task.kind,
       cost: task.cost(engine),
       visible: task.visible(engine),
-      canAddToQueue: true,
+      canAddToQueue: canAddToQueue(engine, task),
       shortName: task.shortName,
     })),
   };
@@ -94,4 +95,14 @@ function projectSchedule(engine: Engine): ScheduleView {
       progress: schedule.task.cost(engine) - schedule.timeLeftOnTask,
     },
   };
+}
+
+/**
+ * True if we should even consider adding this to the queue. This doesn't
+ * indicate that it will *succeed*
+ */
+function canAddToQueue(engine: Engine, task: Task): boolean {
+  return entries(task.required.progress || {}).every(
+    ([progress, min]) => engine.progress[progress].level >= min
+  );
 }
