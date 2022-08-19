@@ -1,48 +1,18 @@
 import { Button } from "./common/Button";
-import {
-  SimulationStep,
-  TASKS,
-  SKILL_NAME,
-  ProgressId,
-  PROGRESS_NAME,
-  Requirements,
-  RESOURCES,
-  ResourceId,
-} from "../engine";
+import { SimulationStep, TASKS } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBackFill } from "react-icons/ri";
 import * as q from "../engine/taskQueue";
 import React from "react";
+import { TaskTooltip } from "./TaskTooltip";
 
 interface Props {
   className?: string;
   queue: q.TaskQueue;
   setQueue: (queue: q.TaskQueue) => void;
 }
-
-const RequirementsDisplay = React.memo(
-  ({ progress, resources }: Requirements) => {
-    const progressFrags = Object.entries(progress || {}).map(
-      ([progress, min]) => `${min}% ${PROGRESS_NAME[progress as ProgressId]}`
-    );
-    const resourceFrags = Object.entries(resources || {}).map(
-      ([resource, amount]) =>
-        `${amount}x ${RESOURCES[resource as ResourceId].name}`
-    );
-    const frags = [...progressFrags, ...resourceFrags];
-    if (frags.length) {
-      return (
-        <p>
-          <strong>Requires</strong>: {frags}
-        </p>
-      );
-    } else {
-      return null;
-    }
-  }
-);
 
 const TaskQueueEditor = React.memo((props: Props) => {
   const { queue, setQueue, className } = props;
@@ -92,32 +62,13 @@ const TaskQueueEditor = React.memo((props: Props) => {
   const addButtons = Object.values(TASKS)
     .filter((task) => true)
     .map((task) => {
-      const trainingSection = task.trainedSkills.length !== 0 && (
-        <p>
-          <strong>Trains:</strong>{" "}
-          {task.trainedSkills.map((s) => SKILL_NAME[s]).join(", ")}
-        </p>
-      );
-      const tooltip = (
-        <div className="w-96 p-2 text-sm">
-          <p className="font-bold">{task.name}</p>
-          <p className="my-2">{task.description}</p>
-          <p>
-            <strong>Cost:</strong> OOPS
-          </p>
-          <RequirementsDisplay {...task.required} />
-          {trainingSection}
-          <hr className="border-gray-700 my-3" />
-          <p className="text-xs mb-2 text-gray-400">{task.flavor}</p>
-        </div>
-      );
       return (
         <Button
           className="font-mono whitespace-pre"
           key={task.kind}
           icon={ICONS[task.kind]}
           onClick={() => setQueue(q.pushTaskToQueue(queue, task.kind))}
-          tooltip={tooltip}
+          tooltip={<TaskTooltip kind={task.kind} />}
           state={true ? "active" : "locked"}
         >
           {task.shortName.padEnd(8)}
