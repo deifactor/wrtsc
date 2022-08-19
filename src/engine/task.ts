@@ -143,9 +143,9 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
-  required: { progress: { ruinsExploration: 30 } },
+  required: { progress: { ruinsExploration: 15 } },
   rewards: { progress: { patrolRoutesObserved: 1024 * 6 } },
-  visible: (engine) => engine.progress.ruinsExploration.level > 20,
+  visible: (engine) => engine.progress.ruinsExploration.level > 10,
 };
 
 export const KILL_SCOUT: Task = {
@@ -217,8 +217,10 @@ export const STRAFING_RUN: Task = {
   description: "Clean up the remaining Preservers.",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
+  visible: (engine) => engine.progress.qhLockout.level >= 25,
   required: {
     flags: { shipHijacked: true },
+    progress: { qhLockout: 50 },
   },
   rewards: {},
 };

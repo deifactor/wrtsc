@@ -102,7 +102,7 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     name: "Preserver Scouts Located",
     zone: "ruins",
     initial: (engine) =>
-      Math.floor(engine.progress.ruinsExploration.level / 10),
+      Math.floor(engine.progress.patrolRoutesObserved.level / 10),
   },
   unoccupiedShips: {
     id: "unoccupiedShips",
