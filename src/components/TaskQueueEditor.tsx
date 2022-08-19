@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { SimulationStep, TASKS } from "../engine";
+import { SimulationStep } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
@@ -7,6 +7,7 @@ import { RiDeleteBackFill } from "react-icons/ri";
 import * as q from "../engine/taskQueue";
 import React from "react";
 import { TaskTooltip } from "./TaskTooltip";
+import { useEngineSelector } from "../engineStore";
 
 interface Props {
   className?: string;
@@ -59,8 +60,8 @@ const TaskQueueEditor = React.memo((props: Props) => {
     );
   });
 
-  const addButtons = Object.values(TASKS)
-    .filter((task) => true)
+  const addButtons = Object.values(useEngineSelector((engine) => engine.tasks))
+    .filter((task) => task.visible)
     .map((task) => {
       return (
         <Button
@@ -69,7 +70,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
           icon={ICONS[task.kind]}
           onClick={() => setQueue(q.pushTaskToQueue(queue, task.kind))}
           tooltip={<TaskTooltip kind={task.kind} />}
-          state={true ? "active" : "locked"}
+          state={task.canAddToQueue ? "active" : "locked"}
         >
           {task.shortName.padEnd(8)}
         </Button>

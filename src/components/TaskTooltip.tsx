@@ -8,6 +8,7 @@ import {
   TaskKind,
 } from "../engine";
 import React from "react";
+import { useEngineSelector } from "../engineStore";
 
 interface Props {
   kind: TaskKind;
@@ -15,6 +16,7 @@ interface Props {
 
 export const TaskTooltip = React.memo(({ kind }: Props) => {
   const task = TASKS[kind];
+  const cost = useEngineSelector((engine) => engine.tasks[kind].cost);
   const trainingSection = task.trainedSkills.length !== 0 && (
     <p>
       <strong>Trains:</strong>{" "}
@@ -39,7 +41,7 @@ export const TaskTooltip = React.memo(({ kind }: Props) => {
       <p className="font-bold">{task.name}</p>
       <p className="my-2">{task.description}</p>
       <p>
-        <strong>Cost:</strong> OOPS
+        <strong>Cost:</strong> {cost}
       </p>
       {requiresSection}
       {trainingSection}

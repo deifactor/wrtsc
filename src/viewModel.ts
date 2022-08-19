@@ -2,7 +2,14 @@
  * A projection of the engine's state suitable for rendering by the UI. The APIs
  * defined here are guaranteed to *attempt* to not needlessly duplicate objects.
  */
-import { Engine, LoopFlagId, ResourceId, ProgressId, TaskKind } from "./engine";
+import {
+  Engine,
+  LoopFlagId,
+  ResourceId,
+  ProgressId,
+  TaskKind,
+  TASKS,
+} from "./engine";
 import { ZoneKind } from "./engine/zone";
 
 export type ResourcesView = Record<ResourceId, { amount: number }>;
@@ -22,6 +29,14 @@ export type ScheduleView = {
   };
 };
 
+export type TaskView = {
+  kind: TaskKind;
+  cost: number;
+  visible: boolean;
+  canAddToQueue: boolean;
+  shortName: string;
+};
+
 export type EngineView = {
   resources: ResourcesView;
   flags: FlagsView;
@@ -31,6 +46,7 @@ export type EngineView = {
   totalEnergy: number;
   combat: number;
   schedule: ScheduleView;
+  tasks: Record<TaskKind, TaskView>;
 };
 
 export function project(engine: Engine): EngineView {
@@ -52,6 +68,13 @@ export function project(engine: Engine): EngineView {
     energy: engine.energy,
     totalEnergy: engine.totalEnergy,
     schedule: projectSchedule(engine),
+    tasks: mapValues(TASKS, (task) => ({
+      kind: task.kind,
+      cost: task.cost(engine),
+      visible: task.visible(engine),
+      canAddToQueue: true,
+      shortName: task.shortName,
+    })),
   };
 }
 
