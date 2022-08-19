@@ -4,15 +4,20 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
-import { Engine, TaskQueue } from "../engine";
+import { TaskQueue } from "../engine";
 import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Settings, SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import { update, useAppDispatch } from "../engineStore";
-import { project } from "../viewModel";
+import {
+  startLoop,
+  tick,
+  nextTask,
+  hardReset,
+  useAppDispatch,
+} from "../engineStore";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -37,7 +42,6 @@ function useInterval(callback: () => void, delay: number) {
   }, [delay]);
 }
 
-const isDev = process.env.NODE_ENV === "development";
 const UPDATES_PER_SEC = 50;
 
 type PanelProps = {
@@ -54,38 +58,18 @@ const Panel = ({ children, className }: PanelProps) => {
 
 const App = () => {
   const dispatch = useAppDispatch();
-  const engineRef = useRef(Engine.loadFromStorage());
   const [inIntro, setInIntro] = useState(false);
   const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
-  // XXX: not correct around leap seconds, tz changes, etc
-  const lastUpdate = useRef(new Date().getTime());
 
   useInterval(() => {
     if (inIntro) {
       return;
     }
-    const engine = engineRef.current;
-    const now = new Date().getTime();
-    const multiplier = isDev ? 1 : 1;
-    const { ok } = engine.tickTime(multiplier * (now - lastUpdate.current));
-    lastUpdate.current = now;
-    if (settings.autoRestart && (!ok || !engine.schedule.task)) {
-      engine.startLoop(nextQueue);
-    }
-    dispatch(update(project(engine)));
-    engine.saveToStorage();
+    dispatch(tick());
   }, 1000 / UPDATES_PER_SEC);
 
-  const restart = useCallback(
-    () => engineRef.current.startLoop(nextQueue),
-    [nextQueue]
-  );
-  const nextTask = useCallback(() => engineRef.current.nextTask(), []);
   const introFinished = useCallback(() => setInIntro(false), []);
-  const hardReset = useCallback(() => {
-    engineRef.current = new Engine();
-  }, []);
   if (inIntro) {
     return <Intro onFinished={introFinished} />;
   }
@@ -99,8 +83,8 @@ const App = () => {
       <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerDisplay />
-        <Button onClick={restart}>Start</Button>
-        <Button onClick={nextTask}>Next</Button>
+        <Button onClick={() => dispatch(startLoop(nextQueue))}>Start</Button>
+        <Button onClick={() => dispatch(nextTask())}>Next</Button>
       </Panel>
 
       <Panel className="w-8/12 h-full">
@@ -126,7 +110,10 @@ const App = () => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SettingsEditor onHardReset={hardReset} settings={settings} />
+            <SettingsEditor
+              onHardReset={() => dispatch(hardReset())}
+              settings={settings}
+            />
           </TabPanel>
           <TabPanel>
             <Credits />
