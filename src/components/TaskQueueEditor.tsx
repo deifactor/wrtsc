@@ -4,10 +4,17 @@ import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBackFill } from "react-icons/ri";
-import * as q from "../engine/taskQueue";
 import React from "react";
 import { TaskTooltip } from "./TaskTooltip";
-import { useEngineSelector } from "../engineStore";
+import {
+  modifyBatchCount,
+  moveTask,
+  pushTaskToQueue,
+  removeTask,
+  useAppDispatch,
+  useAppSelector,
+  useEngineSelector,
+} from "../engineStore";
 import { entries } from "../records";
 
 /**
@@ -22,22 +29,20 @@ function canAddToQueue(engine: Engine, task: Task): boolean {
 
 interface Props {
   className?: string;
-  queue: q.TaskQueue;
-  setQueue: (queue: q.TaskQueue) => void;
 }
 
 const TaskQueueEditor = React.memo((props: Props) => {
-  const { queue, setQueue, className } = props;
+  const dispatch = useAppDispatch();
+  const queue = useAppSelector((store) => store.engine.nextQueue);
+  const { className } = props;
   const tasks = queue.map((entry, index) => {
-    const incrementCount = (): void =>
-      setQueue(q.adjustTaskCount(queue, { index, amount: 1 }));
-    const decrementCount = (): void =>
-      setQueue(q.adjustTaskCount(queue, { index, amount: -1 }));
-    const moveUp = (): void =>
-      setQueue(q.moveTask(queue, { from: index, to: index - 1 }));
-    const moveDown = (): void =>
-      setQueue(q.moveTask(queue, { from: index, to: index + 1 }));
-    const remove = (): void => setQueue(q.removeTask(queue, index));
+    const incrementCount = () =>
+      dispatch(modifyBatchCount({ index, amount: 1 }));
+    const decrementCount = () =>
+      dispatch(modifyBatchCount({ index, amount: -1 }));
+    const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
+    const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
+    const remove = () => dispatch(removeTask(index));
     const step: SimulationStep | undefined = { ok: true, energy: 100 };
     return (
       // eslint-disable-next-line react/no-array-index-key
@@ -87,7 +92,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
           className="font-mono whitespace-pre"
           key={task.kind}
           icon={ICONS[task.kind]}
-          onClick={() => setQueue(q.pushTaskToQueue(queue, task.kind))}
+          onClick={() => dispatch(pushTaskToQueue(task.kind))}
           tooltip={<TaskTooltip kind={task.kind} />}
           state={task.canAddToQueue ? "active" : "locked"}
         >

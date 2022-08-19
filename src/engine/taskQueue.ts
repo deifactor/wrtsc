@@ -1,5 +1,4 @@
 import { Task, TaskKind, TASKS } from "./task";
-import { produce } from "immer";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskBatch {
@@ -69,61 +68,4 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
 
 export function taskIterator(queue: TaskQueue): TaskQueueIterator {
   return new TaskQueueIterator(queue);
-}
-
-/**
- * Push a task to the end of the queue. If the last task in the queue is the
- * given kind, increments its count by 1 instead.
- */
-export const pushTaskToQueue = produce<TaskQueue, [TaskKind]>((queue, kind) => {
-  const len = queue.length;
-  if (len !== 0 && queue[len - 1].task === kind) {
-    queue[queue.length - 1].count++;
-  } else {
-    queue.push({ task: kind, count: 1 });
-  }
-});
-
-/**
- * { Modify the task count of the index-th task by amount. If this would result
- * in a negative amount, removes it.
- */
-export const adjustTaskCount = produce<
-  TaskQueue,
-  [{ index: number; amount: number }]
->((queue, { index, amount }) => {
-  checkBounds(queue, index);
-  const entry = queue[index];
-  entry.count += amount;
-  if (entry.count <= 0) {
-    queue.splice(index, 1);
-  }
-});
-
-/**
- * Move the task at `from` to the position `to`. Throws if either of those is
- * out of bounds.
- */
-export const moveTask = produce<TaskQueue, [{ from: number; to: number }]>(
-  (queue, { from, to }) => {
-    checkBounds(queue, from);
-    checkBounds(queue, to);
-    // Yes, this works no matter what `from` and `to` are. Unit test it anyway
-    // though.
-    const entry = queue[from];
-    queue.splice(from, 1);
-    queue.splice(to, 0, entry);
-  }
-);
-
-/** Removes the task at index `index`. */
-export const removeTask = produce<TaskQueue, [number]>((queue, index) => {
-  checkBounds(queue, index);
-  queue.splice(index, 1);
-});
-
-function checkBounds(queue: TaskQueue, index: number) {
-  if (index < 0 || index >= queue.length) {
-    throw new Error(`Invalid index ${index} for queue ${queue}`);
-  }
 }

@@ -4,7 +4,6 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
 import { ZoneDisplay } from "./ZoneDisplay";
-import { TaskQueue } from "../engine";
 import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -59,7 +58,6 @@ const Panel = ({ children, className }: PanelProps) => {
 const App = () => {
   const dispatch = useAppDispatch();
   const [inIntro, setInIntro] = useState(false);
-  const [nextQueue, setNextQueue] = useState<TaskQueue>([]);
   const [settings] = useState(new Settings());
 
   useInterval(() => {
@@ -83,7 +81,7 @@ const App = () => {
       <Panel className="w-3/12">
         <h1>Stats</h1>
         <PlayerDisplay />
-        <Button onClick={() => dispatch(startLoop(nextQueue))}>Start</Button>
+        <Button onClick={() => dispatch(startLoop())}>Start</Button>
         <Button onClick={() => dispatch(nextTask())}>Next</Button>
       </Panel>
 
@@ -101,11 +99,7 @@ const App = () => {
           <hr className="border-gray-400 my-4" />
           <TabPanel>
             <div className="flex flex-row h-full space-x-12">
-              <TaskQueueEditor
-                className="h-full w-3/5"
-                queue={nextQueue}
-                setQueue={setNextQueue}
-              />
+              <TaskQueueEditor className="h-full w-3/5" />
               <ScheduleDisplay className="h-full w-2/5" />
             </div>
           </TabPanel>

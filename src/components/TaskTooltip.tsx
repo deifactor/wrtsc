@@ -32,14 +32,14 @@ export const TaskTooltip = React.memo(({ kind }: Props) => {
   );
   const frags = [...progressFrags, ...resourceFrags];
   const requiresSection = frags.length !== 0 && (
-    <p>
+    <div>
       <strong>Requires</strong>:
       <ul>
         {frags.map((frag) => (
-          <li>{frag}</li>
+          <li key={frag}>{frag}</li>
         ))}
       </ul>
-    </p>
+    </div>
   );
   return (
     <div className="w-96 p-2 text-sm">
