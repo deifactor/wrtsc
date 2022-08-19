@@ -125,7 +125,6 @@ export const LINK_SENSOR_DRONES: Task = {
   description: `Increases progress for ${EXPLORE_RUINS.name}.`,
   flavor:
     "Long-range sensors are still responding to pings. Superresolution routines loaded.",
-  extraPerform: (engine) => engine.resources.linkedSensorDrones++,
   required: {
     resources: { unlinkedSensorDrones: 1 },
     progress: { ruinsExploration: 10 },
