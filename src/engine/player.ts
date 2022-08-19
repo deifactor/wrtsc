@@ -62,6 +62,8 @@ export const RESOURCE_IDS = [
   "ruinsBatteries",
   "unlinkedSensorDrones",
   "linkedSensorDrones",
+  "scouts",
+  "unoccupiedShips",
   "weaponSalvage",
   "qhLockoutAttempts",
 ] as const;
@@ -92,6 +94,19 @@ export const RESOURCES: Record<ResourceId, Resource> = {
   linkedSensorDrones: {
     id: "linkedSensorDrones",
     name: "Linked Sensor Drones",
+    zone: "ruins",
+    initial: () => 0,
+  },
+  scouts: {
+    id: "scouts",
+    name: "Preserver Scouts Located",
+    zone: "ruins",
+    initial: (engine) =>
+      Math.floor(engine.progress.ruinsExploration.level / 10),
+  },
+  unoccupiedShips: {
+    id: "unoccupiedShips",
+    name: "Unoccupied Ships",
     zone: "ruins",
     initial: () => 0,
   },

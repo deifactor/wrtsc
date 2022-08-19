@@ -142,6 +142,12 @@ export const KILL_SCOUT: Task = {
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:
     "Simulations predict >99.99% kill rate with minimal retaliatory damage.",
+  requiredResources: { scouts: 1 },
+  extraPerform: (engine) => {
+    engine.resources.weaponSalvage++;
+    engine.resources.unoccupiedShips++;
+  },
+  visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
 };
 
 export const HIJACK_SHIP: Task = {
@@ -162,8 +168,9 @@ export const HIJACK_SHIP: Task = {
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   extraPerform: (engine) => {
     engine.flags.shipHijacked = true;
+    engine.resources.qhLockoutAttempts += 12;
   },
-  requiredProgress: { patrolRoutesObserved: 30 },
+  requiredResources: { unoccupiedShips: 1 },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   trainedSkills: ["lethality"],
 };
@@ -181,10 +188,7 @@ export const DISABLE_LOCKOUTS: Task = {
   extraPerform: (engine) => {
     engine.progress.qhLockout.addXp(1024 * 10);
   },
-  requiredProgress: { patrolRoutesObserved: 10 },
   requiredResources: { qhLockoutAttempts: 1 },
-  requiredLoopFlags: { shipHijacked: true },
-  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 20,
 };
 
 export const STRAFING_RUN: Task = {

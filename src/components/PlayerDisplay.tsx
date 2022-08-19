@@ -11,6 +11,8 @@ export const PlayerDisplay = React.memo(() => {
         <strong>AEU</strong>: {energy.toFixed(0)}
       </div>
       <ResourceDisplay kind="linkedSensorDrones" />
+      <ResourceDisplay kind="qhLockoutAttempts" />
+      <ResourceDisplay kind="weaponSalvage" />
       <p>
         <strong>Combat:</strong> {combat}
       </p>
