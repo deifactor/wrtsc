@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { SimulationStep } from "../engine";
+import { Engine, SimulationStep, Task, TASKS } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
@@ -8,6 +8,17 @@ import * as q from "../engine/taskQueue";
 import React from "react";
 import { TaskTooltip } from "./TaskTooltip";
 import { useEngineSelector } from "../engineStore";
+import { entries } from "../records";
+
+/**
+ * True if we should even consider adding this to the queue. This doesn't
+ * indicate that it will *succeed*
+ */
+function canAddToQueue(engine: Engine, task: Task): boolean {
+  return entries(task.required.progress || {}).every(
+    ([progress, min]) => engine.progress[progress].level >= min
+  );
+}
 
 interface Props {
   className?: string;
@@ -60,7 +71,15 @@ const TaskQueueEditor = React.memo((props: Props) => {
     );
   });
 
-  const addButtons = Object.values(useEngineSelector((engine) => engine.tasks))
+  const addButtons = useEngineSelector((engine) =>
+    Object.values(TASKS).map((task) => ({
+      kind: task.kind,
+      cost: task.cost(engine),
+      visible: task.visible(engine),
+      canAddToQueue: canAddToQueue(engine, task),
+      shortName: task.shortName,
+    }))
+  )
     .filter((task) => task.visible)
     .map((task) => {
       return (

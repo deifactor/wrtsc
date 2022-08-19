@@ -13,7 +13,22 @@ function formatCompletion(frac: number): string {
 
 export const ScheduleDisplay = (props: Props) => {
   const { className } = props;
-  const schedule = useEngineSelector((engine) => engine.schedule);
+  const schedule = useEngineSelector((engine) => {
+    const schedule = engine.schedule;
+    return {
+      tasks: schedule.queue.map(({ task, count }, index) => ({
+        kind: task,
+        count,
+        completed: schedule.completions(index),
+      })),
+      currentTask: schedule.task && {
+        index: schedule.task.index,
+        cost: schedule.task.cost(engine),
+        iteration: schedule.task.iteration,
+        progress: schedule.task.cost(engine) - schedule.timeLeftOnTask,
+      },
+    };
+  });
 
   const completionFraction =
     schedule.currentTask &&

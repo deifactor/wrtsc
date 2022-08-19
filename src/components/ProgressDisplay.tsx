@@ -7,8 +7,10 @@ type Props = {
 
 export const ProgressDisplay = (props: Props) => {
   const { kind } = props;
-  const { level, xp, totalToNextLevel } = useEngineSelector(
-    (engine) => engine.progress[kind]
+  const level = useEngineSelector((engine) => engine.progress[kind].level);
+  const xp = useEngineSelector((engine) => engine.progress[kind].xp);
+  const totalToNextLevel = useEngineSelector(
+    (engine) => engine.progress[kind].totalToNextLevel
   );
   let levelDisplay = level.toString() + "%";
   const progressPercent = Math.floor((100 * xp) / totalToNextLevel);

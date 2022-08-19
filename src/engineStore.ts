@@ -2,7 +2,6 @@ import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { Engine, TaskQueue } from "./engine";
-import { EngineView, project } from "./viewModel";
 
 export type Settings = {
   autoRestart: boolean;
@@ -12,8 +11,12 @@ export const engineSlice = createSlice({
   name: "engine",
   initialState: () => ({
     engine: Engine.loadFromStorage(),
-
     settings: { autoRestart: true },
+    /**
+     * Note: this is "load-bearing" in that changing it forces Redux to think
+     * that the store has changed. You need to update this every time you tick
+     * the engine!
+     */
     lastUpdate: new Date().getTime(),
   }),
   reducers: {
@@ -62,9 +65,9 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export function useEngineSelector<T>(selector: (engine: EngineView) => T): T {
+export function useEngineSelector<T>(selector: (engine: Engine) => T): T {
   return useSelector<RootState, T>(
-    (store) => selector(project(store.engine.engine)),
+    (store) => selector(store.engine.engine),
     equal
   );
 }
