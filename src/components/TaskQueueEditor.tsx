@@ -5,6 +5,9 @@ import {
   SKILL_NAME,
   ProgressId,
   PROGRESS_NAME,
+  Requirements,
+  RESOURCES,
+  ResourceId,
 } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
@@ -18,6 +21,28 @@ interface Props {
   queue: q.TaskQueue;
   setQueue: (queue: q.TaskQueue) => void;
 }
+
+const RequirementsDisplay = React.memo(
+  ({ progress, resources }: Requirements) => {
+    const progressFrags = Object.entries(progress || {}).map(
+      ([progress, min]) => `${min}% ${PROGRESS_NAME[progress as ProgressId]}`
+    );
+    const resourceFrags = Object.entries(resources || {}).map(
+      ([resource, amount]) =>
+        `${amount}x ${RESOURCES[resource as ResourceId].name}`
+    );
+    const frags = [...progressFrags, ...resourceFrags];
+    if (frags.length) {
+      return (
+        <p>
+          <strong>Requires</strong>: {frags}
+        </p>
+      );
+    } else {
+      return null;
+    }
+  }
+);
 
 const TaskQueueEditor = React.memo((props: Props) => {
   const { queue, setQueue, className } = props;
@@ -67,13 +92,6 @@ const TaskQueueEditor = React.memo((props: Props) => {
   const addButtons = Object.values(TASKS)
     .filter((task) => true)
     .map((task) => {
-      const requirements = Object.entries(task.requiredProgress).map(
-        ([id, min]) => (
-          <span key={id}>
-            {PROGRESS_NAME[id as ProgressId]} {min}
-          </span>
-        )
-      );
       const trainingSection = task.trainedSkills.length !== 0 && (
         <p>
           <strong>Trains:</strong>{" "}
@@ -87,12 +105,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
           <p>
             <strong>Cost:</strong> OOPS
           </p>
-          {Object.keys(task.requiredProgress).length !== 0 && (
-            <p>
-              <strong>Requires: </strong>
-              {requirements}
-            </p>
-          )}
+          <RequirementsDisplay {...task.required} />
           {trainingSection}
           <hr className="border-gray-700 my-3" />
           <p className="text-xs mb-2 text-gray-400">{task.flavor}</p>

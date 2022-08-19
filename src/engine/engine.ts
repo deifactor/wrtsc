@@ -103,21 +103,21 @@ export class Engine {
   }
 
   perform(task: Task) {
-    task.extraPerform(this);
-    Object.entries(task.requiredResources).forEach(([res, value]) => {
+    Object.entries(task.required.resources || {}).forEach(([res, value]) => {
       this.resources[res as ResourceId] -= value;
     });
+    task.extraPerform(this);
   }
 
   canPerform(task: Task): boolean {
     return (
-      Object.entries(task.requiredProgress).every(
+      Object.entries(task.required.progress || {}).every(
         ([id, min]) => this.progress[id as ProgressId].level >= min
       ) &&
-      Object.entries(task.requiredResources).every(
+      Object.entries(task.required.resources || {}).every(
         ([id, min]) => this.resources[id as ResourceId] >= min
       ) &&
-      Object.entries(task.requiredLoopFlags).every(
+      Object.entries(task.required.flags || {}).every(
         ([id, value]) => this.flags[id as LoopFlagId] === value
       ) &&
       task.extraCheck(this)

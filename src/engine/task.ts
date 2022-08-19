@@ -29,6 +29,22 @@ const defaults = {
 // Some notes: at 1-1-1-1 2-2-2-2 etc task progression, it takes about 1300
 // repetitions to finish a task.
 
+export type Requirements = {
+  /** These progress values must be at least this large. */
+  progress?: Partial<Record<ProgressId, number>>;
+  /** These resources will be subtracted in the given amounts. */
+  resources?: Partial<Record<ResourceId, number>>;
+  /** These flags must be present with the specified values. */
+  flags?: Partial<Record<LoopFlagId, boolean>>;
+};
+export type Rewards = {
+  /** Rewards this much xp to the given progress. */
+  progress?: Partial<Record<ProgressId, number>>;
+  /** Adjusts the resource count by this much. */
+  resources?: Partial<Record<ResourceId, number>>;
+  /** Sets the flags to the given values. */
+  flags?: Partial<Record<LoopFlagId, boolean>>;
+};
 /** A task, something that goes in the task queue. */
 export type Task = {
   readonly kind: TaskKind;
@@ -47,21 +63,13 @@ export type Task = {
    * Note that this doesn't mean the player can take it; see `enabled`.
    */
   visible: (engine: Engine) => boolean;
-  /** Minimum stats for the action to be performable. */
-  requiredProgress: Partial<Record<ProgressId, number>>;
+  required: Requirements;
+  rewards: Rewards;
   /**
    * Skills that performing this task trains. This is an array and not a set,
    * even though it's unique, because the type inference works better this way.
    */
   trainedSkills: SkillId[];
-  /**
-   * Skills that tsh skills: SkillId[]; /** Minimum resources for the action to
-   * be performable. This will also result in the player consuming the resources
-   * on perform.
-   */
-  requiredResources: Partial<Record<ResourceId, number>>;
-  /** These flags must be present with the given values. */
-  requiredLoopFlags: Partial<Record<LoopFlagId, boolean>>;
   /**
    * An extra predicate indicating whether the action can be taken. This is on
    * top of any requirements.
@@ -79,9 +87,12 @@ export const EXPLORE_RUINS: Task = {
     "Increases amount of weapons and batteries that can be scavenged. 8x progress with Ship Hijacked.",
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
+  required: {},
+  rewards: { progress: { ruinsExploration: 1024 } },
   extraPerform: (engine) => {
-    const mult = engine.flags.shipHijacked ? 8 : 2;
-    engine.progress.ruinsExploration.addXp(mult * 1024);
+    if (engine.flags.shipHijacked) {
+      engine.progress.ruinsExploration.addXp(7 * 1024);
+    }
   },
   trainedSkills: ["ergodicity"],
 };
@@ -100,7 +111,8 @@ export const SCAVENGE_BATTERIES: Task = {
   extraPerform: (engine) => {
     engine.addEnergy(BATTERY_AMOUNT);
   },
-  requiredResources: { ruinsBatteries: 1 },
+  required: { resources: { ruinsBatteries: 1 } },
+  rewards: {},
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
 };
 
@@ -114,7 +126,8 @@ export const LINK_SENSOR_DRONES: Task = {
   flavor:
     "Long-range sensors are still responding to pings. Superresolution routines loaded.",
   extraPerform: (engine) => engine.resources.linkedSensorDrones++,
-  requiredResources: { unlinkedSensorDrones: 1 },
+  required: { resources: { unlinkedSensorDrones: 1 } },
+  rewards: { resources: { linkedSensorDrones: 1 } },
   visible: (engine) => engine.progress.ruinsExploration.level > 5,
 };
 
@@ -127,9 +140,8 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
-  extraPerform: (engine) => {
-    engine.progress.patrolRoutesObserved.addXp(1024 * 6);
-  },
+  required: { progress: { ruinsExploration: 10 } },
+  rewards: { progress: { patrolRoutesObserved: 1024 * 6 } },
 };
 
 export const KILL_SCOUT: Task = {
@@ -142,10 +154,12 @@ export const KILL_SCOUT: Task = {
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:
     "Simulations predict >99.99% kill rate with minimal retaliatory damage.",
-  requiredResources: { scouts: 1 },
-  extraPerform: (engine) => {
-    engine.resources.weaponSalvage++;
-    engine.resources.unoccupiedShips++;
+  required: { resources: { scouts: 1 } },
+  rewards: {
+    resources: {
+      weaponSalvage: 1,
+      unoccupiedShips: 1,
+    },
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
 };
@@ -166,11 +180,11 @@ export const HIJACK_SHIP: Task = {
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
   flavor:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
-  extraPerform: (engine) => {
-    engine.flags.shipHijacked = true;
-    engine.resources.qhLockoutAttempts += 12;
+  required: { resources: { unoccupiedShips: 1 } },
+  rewards: {
+    flags: { shipHijacked: true },
+    resources: { qhLockoutAttempts: 12 },
   },
-  requiredResources: { unoccupiedShips: 1 },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   trainedSkills: ["lethality"],
 };
@@ -185,10 +199,8 @@ export const DISABLE_LOCKOUTS: Task = {
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
-  extraPerform: (engine) => {
-    engine.progress.qhLockout.addXp(1024 * 10);
-  },
-  requiredResources: { qhLockoutAttempts: 1 },
+  required: { resources: { qhLockoutAttempts: 1 } },
+  rewards: { progress: { qhLockout: 1024 * 10 } },
 };
 
 export const STRAFING_RUN: Task = {
@@ -200,6 +212,10 @@ export const STRAFING_RUN: Task = {
   description: "Clean up the remaining Preservers.",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
+  required: {
+    flags: { shipHijacked: true },
+  },
+  rewards: {},
 };
 
 export const DISMANTLE_SENSOR_DRONES: Task = {
@@ -210,6 +226,11 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   cost: () => 3000,
   description: "Extract remaining energy from sensor drones.",
   flavor: "There is nothing left for them to monitor.",
+  required: {
+    flags: { shipHijacked: true },
+    progress: { qhLockout: 25 },
+  },
+  rewards: {},
 };
 
 export const LEAVE_RUINS: Task = {
@@ -221,7 +242,11 @@ export const LEAVE_RUINS: Task = {
   description: "Advance to the next zone.",
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
-  requiredProgress: { qhLockout: 100 },
+  required: {
+    flags: { shipHijacked: true },
+    progress: { qhLockout: 100 },
+  },
+  rewards: {},
   extraPerform: (engine) => {
     engine.zoneKind = "phobosDeimos";
   },
@@ -236,6 +261,8 @@ export const COMPLETE_RUINS: Task = {
   cost: () => 1,
   description: "Instantly complete everything in the Ruins.",
   flavor: "Existential debugger engaged.",
+  required: {},
+  rewards: {},
   extraPerform: (engine) => {
     for (const kind of [
       "ruinsExploration",
