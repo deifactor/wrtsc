@@ -11,6 +11,7 @@ import {
   TASKS,
 } from "./engine";
 import { ZoneKind } from "./engine/zone";
+import { mapValues } from "./records";
 
 export type ResourcesView = Record<ResourceId, { amount: number }>;
 export type FlagsView = Record<LoopFlagId, boolean>;
@@ -93,16 +94,4 @@ function projectSchedule(engine: Engine): ScheduleView {
       progress: schedule.task.cost(engine) - schedule.timeLeftOnTask,
     },
   };
-}
-
-/** Map a function over the values of a record. */
-function mapValues<K extends string | number | symbol, U, V>(
-  obj: Record<K, U>,
-  func: (val: U, key: K) => V
-): Record<K, V> {
-  const mapped = {} as Record<K, V>;
-  Object.entries(obj).forEach(([key, val]) => {
-    mapped[key as K] = func(val as U, key as K);
-  });
-  return mapped;
 }

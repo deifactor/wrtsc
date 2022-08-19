@@ -6,6 +6,7 @@ import {
   plainToInstance,
   Transform,
 } from "class-transformer";
+import { entries, mapValues } from "../records";
 
 import {
   Progress,
@@ -79,10 +80,7 @@ export class Engine {
   private _totalEnergy: number = INITIAL_ENERGY;
 
   constructor() {
-    this.resources = {} as any;
-    for (const resource of RESOURCE_IDS) {
-      this.resources[resource] = RESOURCES[resource].initial(this);
-    }
+    this.resources = mapValues(RESOURCES, (res) => res.initial(this));
   }
 
   get energy(): number {
@@ -103,31 +101,31 @@ export class Engine {
   }
 
   perform(task: Task) {
-    Object.entries(task.required.resources || {}).forEach(([res, value]) => {
-      this.resources[res as ResourceId] -= value;
+    entries(task.required.resources || {}).forEach(([res, value]) => {
+      this.resources[res] -= value;
     });
-    Object.entries(task.rewards.resources || {}).forEach(([res, value]) => {
-      this.resources[res as ResourceId] += value;
+    entries(task.rewards.resources || {}).forEach(([res, value]) => {
+      this.resources[res] += value;
     });
-    Object.entries(task.rewards.progress || {}).forEach(([progress, xp]) => {
-      this.progress[progress as ProgressId].addXp(xp);
+    entries(task.rewards.progress || {}).forEach(([progress, xp]) => {
+      this.progress[progress].addXp(xp);
     });
-    Object.entries(task.rewards.flags || {}).forEach(([flag, value]) => {
-      this.flags[flag as LoopFlagId] = value;
+    entries(task.rewards.flags || {}).forEach(([flag, value]) => {
+      this.flags[flag] = value;
     });
     task.extraPerform(this);
   }
 
   canPerform(task: Task): boolean {
     return (
-      Object.entries(task.required.progress || {}).every(
-        ([id, min]) => this.progress[id as ProgressId].level >= min
+      entries(task.required.progress || {}).every(
+        ([id, min]) => this.progress[id].level >= min
       ) &&
-      Object.entries(task.required.resources || {}).every(
-        ([id, min]) => this.resources[id as ResourceId] >= min
+      entries(task.required.resources || {}).every(
+        ([id, min]) => this.resources[id] >= min
       ) &&
-      Object.entries(task.required.flags || {}).every(
-        ([id, value]) => this.flags[id as LoopFlagId] === value
+      entries(task.required.flags || {}).every(
+        ([id, value]) => this.flags[id] === value
       ) &&
       task.extraCheck(this)
     );
