@@ -11,6 +11,7 @@ import {
   moveTask,
   pushTaskToQueue,
   removeTask,
+  setBatchCountToMax,
   useAppDispatch,
   useAppSelector,
   useEngineSelector,
@@ -45,6 +46,11 @@ const TaskQueueEditor = React.memo((props: Props) => {
     const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
     const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
     const remove = () => dispatch(removeTask(index));
+    const setToMaxButton = TASKS[entry.task].maxIterations && (
+      <Button size="sm" onClick={() => dispatch(setBatchCountToMax(index))}>
+        Max
+      </Button>
+    );
     const step: SimulationStep | undefined = simulation[index];
     return (
       // eslint-disable-next-line react/no-array-index-key
@@ -59,6 +65,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
           {entry.count}
         </div>
         <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>
+        {setToMaxButton}
         <Button size="sm" onClick={incrementCount}>
           <FaPlus />
         </Button>

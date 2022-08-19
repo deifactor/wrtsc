@@ -1,5 +1,11 @@
 import { Engine } from "./engine";
-import { LoopFlagId, ResourceId, SkillId, ProgressId } from "./player";
+import {
+  LoopFlagId,
+  ResourceId,
+  SkillId,
+  ProgressId,
+  RESOURCES,
+} from "./player";
 
 export type TaskKind =
   | "exploreRuins"
@@ -75,6 +81,12 @@ export type Task = {
    * top of any requirements.
    */
   extraCheck: (engine: Engine) => boolean;
+  /**
+   * Number of times this task can be performed in a loop. This is for tasks
+   * such as Scavenge Energy and Link Patrol Drones that effectively just spend
+   * a resource. If supplied, this must be always right.
+   */
+  maxIterations?: (engine: Engine) => number;
 };
 
 export const EXPLORE_RUINS: Task = {
@@ -114,6 +126,7 @@ export const SCAVENGE_BATTERIES: Task = {
   required: { resources: { ruinsBatteries: 1 } },
   rewards: {},
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
+  maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -131,6 +144,7 @@ export const LINK_SENSOR_DRONES: Task = {
   },
   rewards: { resources: { linkedSensorDrones: 1 } },
   visible: (engine) => engine.progress.ruinsExploration.level > 5,
+  maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -165,6 +179,7 @@ export const KILL_SCOUT: Task = {
     },
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
+  maxIterations: (engine) => RESOURCES.scouts.initial(engine),
 };
 
 export const HIJACK_SHIP: Task = {

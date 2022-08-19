@@ -2,7 +2,7 @@ import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { original } from "immer";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { Engine, TaskQueue, TaskKind, SimulationResult } from "./engine";
+import { Engine, TaskQueue, TaskKind, SimulationResult, TASKS } from "./engine";
 
 export type Settings = {
   autoRestart: boolean;
@@ -90,6 +90,20 @@ export const engineSlice = createSlice({
     },
 
     /**
+     * Set the batch count to the largest possible. The index-th task *must*
+     * have a defined maxIterations function.
+     */
+    setBatchCountToMax: (state, action: PayloadAction<number>) => {
+      const index = action.payload;
+      const queue = state.nextQueue;
+      const maxIterations = TASKS[queue[index].task].maxIterations!(
+        state.engine as any
+      );
+      queue[index].count = maxIterations;
+      state.simulation = state.engine.simulation(state.nextQueue);
+    },
+
+    /**
      * Move the task at `from` to the position `to`. Throws if either of those
      * is out of bounds.
      */
@@ -124,6 +138,7 @@ export const {
   nextTask,
   pushTaskToQueue,
   modifyBatchCount,
+  setBatchCountToMax,
   moveTask,
   removeTask,
 } = engineSlice.actions;
