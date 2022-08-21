@@ -6,7 +6,7 @@ export class Progress {
   public level: number = 0;
 
   get totalToNextLevel(): number {
-    return (Math.floor(this.level / 4) + 1) * 1024;
+    return (this.level + 1) * 1024;
   }
 
   addXp(xp: number) {
