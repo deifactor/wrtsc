@@ -95,7 +95,7 @@ export const EXPLORE_RUINS: Task = {
   kind: "exploreRuins",
   name: "Explore Ruins",
   shortName: "XPL_RUIN",
-  cost: () => 2500,
+  cost: () => 2000,
   description:
     "Increases amount of weapons and batteries that can be scavenged. 50% more progress with Ship Hijacked.",
   flavor:
@@ -210,6 +210,8 @@ export const KILL_SCOUT: Task = {
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
 };
 
+const LOCKOUTS_PER_SHIP = 8;
+
 export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
@@ -232,12 +234,13 @@ export const HIJACK_SHIP: Task = {
   },
   rewards: {
     flags: { shipHijacked: true },
-    resources: { qhLockoutAttempts: 8 },
+    resources: { qhLockoutAttempts: LOCKOUTS_PER_SHIP },
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
     engine.addMilestone("shipHijacked");
   },
+  maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: ["lethality"],
 };
 
@@ -252,8 +255,10 @@ export const DISABLE_LOCKOUTS: Task = {
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   visible: (engine) => engine.hasMilestone("shipHijacked"),
+  maxIterations: (engine) =>
+    LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
-  rewards: { progress: { qhLockout: 128 } },
+  rewards: { progress: { qhLockout: 256 } },
 };
 
 export const STRAFING_RUN: Task = {
@@ -261,8 +266,9 @@ export const STRAFING_RUN: Task = {
   kind: "strafingRun",
   name: "Strafing Run",
   shortName: "STRAFE",
-  cost: () => 3000,
-  description: "Clean up the remaining Preservers.",
+  cost: () => 6000,
+  description:
+    "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
   visible: (engine) => engine.hasMilestone("shipHijacked"),
@@ -278,17 +284,19 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   kind: "dismantleSensorDrones",
   name: "Dismantle Sensor Drones",
   shortName: "DSMNTL",
-  cost: () => 3000,
+  cost: () => 500,
   description:
-    "Use your stolen ship to fly to your sensor drone array and dismantle it for energy.",
+    "Use your stolen ship to fly to your sensor drone array. Each drone dismantled provides 3000 AEU.",
   flavor:
     "There is nothing left for them to monitor. The Sixteenth Flower is gone.",
   visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 25 },
+    resources: { linkedSensorDrones: 1 },
   },
   rewards: {},
+  extraPerform: (engine) => engine.addEnergy(3000),
 };
 
 export const LEAVE_RUINS: Task = {
@@ -344,8 +352,8 @@ export const TASKS: Record<TaskKind, Task> = {
   eradicateScout: KILL_SCOUT,
   hijackShip: HIJACK_SHIP,
   disableLockouts: DISABLE_LOCKOUTS,
-  strafingRun: STRAFING_RUN,
   dismantleSensorDrones: DISMANTLE_SENSOR_DRONES,
+  strafingRun: STRAFING_RUN,
   leaveRuins: LEAVE_RUINS,
   completeRuins: COMPLETE_RUINS,
 };
