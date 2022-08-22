@@ -98,10 +98,15 @@ function projectSchedule(engine: Engine): ScheduleView {
 }
 
 /**
- * True if we should even consider adding this to the queue. This doesn't
- * indicate that it will *succeed*
+ * True if we should even allow the player to add this task to the queue. This
+ * should only return false if there is no possible way for this task to succeed.
  */
 function canAddToQueue(engine: Engine, task: Task): boolean {
+  // Zero max iterations means it's impossible.
+  if (task.maxIterations && task.maxIterations(engine) === 0) {
+    return false;
+  }
+  // Check progress against the minima. We can't check resources or flags because those vary.
   return entries(task.required.progress || {}).every(
     ([progress, min]) => engine.progress[progress].level >= min
   );
