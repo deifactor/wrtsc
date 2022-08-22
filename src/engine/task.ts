@@ -89,10 +89,10 @@ export type Task = {
 /**
  * Some timescale stuff. for a one-second task:
  *
- * - 10% takes 1 minute
- * - 20% takes 3.5 minutes
- * - 50% takes 21 minutes
- * - 100% takes 84 minutes
+ * - 10% takes 1 minute, or about 1% of the total.
+ * - 20% takes 3.5 minutes, or about 4% of the total.
+ * - 50% takes 21 minutes, or about 25% of the total.
+ * - 100% takes 84 minutes.
  */
 
 export const EXPLORE_RUINS: Task = {
