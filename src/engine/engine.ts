@@ -1,6 +1,7 @@
 import {
   ClassConstructor,
   Exclude,
+  Expose,
   instanceToInstance,
   instanceToPlain,
   plainToInstance,
@@ -54,8 +55,10 @@ function _convertRecord<T>(cls: ClassConstructor<T>) {
 const INITIAL_ENERGY = 5000;
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
+@Exclude()
 export class Engine {
   /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
+  @Expose()
   @Transform(_convertRecord(Progress), { toClassOnly: true })
   readonly progress: Record<ProgressId, Progress> = {
     ruinsExploration: new Progress(),
@@ -70,6 +73,7 @@ export class Engine {
   };
 
   // It *says* it can handle sets, but that doesn't appear to be true...
+  @Expose()
   @Transform((params: { value: MilestoneId[] }) => new Set(...params.value), {
     toClassOnly: true,
   })
@@ -77,13 +81,11 @@ export class Engine {
 
   zoneKind: ZoneKind = RUINS.kind;
 
-  @Exclude()
   schedule: Schedule = new Schedule([], this);
 
-  @Exclude()
   private _energy: number = INITIAL_ENERGY;
+
   /** The total amount of energy acquired in this loop. */
-  @Exclude()
   private _totalEnergy: number = INITIAL_ENERGY;
 
   constructor() {
