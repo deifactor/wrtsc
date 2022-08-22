@@ -43,7 +43,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
       // eslint-disable-next-line react/no-array-index-key
       <div
         key={index}
-        className={classNames("flex items-center leading-8 my-1", {
+        className={classNames("flex items-center h-10", {
           "text-red-300": !step?.ok,
         })}
       >
