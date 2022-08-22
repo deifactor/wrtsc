@@ -3,29 +3,37 @@ import equal from "fast-deep-equal";
 import { original } from "immer";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { Engine, TaskQueue, TaskKind, SimulationResult, TASKS } from "./engine";
+import { EngineView, project } from "./viewModel";
 
 export type Settings = {
   autoRestart: boolean;
 };
 
+// TODO: Change these reducers to actually be pure. No calling getTime. Mutation should be moved into middleware.
 export const engineSlice = createSlice({
   name: "engine",
-  initialState: () => ({
-    engine: Engine.loadFromStorage(),
-    settings: { autoRestart: true },
-    nextQueue: [] as TaskQueue,
-    simulation: [] as SimulationResult,
-    /**
-     * Note: this is "load-bearing" in that changing it forces Redux to think
-     * that the store has changed. You need to update this every time you tick
-     * the engine!
-     */
-    lastUpdate: new Date().getTime(),
-  }),
+  initialState: () => {
+    const engine = Engine.loadFromStorage();
+    return {
+      engine,
+      view: project(engine),
+      settings: { autoRestart: true },
+      nextQueue: [] as TaskQueue,
+      simulation: [] as SimulationResult,
+      /**
+       * Note: this is "load-bearing" in that changing it forces Redux to think
+       * that the store has changed. You need to update this every time you tick
+       * the engine!
+       */
+      lastUpdate: new Date().getTime(),
+    };
+  },
   reducers: {
     hardReset: () => {
+      const engine = new Engine();
       return {
-        engine: new Engine(),
+        engine: engine,
+        view: project(engine),
         settings: { autoRestart: true },
         nextQueue: [],
         simulation: [],
@@ -35,10 +43,12 @@ export const engineSlice = createSlice({
     startLoop: (state) => {
       state.engine.startLoop(original(state.nextQueue)!);
       state.simulation = state.engine.simulation(state.nextQueue);
+      state.view = project(state.engine as any as Engine);
       state.lastUpdate = new Date().getTime();
     },
     nextTask: (state) => {
       state.engine.nextTask();
+      state.view = project(state.engine as any as Engine);
       state.lastUpdate = new Date().getTime();
     },
     tick: (state, action: PayloadAction<number | undefined>) => {
@@ -52,6 +62,7 @@ export const engineSlice = createSlice({
       }
       state.lastUpdate = now;
       state.engine.saveToStorage();
+      state.view = project(state.engine as any as Engine);
     },
 
     /**
@@ -157,9 +168,9 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export function useEngineSelector<T>(selector: (engine: Engine) => T): T {
+export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
   return useSelector<RootState, T>(
-    (store) => selector(store.engine.engine),
+    (store) => selector(store.engine.view),
     equal
   );
 }

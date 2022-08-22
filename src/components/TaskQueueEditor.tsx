@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { Engine, SimulationStep, Task, TASKS } from "../engine";
+import { SimulationStep, TASKS } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
@@ -16,18 +16,7 @@ import {
   useAppSelector,
   useEngineSelector,
 } from "../engineStore";
-import { entries } from "../records";
 import equal from "fast-deep-equal";
-
-/**
- * True if we should even consider adding this to the queue. This doesn't
- * indicate that it will *succeed*
- */
-function canAddToQueue(engine: Engine, task: Task): boolean {
-  return entries(task.required.progress || {}).every(
-    ([progress, min]) => engine.progress[progress].level >= min
-  );
-}
 
 interface Props {
   className?: string;
@@ -85,15 +74,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
     );
   });
 
-  const addButtons = useEngineSelector((engine) =>
-    Object.values(TASKS).map((task) => ({
-      kind: task.kind,
-      cost: task.cost(engine),
-      visible: task.visible(engine),
-      canAddToQueue: canAddToQueue(engine, task),
-      shortName: task.shortName,
-    }))
-  )
+  const addButtons = useEngineSelector((engine) => Object.values(engine.tasks))
     .filter((task) => task.visible)
     .map((task) => {
       return (

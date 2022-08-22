@@ -17,7 +17,7 @@ interface Props {
 
 export const TaskTooltip = React.memo(({ kind }: Props) => {
   const task = TASKS[kind];
-  const cost = useEngineSelector((engine) => TASKS[kind].cost(engine));
+  const cost = useEngineSelector((engine) => engine.tasks[kind].cost);
   const trainingSection = task.trainedSkills.length !== 0 && (
     <p>
       <strong>Trains:</strong>{" "}

@@ -135,15 +135,16 @@ export const LINK_SENSOR_DRONES: Task = {
   name: "Link Sensor Drones",
   shortName: "LINK_DRN",
   cost: () => 1500,
-  description: `Increases progress for ${EXPLORE_RUINS.name}.`,
+  description:
+    "Increases progress for Explore Ruins and Observe Patrol Routes.",
   flavor:
-    "Long-range sensors are still responding to pings. Superresolution routines loaded.",
+    "Long-range sensors are still responding to pings. Superresolution routines loaded. Beginning handshake...",
   required: {
     resources: { unlinkedSensorDrones: 1 },
     progress: { ruinsExploration: 10 },
   },
   rewards: { resources: { linkedSensorDrones: 1 } },
-  visible: (engine) => engine.progress.ruinsExploration.level > 5,
+  visible: (engine) => engine.progress.ruinsExploration.level >= 5,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
 };
 
@@ -158,7 +159,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
   rewards: { progress: { patrolRoutesObserved: 1024 * 6 } },
-  visible: (engine) => engine.progress.ruinsExploration.level > 10,
+  visible: (engine) => engine.progress.ruinsExploration.level >= 10,
 };
 
 export const KILL_SCOUT: Task = {
@@ -245,8 +246,11 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   name: "Dismantle Sensor Drones",
   shortName: "DSMNTL",
   cost: () => 3000,
-  description: "Extract remaining energy from sensor drones.",
-  flavor: "There is nothing left for them to monitor.",
+  description:
+    "Use your stolen ship to fly to your sensor drone array and dismantle it for energy.",
+  flavor:
+    "There is nothing left for them to monitor. The Sixteenth Flower is gone.",
+  visible: (engine) => engine.progress.qhLockout.level >= 10,
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 25 },
