@@ -176,6 +176,7 @@ export class Engine {
   nextTask() {
     entries(this.schedule.task!.trainedSkills).forEach(([id, xp]) => {
       this.skills[id].addXp(xp);
+      this.skills.metacognition.addXp(xp / 10);
     });
     this.perform(this.schedule.task!);
     this.schedule.next();
