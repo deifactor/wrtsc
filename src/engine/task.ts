@@ -226,7 +226,10 @@ export const HIJACK_SHIP: Task = {
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
   flavor:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
-  required: { resources: { unoccupiedShips: 1 } },
+  required: {
+    resources: { unoccupiedShips: 1 },
+    progress: { patrolRoutesObserved: 15 },
+  },
   rewards: {
     flags: { shipHijacked: true },
     resources: { qhLockoutAttempts: 12 },
