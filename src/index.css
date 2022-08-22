@@ -15,6 +15,10 @@ html {
   h2 {
     @apply text-xl pb-2;
   }
+
+  a {
+   @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
+  }
 }
 
 /* We use div. here in order to get extra specificity. */

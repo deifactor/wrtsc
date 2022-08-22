@@ -17,7 +17,7 @@ export const Credits = (props: Props) => {
         skill icons and to{" "}
         <a href="https://www.freepik.com/vectors/background">
           coolvector on freepik
-        </a>
+        </a>{" "}
         for the backgrounds.
       </p>
       <p>
