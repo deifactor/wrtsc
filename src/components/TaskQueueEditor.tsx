@@ -34,7 +34,7 @@ const TaskQueueEditor = React.memo((props: Props) => {
     const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
     const remove = () => dispatch(removeTask(index));
     const setToMaxButton = TASKS[entry.task].maxIterations && (
-      <Button size="sm" onClick={() => dispatch(setBatchCountToMax(index))}>
+      <Button size="xs" onClick={() => dispatch(setBatchCountToMax(index))}>
         Max
       </Button>
     );
@@ -43,32 +43,34 @@ const TaskQueueEditor = React.memo((props: Props) => {
       // eslint-disable-next-line react/no-array-index-key
       <div
         key={index}
-        className={classNames("flex items-center my-1", {
+        className={classNames("flex items-center leading-8 my-1", {
           "text-red-300": !step?.ok,
         })}
       >
         <div className="flex-grow font-mono text-lg">
-          <TaskIcon className="inline" task={entry.task} />x{entry.count}
+          <TaskIcon className="inline" task={entry.task} /> x{entry.count}
         </div>
         <div className="px-4 text-yellow-300 font-mono font-bold text-lg">
           {step?.energy}
         </div>
-        {setToMaxButton}
-        <Button size="sm" onClick={incrementCount}>
-          <FaPlus />
-        </Button>
-        <Button size="sm" onClick={decrementCount}>
-          <FaMinus />
-        </Button>
-        <Button size="sm" onClick={moveUp}>
-          <FaArrowUp />
-        </Button>
-        <Button size="sm" onClick={moveDown}>
-          <FaArrowDown />
-        </Button>
-        <Button size="sm" onClick={remove}>
-          <RiDeleteBackFill />
-        </Button>
+        <div className="text-sm">
+          {setToMaxButton}
+          <Button size="xs" onClick={incrementCount}>
+            <FaPlus size="1em" />
+          </Button>
+          <Button size="xs" onClick={decrementCount}>
+            <FaMinus />
+          </Button>
+          <Button size="xs" onClick={moveUp}>
+            <FaArrowUp />
+          </Button>
+          <Button size="xs" onClick={moveDown}>
+            <FaArrowDown />
+          </Button>
+          <Button size="xs" onClick={remove}>
+            <RiDeleteBackFill />
+          </Button>
+        </div>
       </div>
     );
   });

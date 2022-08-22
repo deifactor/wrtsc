@@ -38,7 +38,7 @@ export const ScheduleDisplay = (props: Props) => {
     );
     // eslint-disable-next-line react/no-array-index-key
     return (
-      <div className="flex my-1 font-mono text-lg" key={idx}>
+      <div className="flex my-1 font-mono text-lg leading-8" key={idx}>
         <span className="inline-block">
           <TaskIcon className="inline" task={entry.kind} /> {entry.completed}/
           {entry.count}{" "}

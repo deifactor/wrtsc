@@ -10,7 +10,7 @@ interface Props {
   icon?: IconType;
   state?: "active" | "locked";
   kind?: "normal" | "danger";
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
   children: ReactNode;
   className?: string;
   tooltip?: ReactNode;
@@ -36,6 +36,7 @@ export const Button = React.memo(
     } = usePopperTooltip();
 
     const sizeClass = {
+      xs: "h-5 outline-0 bg-inherit",
       sm: "py-1 px-1 h-7",
       md: "py-2 px-2 h-10",
     };
