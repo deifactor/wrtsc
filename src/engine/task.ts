@@ -263,7 +263,7 @@ export const DISABLE_LOCKOUTS: Task = {
   maxIterations: (engine) =>
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
-  rewards: { progress: { qhLockout: 256 } },
+  rewards: { progress: { qhLockout: 1024 } },
   trainedSkills: ["datalink"],
 };
 
