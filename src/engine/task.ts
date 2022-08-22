@@ -136,7 +136,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   name: "Discharge Teracapacitor",
   shortName: "DSCH_TER",
   cost: () => 2000,
-  description: `Gives 100 * (seconds in loop) energy, capped at 25600 at 256 seconds`,
+  description: `Gives 200 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
   required: { resources: { teracapacitors: 1 } },
@@ -144,7 +144,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
   extraPerform: (engine) => {
-    engine.addEnergy(Math.min(25600, engine.timeInLoop / 10));
+    engine.addEnergy(Math.min(25600, engine.timeInLoop / 5));
   },
 };
 
@@ -246,7 +246,7 @@ export const DISABLE_LOCKOUTS: Task = {
   kind: "disableLockouts",
   name: "Override Lockouts",
   shortName: "OVR_LOCK",
-  cost: () => 3000,
+  cost: () => 800,
   description:
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
   flavor:
