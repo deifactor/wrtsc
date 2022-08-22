@@ -253,7 +253,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: { resources: { qhLockoutAttempts: 1 } },
-  rewards: { progress: { qhLockout: 1024 * 10 } },
+  rewards: { progress: { qhLockout: 1024 } },
 };
 
 export const STRAFING_RUN: Task = {
@@ -308,7 +308,7 @@ export const LEAVE_RUINS: Task = {
   extraPerform: (engine) => {
     engine.zoneKind = "phobosDeimos";
   },
-  visible: (engine) => engine.progress.qhLockout.level >= 50,
+  visible: (engine) => engine.hasMilestone("shipHijacked"),
 };
 
 export const COMPLETE_RUINS: Task = {
