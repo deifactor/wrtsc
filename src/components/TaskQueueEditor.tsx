@@ -47,11 +47,12 @@ const TaskQueueEditor = React.memo((props: Props) => {
           "text-red-300": !step?.ok,
         })}
       >
-        <div className="flex-grow">
-          <TaskIcon className="inline align-sub" task={entry.task} /> x
-          {entry.count}
+        <div className="flex-grow font-mono text-lg">
+          <TaskIcon className="inline" task={entry.task} />x{entry.count}
         </div>
-        <div className="px-4 text-yellow-300 font-bold">{step?.energy}</div>
+        <div className="px-4 text-yellow-300 font-mono font-bold text-lg">
+          {step?.energy}
+        </div>
         {setToMaxButton}
         <Button size="sm" onClick={incrementCount}>
           <FaPlus />
