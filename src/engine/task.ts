@@ -32,9 +32,6 @@ const defaults = {
   trainedSkills: [],
 };
 
-// Some notes: at 1-1-1-1 2-2-2-2 etc task progression, it takes about 1300
-// repetitions to finish a task.
-
 export type Requirements = {
   /** These progress values must be at least this large. */
   progress?: Partial<Record<ProgressId, number>>;
@@ -89,6 +86,15 @@ export type Task = {
   maxIterations?: (engine: Engine) => number;
 };
 
+/**
+ * Some timescale stuff. for a one-second task:
+ *
+ * - 10% takes 1 minute
+ * - 20% takes 3.5 minutes
+ * - 50% takes 21 minutes
+ * - 100% takes 84 minutes
+ */
+
 export const EXPLORE_RUINS: Task = {
   ...defaults,
   kind: "exploreRuins",
@@ -96,27 +102,27 @@ export const EXPLORE_RUINS: Task = {
   shortName: "XPL_RUIN",
   cost: () => 2500,
   description:
-    "Increases amount of weapons and batteries that can be scavenged. 8x progress with Ship Hijacked.",
+    "Increases amount of weapons and batteries that can be scavenged. 50% more progress with Ship Hijacked.",
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   required: {},
   rewards: { progress: { ruinsExploration: 1024 } },
   extraPerform: (engine) => {
-    if (engine.flags.shipHijacked) {
-      engine.progress.ruinsExploration.addXp(7 * 1024);
-    }
+    engine.progress.ruinsExploration.addXp(
+      (exploreMultiplier(engine) - 1) * 1024
+    );
   },
   trainedSkills: ["ergodicity"],
 };
 
-const BATTERY_AMOUNT = 3500;
+const BATTERY_AMOUNT = 3000;
 
 export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
-  cost: () => 1000,
+  cost: () => 500,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
@@ -136,15 +142,15 @@ export const LINK_SENSOR_DRONES: Task = {
   shortName: "LINK_DRN",
   cost: () => 1500,
   description:
-    "Increases progress for Explore Ruins and Observe Patrol Routes.",
+    "Multiplies progress for Explore Ruins and Observe Patrol Routes by sqrt(1 + linked drones). Bonus stacks with Ship Hijacked bonuses.",
   flavor:
     "Long-range sensors are still responding to pings. Superresolution routines loaded. Beginning handshake...",
   required: {
     resources: { unlinkedSensorDrones: 1 },
-    progress: { ruinsExploration: 10 },
+    progress: { ruinsExploration: 5 },
   },
   rewards: { resources: { linkedSensorDrones: 1 } },
-  visible: (engine) => engine.progress.ruinsExploration.level >= 5,
+  visible: (engine) => engine.progress.ruinsExploration.level >= 1,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
 };
 
@@ -158,7 +164,12 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
-  rewards: { progress: { patrolRoutesObserved: 1024 * 6 } },
+  rewards: { progress: { patrolRoutesObserved: 1024 } },
+  extraPerform: (engine) => {
+    engine.progress.patrolRoutesObserved.addXp(
+      (exploreMultiplier(engine) - 1) * 1024
+    );
+  },
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
 };
 
@@ -172,7 +183,10 @@ export const KILL_SCOUT: Task = {
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:
     "Simulations predict >99.99% kill rate with minimal retaliatory damage.",
-  required: { resources: { scouts: 1 } },
+  required: {
+    resources: { scouts: 1 },
+    progress: { patrolRoutesObserved: 10 },
+  },
   rewards: {
     resources: {
       weaponSalvage: 1,
@@ -315,3 +329,9 @@ export const TASKS: Record<TaskKind, Task> = {
   leaveRuins: LEAVE_RUINS,
   completeRuins: COMPLETE_RUINS,
 };
+
+function exploreMultiplier(engine: Engine): number {
+  const droneMultiplier = Math.sqrt(1 + engine.resources.linkedSensorDrones);
+  const shipMultiplier = engine.flags.shipHijacked ? 1.5 : 1;
+  return droneMultiplier * shipMultiplier;
+}

@@ -88,8 +88,7 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     id: "unlinkedSensorDrones",
     name: "Unlinked Sensor Drones",
     zone: "ruins",
-    initial: (engine) =>
-      Math.floor(engine.progress.ruinsExploration.level / 10),
+    initial: (engine) => Math.floor(engine.progress.ruinsExploration.level / 5),
   },
   linkedSensorDrones: {
     id: "linkedSensorDrones",
