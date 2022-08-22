@@ -45,6 +45,7 @@ export const engineSlice = createSlice({
       state.simulation = state.engine.simulation(state.nextQueue);
       state.view = project(state.engine as any as Engine);
       state.lastUpdate = new Date().getTime();
+      state.engine.saveToStorage();
     },
     nextTask: (state) => {
       state.engine.nextTask();
@@ -62,9 +63,9 @@ export const engineSlice = createSlice({
         if (shouldRestart) {
           state.simulation = state.engine.simulation(state.nextQueue);
           state.engine.startLoop(original(state.nextQueue)!);
+          state.engine.saveToStorage();
         }
         state.lastUpdate = now;
-        state.engine.saveToStorage();
         state.view = project(state.engine as any as Engine);
       },
       prepare(payload: {
