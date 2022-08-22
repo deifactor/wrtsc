@@ -100,6 +100,7 @@ const App = () => {
           <TabPanel>
             <div className="flex flex-row h-full space-x-12">
               <TaskQueueEditor className="h-full w-3/5" />
+              <div className="w-px bg-gray-800" />
               <ScheduleDisplay className="h-full w-2/5" />
             </div>
           </TabPanel>
