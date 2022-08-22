@@ -17,6 +17,8 @@ import {
   RESOURCES,
   RESOURCE_IDS,
   MilestoneId,
+  Skill,
+  SkillId,
 } from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
@@ -64,6 +66,17 @@ export class Engine {
     ruinsExploration: new Progress(),
     patrolRoutesObserved: new Progress(),
     qhLockout: new Progress(),
+  };
+
+  @Expose()
+  @Transform(_convertRecord(Skill), { toClassOnly: true })
+  readonly skills: Record<SkillId, Skill> = {
+    lethality: new Skill(),
+    ergodicity: new Skill(),
+    datalink: new Skill(),
+    spatial: new Skill(),
+    metacognition: new Skill(),
+    energyTransfer: new Skill(),
   };
 
   resources: Record<ResourceId, number>;
@@ -187,6 +200,9 @@ export class Engine {
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
+      for (const skill of this.schedule.task.trainedSkills) {
+        this.skills[skill].addXp(ticked);
+      }
       this.removeEnergy(ticked);
       this._timeInLoop += ticked;
       if (this.schedule.taskDone) {

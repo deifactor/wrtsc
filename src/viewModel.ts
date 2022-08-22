@@ -10,6 +10,7 @@ import {
   TaskKind,
   TASKS,
   Task,
+  SkillId,
 } from "./engine";
 import { ZoneKind } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
@@ -19,6 +20,10 @@ export type ResourcesView = Record<
   { amount: number; visible: boolean }
 >;
 export type FlagsView = Record<LoopFlagId, boolean>;
+export type SkillView = Record<
+  SkillId,
+  { level: number; xp: number; totalToNextLevel: number; visible: boolean }
+>;
 export type ProgressView = Record<
   ProgressId,
   { level: number; xp: number; totalToNextLevel: number; visible: boolean }
@@ -46,6 +51,7 @@ export type EngineView = {
   resources: ResourcesView;
   flags: FlagsView;
   progress: ProgressView;
+  skills: SkillView;
   zoneKind: ZoneKind;
   energy: number;
   totalEnergy: number;
@@ -70,6 +76,12 @@ export function project(engine: Engine): EngineView {
       xp: level.xp,
       totalToNextLevel: level.totalToNextLevel,
       visible: visibles.progresses.has(id),
+    })),
+    skills: mapValues(engine.skills, (skill) => ({
+      level: skill.level,
+      xp: skill.xp,
+      totalToNextLevel: skill.totalToNextLevel,
+      visible: true,
     })),
     combat: engine.combat,
     zoneKind: engine.zoneKind,

@@ -128,6 +128,7 @@ export const SCAVENGE_BATTERIES: Task = {
   rewards: {},
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
+  trainedSkills: ["energyTransfer"],
 };
 
 export const DRAIN_TERACAPACITOR: Task = {
@@ -146,6 +147,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   extraPerform: (engine) => {
     engine.addEnergy(Math.min(25600, engine.timeInLoop / 5));
   },
+  trainedSkills: ["energyTransfer"],
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -165,6 +167,7 @@ export const LINK_SENSOR_DRONES: Task = {
   rewards: { resources: { linkedSensorDrones: 1 } },
   visible: (engine) => engine.progress.ruinsExploration.level >= 1,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
+  trainedSkills: ["datalink"],
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -184,6 +187,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     );
   },
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
+  trainedSkills: ["ergodicity"],
 };
 
 export const KILL_SCOUT: Task = {
@@ -208,6 +212,7 @@ export const KILL_SCOUT: Task = {
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
+  trainedSkills: ["lethality"],
 };
 
 const LOCKOUTS_PER_SHIP = 8;
@@ -259,6 +264,7 @@ export const DISABLE_LOCKOUTS: Task = {
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
   rewards: { progress: { qhLockout: 256 } },
+  trainedSkills: ["datalink"],
 };
 
 export const STRAFING_RUN: Task = {
@@ -277,6 +283,7 @@ export const STRAFING_RUN: Task = {
     progress: { qhLockout: 50 },
   },
   rewards: {},
+  trainedSkills: ["spatial"],
 };
 
 export const DISMANTLE_SENSOR_DRONES: Task = {
@@ -297,6 +304,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   },
   rewards: {},
   extraPerform: (engine) => engine.addEnergy(3000),
+  trainedSkills: ["energyTransfer"],
 };
 
 export const LEAVE_RUINS: Task = {
@@ -317,6 +325,7 @@ export const LEAVE_RUINS: Task = {
     engine.zoneKind = "phobosDeimos";
   },
   visible: (engine) => engine.hasMilestone("shipHijacked"),
+  trainedSkills: ["spatial"],
 };
 
 export const COMPLETE_RUINS: Task = {

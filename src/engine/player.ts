@@ -22,29 +22,54 @@ export class Progress {
   }
 }
 
+/**
+ * Skills are trained by putting time into a task that marks them as training
+ * that skill. One AEU spent on that task = 1 skill XP.
+ */
+export class Skill {
+  public xp: number = 0;
+  public level: number = 0;
+
+  // Baseline of 3 minutes to level up a skill initially.
+  get totalToNextLevel(): number {
+    return (this.level + 1) * 1000 * 3 * 60;
+  }
+
+  addXp(xp: number) {
+    this.xp += xp;
+    while (this.xp >= this.totalToNextLevel) {
+      this.xp -= this.totalToNextLevel;
+      this.level++;
+    }
+    if (this.level >= 100) {
+      this.level = 100;
+      this.xp = 0;
+    }
+  }
+}
+
 export const SKILL_IDS = [
   "lethality",
   "ergodicity",
-  "evasion",
+  "datalink",
+  "spatial",
   // Note that this is not explicitly trained; anything that trains any skill
   // trains it.
   "metacognition",
-  // Note that this is not explicitly trained; anything that recharges energy
-  // implicitly trains it.
   "energyTransfer",
 ] as const;
 export type SkillId = typeof SKILL_IDS[number];
 export type Skills = Record<SkillId, Skill>;
 
 export const SKILL_NAME: Record<SkillId, string> = {
+  datalink: "Datalink",
   lethality: "Lethality",
   ergodicity: "Ergodicity",
-  evasion: "Evasion",
+  spatial: "Spatial Awareness",
   metacognition: "Metacognition",
   energyTransfer: "Energy Transfer",
 };
 
-type Skill = { xp: number; level: number };
 export const PROGRESS_IDS = [
   "ruinsExploration",
   "patrolRoutesObserved",
