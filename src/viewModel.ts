@@ -12,13 +12,16 @@ import {
   Task,
 } from "./engine";
 import { ZoneKind } from "./engine/zone";
-import { entries, mapValues } from "./records";
+import { entries, keys, mapValues } from "./records";
 
-export type ResourcesView = Record<ResourceId, { amount: number }>;
+export type ResourcesView = Record<
+  ResourceId,
+  { amount: number; visible: boolean }
+>;
 export type FlagsView = Record<LoopFlagId, boolean>;
 export type ProgressView = Record<
   ProgressId,
-  { level: number; xp: number; totalToNextLevel: number }
+  { level: number; xp: number; totalToNextLevel: number; visible: boolean }
 >;
 export type ScheduleView = {
   /** `completed` is the number of iterations of that task that has been completed. */
@@ -52,18 +55,21 @@ export type EngineView = {
 };
 
 export function project(engine: Engine): EngineView {
+  const visibles = findVisibles(engine);
   return {
-    resources: mapValues(engine.resources, (amount) => {
+    resources: mapValues(engine.resources, (amount, id) => {
       return {
         amount,
+        visible: visibles.resources.has(id),
       };
     }),
     // mapping the identity is just cloning
     flags: mapValues(engine.flags, (flag) => flag),
-    progress: mapValues(engine.progress, (level) => ({
+    progress: mapValues(engine.progress, (level, id) => ({
       level: level.level,
       xp: level.xp,
       totalToNextLevel: level.totalToNextLevel,
+      visible: visibles.progresses.has(id),
     })),
     combat: engine.combat,
     zoneKind: engine.zoneKind,
@@ -110,4 +116,27 @@ function canAddToQueue(engine: Engine, task: Task): boolean {
   return entries(task.required.progress || {}).every(
     ([progress, min]) => engine.progress[progress].level >= min
   );
+}
+
+function findVisibles(engine: Engine): {
+  resources: Set<ResourceId>;
+  progresses: Set<ProgressId>;
+} {
+  const resources = new Set<ResourceId>();
+  const progresses = new Set<ProgressId>();
+  Object.values(TASKS)
+    .filter((task) => task.visible(engine))
+    .forEach((task) => {
+      keys(task.required.resources || {}).forEach(
+        resources.add.bind(resources)
+      );
+      keys(task.rewards.resources || {}).forEach(resources.add.bind(resources));
+      keys(task.required.progress || {}).forEach(
+        progresses.add.bind(progresses)
+      );
+      keys(task.rewards.progress || {}).forEach(
+        progresses.add.bind(progresses)
+      );
+    });
+  return { resources, progresses };
 }

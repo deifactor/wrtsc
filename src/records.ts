@@ -5,6 +5,12 @@
  * that aren't in the enumeration type.
  */
 
+export function keys<K extends string | number | symbol, V>(
+  obj: Partial<Record<K, V>>
+): K[] {
+  return Object.keys(obj) as K[];
+}
+
 export function entries<K extends string | number | symbol, V>(
   obj: Partial<Record<K, V>>
 ): [K, V][] {
