@@ -10,6 +10,7 @@ import {
 export type TaskKind =
   | "exploreRuins"
   | "scavengeBatteries"
+  | "dischargeTeracapacitor"
   | "linkSensorDrones"
   | "observePatrolRoutes"
   | "eradicateScout"
@@ -133,6 +134,24 @@ export const SCAVENGE_BATTERIES: Task = {
   rewards: {},
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
+};
+
+export const DRAIN_TERACAPACITOR: Task = {
+  ...defaults,
+  kind: "dischargeTeracapacitor",
+  name: "Discharge Teracapacitor",
+  shortName: "DSCH_TER",
+  cost: () => 2000,
+  description: `Gives 100 * (seconds in loop) energy, capped at 25600 at 256 seconds`,
+  flavor:
+    "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
+  required: { resources: { teracapacitors: 1 } },
+  rewards: {},
+  visible: (engine) => engine.progress.ruinsExploration.level >= 10,
+  maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
+  extraPerform: (engine) => {
+    engine.addEnergy(Math.min(25600, engine.timeInLoop / 10));
+  },
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -322,6 +341,7 @@ export const COMPLETE_RUINS: Task = {
 export const TASKS: Record<TaskKind, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
+  dischargeTeracapacitor: DRAIN_TERACAPACITOR,
   linkSensorDrones: LINK_SENSOR_DRONES,
   observePatrolRoutes: OBSERVE_PATROL_ROUTES,
   eradicateScout: KILL_SCOUT,

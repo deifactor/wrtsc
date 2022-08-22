@@ -61,6 +61,7 @@ export const PROGRESS_NAME: Record<ProgressId, string> = {
 export const RESOURCE_IDS = [
   "ruinsBatteries",
   "unlinkedSensorDrones",
+  "teracapacitors",
   "linkedSensorDrones",
   "scouts",
   "unoccupiedShips",
@@ -83,6 +84,14 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     name: "Intact Batteries",
     zone: "ruins",
     initial: (engine) => Math.floor(engine.progress.ruinsExploration.level / 4),
+  },
+  teracapacitors: {
+    id: "teracapacitors",
+    name: "Functioning Teracapacitors",
+    zone: "ruins",
+    // Available at 10, 35, 60, 85.
+    initial: (engine) =>
+      Math.floor((engine.progress.ruinsExploration.level + 15) / 25),
   },
   unlinkedSensorDrones: {
     id: "unlinkedSensorDrones",

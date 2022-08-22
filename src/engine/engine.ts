@@ -83,6 +83,9 @@ export class Engine {
 
   schedule: Schedule = new Schedule([], this);
 
+  /** Time, in milliseconds, since the start of the loop. */
+  private _timeInLoop: number = 0;
+
   private _energy: number = INITIAL_ENERGY;
 
   /** The total amount of energy acquired in this loop. */
@@ -100,8 +103,13 @@ export class Engine {
     return this._totalEnergy;
   }
 
+  get timeInLoop(): number {
+    return this._timeInLoop;
+  }
+
   /** Restart the time loop. */
   startLoop(queue: TaskQueue) {
+    this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new Schedule(queue, this);
     for (const resource of RESOURCE_IDS) {
@@ -180,8 +188,8 @@ export class Engine {
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
-
       this.removeEnergy(ticked);
+      this._timeInLoop += ticked;
       if (this.schedule.taskDone) {
         this.nextTask();
       }

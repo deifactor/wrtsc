@@ -19,6 +19,7 @@ export const ZoneDisplay = (props: Props) => {
             <ProgressDisplay kind="ruinsExploration" />
             <ProgressDisplay kind="patrolRoutesObserved" />
             <ResourceDisplay kind="ruinsBatteries" />
+            <ResourceDisplay kind="teracapacitors" />
             <ResourceDisplay kind="unlinkedSensorDrones" />
             <ResourceDisplay kind="scouts" />
             <ResourceDisplay kind="unoccupiedShips" />

@@ -10,7 +10,7 @@ import {
   GiStrafe,
   GiTargeting,
 } from "react-icons/gi";
-import { SiDrone } from "react-icons/si";
+import { SiCapacitor, SiDrone } from "react-icons/si";
 import { FaVenusDouble, FaWrench } from "react-icons/fa";
 import React from "react";
 
@@ -20,6 +20,7 @@ const DEBUG_ICON = FaVenusDouble;
 export const ICONS: Partial<Record<TaskKind, IconType>> = {
   exploreRuins: GiTargeting,
   scavengeBatteries: GiBatteryPack,
+  dischargeTeracapacitor: SiCapacitor,
   observePatrolRoutes: GiSpyglass,
   hijackShip: GiSpaceship,
   disableLockouts: GiLockPicking,
