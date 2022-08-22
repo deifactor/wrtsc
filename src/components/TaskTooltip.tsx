@@ -8,7 +8,7 @@ import {
   TaskKind,
 } from "../engine";
 import React from "react";
-import { useEngineSelector } from "../engineStore";
+import { useEngineSelector } from "../store";
 import { entries } from "../records";
 
 interface Props {

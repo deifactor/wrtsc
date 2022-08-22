@@ -1,26 +1,34 @@
+import { setAutoRestart, setAutoRestartOnFailure } from "../settingsStore";
+import { useAppDispatch, useAppSelector } from "../store";
 import { Button } from "./common/Button";
 import { Switch } from "./common/Switch";
 
-export class Settings {
-  autoRestart: boolean = true;
-}
-
 type Props = {
   onHardReset: () => void;
-  settings: Settings;
 };
 
-export const SettingsEditor = ({ onHardReset, settings }: Props) => {
-  const setAutoRestart = (value: boolean) => {
-    settings.autoRestart = value;
-  };
+export const SettingsEditor = ({ onHardReset }: Props) => {
+  const dispatch = useAppDispatch();
+  const autoRestart = useAppSelector((store) => store.settings.autoRestart);
+  const autoRestartOnFailure = useAppSelector(
+    (store) => store.settings.autoRestartOnFailure
+  );
   return (
     <div>
       <Button kind="danger" onClick={onHardReset}>
         Hard Reset
       </Button>
-      <Switch checked={settings.autoRestart} onChange={setAutoRestart}>
+      <Switch
+        checked={autoRestart}
+        onChange={(checked) => dispatch(setAutoRestart(checked))}
+      >
         Auto-restart
+      </Switch>
+      <Switch
+        checked={autoRestartOnFailure}
+        onChange={(checked) => dispatch(setAutoRestartOnFailure(checked))}
+      >
+        Auto-restart on failure
       </Switch>
     </div>
   );

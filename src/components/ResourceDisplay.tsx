@@ -1,6 +1,6 @@
 import React from "react";
 import { ResourceId, RESOURCES } from "../engine";
-import { useEngineSelector } from "../engineStore";
+import { useEngineSelector } from "../store";
 
 type Props = {
   kind: ResourceId;

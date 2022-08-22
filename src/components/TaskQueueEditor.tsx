@@ -12,11 +12,9 @@ import {
   pushTaskToQueue,
   removeTask,
   setBatchCountToMax,
-  useAppDispatch,
-  useAppSelector,
-  useEngineSelector,
 } from "../engineStore";
 import equal from "fast-deep-equal";
+import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 
 interface Props {
   className?: string;

@@ -1,5 +1,5 @@
 import React from "react";
-import { useEngineSelector } from "../engineStore";
+import { useEngineSelector } from "../store";
 import { ResourceDisplay } from "./ResourceDisplay";
 
 export const PlayerDisplay = React.memo(() => {

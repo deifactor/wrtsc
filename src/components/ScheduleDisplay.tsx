@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { TaskIcon } from "./common/TaskIcon";
-import { useEngineSelector } from "../engineStore";
+import { useEngineSelector } from "../store";
 
 interface Props {
   className?: string;

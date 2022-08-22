@@ -1,12 +1,12 @@
-import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import equal from "fast-deep-equal";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { original } from "immer";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { Engine, TaskQueue, TaskKind, SimulationResult, TASKS } from "./engine";
-import { EngineView, project } from "./viewModel";
+import { project } from "./viewModel";
 
-export type Settings = {
+type TickPayload = {
+  now: number; // as in new Date().getTime()
   autoRestart: boolean;
+  autoRestartOnFailure: boolean;
 };
 
 // TODO: Change these reducers to actually be pure. No calling getTime. Mutation should be moved into middleware.
@@ -17,7 +17,6 @@ export const engineSlice = createSlice({
     return {
       engine,
       view: project(engine),
-      settings: { autoRestart: true },
       nextQueue: [] as TaskQueue,
       simulation: [] as SimulationResult,
       /**
@@ -51,18 +50,28 @@ export const engineSlice = createSlice({
       state.view = project(state.engine as any as Engine);
       state.lastUpdate = new Date().getTime();
     },
-    tick: (state, action: PayloadAction<number | undefined>) => {
-      const now = new Date().getTime();
-      const dt =
-        action.payload !== undefined ? action.payload : now - state.lastUpdate;
-      state.engine.tickTime(dt);
-      if (state.settings.autoRestart && !state.engine.schedule.task) {
-        state.simulation = state.engine.simulation(state.nextQueue);
-        state.engine.startLoop(original(state.nextQueue)!);
-      }
-      state.lastUpdate = now;
-      state.engine.saveToStorage();
-      state.view = project(state.engine as any as Engine);
+    tick: {
+      reducer(state, action: PayloadAction<TickPayload>) {
+        const { now, autoRestart, autoRestartOnFailure } = action.payload;
+        const dt = now - state.lastUpdate;
+        const { ok } = state.engine.tickTime(dt);
+        const shouldRestart =
+          (!ok && autoRestartOnFailure) ||
+          (ok && !state.engine.schedule.task && autoRestart);
+        if (shouldRestart) {
+          state.simulation = state.engine.simulation(state.nextQueue);
+          state.engine.startLoop(original(state.nextQueue)!);
+        }
+        state.lastUpdate = now;
+        state.engine.saveToStorage();
+        state.view = project(state.engine as any as Engine);
+      },
+      prepare(payload: {
+        autoRestart: boolean;
+        autoRestartOnFailure: boolean;
+      }) {
+        return { payload: { now: new Date().getTime(), ...payload } };
+      },
     },
 
     /**
@@ -153,29 +162,6 @@ export const {
   moveTask,
   removeTask,
 } = engineSlice.actions;
-
-export const store = configureStore({
-  reducer: {
-    engine: engineSlice.reducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredPaths: ["engine.engine"],
-      },
-    }),
-});
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
-  return useSelector<RootState, T>(
-    (store) => selector(store.engine.view),
-    equal
-  );
-}
-export const useAppDispatch: () => AppDispatch = useDispatch;
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 function checkBounds(queue: TaskQueue, index: number) {
   if (index < 0 || index >= queue.length) {

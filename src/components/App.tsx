@@ -7,16 +7,12 @@ import { ZoneDisplay } from "./ZoneDisplay";
 import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { Settings, SettingsEditor } from "./SettingsEditor";
+import { SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import {
-  startLoop,
-  tick,
-  nextTask,
-  hardReset,
-  useAppDispatch,
-} from "../engineStore";
+import { startLoop, tick, nextTask, hardReset } from "../engineStore";
+import { useAppDispatch, useAppSelector } from "../store";
+import equal from "fast-deep-equal";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -57,14 +53,17 @@ const Panel = ({ children, className }: PanelProps) => {
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const { autoRestart, autoRestartOnFailure } = useAppSelector(
+    (store) => store.settings,
+    equal
+  );
   const [inIntro, setInIntro] = useState(false);
-  const [settings] = useState(new Settings());
 
   useInterval(() => {
     if (inIntro) {
       return;
     }
-    dispatch(tick());
+    dispatch(tick({ autoRestart, autoRestartOnFailure }));
   }, 1000 / UPDATES_PER_SEC);
 
   const introFinished = useCallback(() => setInIntro(false), []);
@@ -104,10 +103,7 @@ const App = () => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SettingsEditor
-              onHardReset={() => dispatch(hardReset())}
-              settings={settings}
-            />
+            <SettingsEditor onHardReset={() => dispatch(hardReset())} />
           </TabPanel>
           <TabPanel>
             <Credits />

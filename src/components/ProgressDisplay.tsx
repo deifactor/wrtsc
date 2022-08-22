@@ -1,5 +1,5 @@
 import { ProgressId, PROGRESS_NAME } from "../engine";
-import { useEngineSelector } from "../engineStore";
+import { useEngineSelector } from "../store";
 
 type Props = {
   kind: ProgressId;
