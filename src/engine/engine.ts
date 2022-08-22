@@ -174,6 +174,9 @@ export class Engine {
 
   /** Iterate to the next task. This includes performing the current task. */
   nextTask() {
+    entries(this.schedule.task!.trainedSkills).forEach(([id, xp]) => {
+      this.skills[id].addXp(xp);
+    });
     this.perform(this.schedule.task!);
     this.schedule.next();
   }
@@ -200,9 +203,6 @@ export class Engine {
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
-      for (const skill of this.schedule.task.trainedSkills) {
-        this.skills[skill].addXp(ticked);
-      }
       this.removeEnergy(ticked);
       this._timeInLoop += ticked;
       if (this.schedule.taskDone) {

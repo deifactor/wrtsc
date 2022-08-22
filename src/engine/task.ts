@@ -68,11 +68,8 @@ export type Task = {
   visible: (engine: Engine) => boolean;
   required: Requirements;
   rewards: Rewards;
-  /**
-   * Skills that performing this task trains. This is an array and not a set,
-   * even though it's unique, because the type inference works better this way.
-   */
-  trainedSkills: SkillId[];
+  /** Skills that performing this task trains: map from skill to amount of XP. */
+  trainedSkills: Partial<Record<SkillId, number>>;
   /**
    * Number of times this task can be performed in a loop. This is for tasks
    * such as Scavenge Energy and Link Patrol Drones that effectively just spend
@@ -107,7 +104,7 @@ export const EXPLORE_RUINS: Task = {
       (exploreMultiplier(engine) - 1) * 1024
     );
   },
-  trainedSkills: ["ergodicity"],
+  trainedSkills: { ergodicity: 128 },
 };
 
 const BATTERY_AMOUNT = 3000;
@@ -128,7 +125,7 @@ export const SCAVENGE_BATTERIES: Task = {
   rewards: {},
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
-  trainedSkills: ["energyTransfer"],
+  trainedSkills: { energyTransfer: 16 },
 };
 
 export const DRAIN_TERACAPACITOR: Task = {
@@ -147,7 +144,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   extraPerform: (engine) => {
     engine.addEnergy(Math.min(25600, engine.timeInLoop / 5));
   },
-  trainedSkills: ["energyTransfer"],
+  trainedSkills: { energyTransfer: 128 },
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -167,7 +164,7 @@ export const LINK_SENSOR_DRONES: Task = {
   rewards: { resources: { linkedSensorDrones: 1 } },
   visible: (engine) => engine.progress.ruinsExploration.level >= 1,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
-  trainedSkills: ["datalink"],
+  trainedSkills: { datalink: 64 },
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -187,7 +184,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     );
   },
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
-  trainedSkills: ["ergodicity"],
+  trainedSkills: { ergodicity: 128 },
 };
 
 export const KILL_SCOUT: Task = {
@@ -212,7 +209,7 @@ export const KILL_SCOUT: Task = {
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: ["lethality"],
+  trainedSkills: { lethality: 256 },
 };
 
 const LOCKOUTS_PER_SHIP = 8;
@@ -246,7 +243,7 @@ export const HIJACK_SHIP: Task = {
     engine.addMilestone("shipHijacked");
   },
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: ["lethality"],
+  trainedSkills: { lethality: 512, spatial: 512 },
 };
 
 export const DISABLE_LOCKOUTS: Task = {
@@ -264,7 +261,7 @@ export const DISABLE_LOCKOUTS: Task = {
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
   rewards: { progress: { qhLockout: 1024 } },
-  trainedSkills: ["datalink"],
+  trainedSkills: { datalink: 64 },
 };
 
 export const STRAFING_RUN: Task = {
@@ -283,7 +280,7 @@ export const STRAFING_RUN: Task = {
     progress: { qhLockout: 50 },
   },
   rewards: {},
-  trainedSkills: ["spatial"],
+  trainedSkills: { spatial: 128 },
 };
 
 export const DISMANTLE_SENSOR_DRONES: Task = {
@@ -304,7 +301,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   },
   rewards: {},
   extraPerform: (engine) => engine.addEnergy(3000),
-  trainedSkills: ["energyTransfer"],
+  trainedSkills: { energyTransfer: 16, datalink: 16 },
 };
 
 export const LEAVE_RUINS: Task = {
@@ -325,7 +322,7 @@ export const LEAVE_RUINS: Task = {
     engine.zoneKind = "phobosDeimos";
   },
   visible: (engine) => engine.hasMilestone("shipHijacked"),
-  trainedSkills: ["spatial"],
+  trainedSkills: { spatial: 128 },
 };
 
 export const COMPLETE_RUINS: Task = {
@@ -350,6 +347,7 @@ export const COMPLETE_RUINS: Task = {
     }
   },
   visible: always,
+  trainedSkills: {},
 };
 
 export const TASKS: Record<TaskKind, Task> = {

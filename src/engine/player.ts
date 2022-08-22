@@ -22,17 +22,13 @@ export class Progress {
   }
 }
 
-/**
- * Skills are trained by putting time into a task that marks them as training
- * that skill. One AEU spent on that task = 1 skill XP.
- */
+/** Skills are trained by performing tasks that are marked as training that skill. */
 export class Skill {
   public xp: number = 0;
   public level: number = 0;
 
-  // Baseline of 3 minutes to level up a skill initially.
   get totalToNextLevel(): number {
-    return (this.level + 1) * 1000 * 3 * 60;
+    return (this.level + 1) * 1024;
   }
 
   addXp(xp: number) {
@@ -40,10 +36,6 @@ export class Skill {
     while (this.xp >= this.totalToNextLevel) {
       this.xp -= this.totalToNextLevel;
       this.level++;
-    }
-    if (this.level >= 100) {
-      this.level = 100;
-      this.xp = 0;
     }
   }
 }
