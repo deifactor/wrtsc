@@ -15,24 +15,33 @@ export const ScheduleDisplay = (props: Props) => {
   const { className } = props;
   const schedule = useEngineSelector((engine) => engine.schedule);
 
-  const completionFraction =
-    schedule.currentTask &&
-    schedule.currentTask.progress / schedule.currentTask.cost;
-
   const entries = schedule.tasks.map((entry, idx) => {
-    const isCurrent = idx === schedule.currentTask?.index;
+    let progressInner;
+    if (idx === schedule.currentTask?.index) {
+      const completionFraction =
+        schedule.currentTask.progress / schedule.currentTask.cost;
+      progressInner = formatCompletion(completionFraction);
+    } else if (!schedule.currentTask || idx < schedule.currentTask.index) {
+      progressInner = (
+        <span>
+          <span className="text-green-400">[ OK!]</span>
+        </span>
+      );
+    } else {
+      progressInner = null;
+    }
     // We need whitespace-pre here because we pad with spaces.
-    const progressSpan = isCurrent && (
-      <span className="inline-block ml-auto whitespace-pre">
-        {formatCompletion(completionFraction!)}
+    const progressSpan = (
+      <span className="inline-block ml-auto whitespace-pre font-bold">
+        {progressInner}
       </span>
     );
     // eslint-disable-next-line react/no-array-index-key
     return (
-      <div className="flex my-1" key={idx}>
+      <div className="flex my-1 font-mono text-lg" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline align-sub" task={entry.kind} />{" "}
-          {entry.completed}/{entry.count}{" "}
+          <TaskIcon className="inline" task={entry.kind} /> {entry.completed}/
+          {entry.count}{" "}
         </span>
         {progressSpan}
       </div>
