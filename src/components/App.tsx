@@ -11,8 +11,7 @@ import { SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
 import { startLoop, tick, nextTask, hardReset } from "../engineStore";
-import { useAppDispatch, useAppSelector } from "../store";
-import equal from "fast-deep-equal";
+import { useAppDispatch } from "../store";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -51,19 +50,21 @@ const Panel = ({ children, className }: PanelProps) => {
   return <div className={classNames(panelClass, className)}>{children}</div>;
 };
 
+/**
+ * Top-level element for the entire game.
+ *
+ * Minimize the amount of state you throw around here, since it'll cause
+ * everything to rerender!
+ */
 const App = () => {
   const dispatch = useAppDispatch();
-  const { autoRestart, autoRestartOnFailure } = useAppSelector(
-    (store) => store.settings,
-    equal
-  );
   const [inIntro, setInIntro] = useState(false);
 
   useInterval(() => {
     if (inIntro) {
       return;
     }
-    dispatch(tick({ autoRestart, autoRestartOnFailure }));
+    dispatch(tick());
   }, 1000 / UPDATES_PER_SEC);
 
   const introFinished = useCallback(() => setInIntro(false), []);

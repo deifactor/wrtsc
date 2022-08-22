@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { AnyAction, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { engineSlice } from "./engineStore";
@@ -20,6 +20,7 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export type AppThunkAction = ThunkAction<void, RootState, unknown, AnyAction>;
 export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
   return useSelector<RootState, T>(
     (store) => selector(store.engine.view),

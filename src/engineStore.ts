@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppThunkAction } from "./store";
 import { original } from "immer";
 import { Engine, TaskQueue, TaskKind, SimulationResult, TASKS } from "./engine";
 import { project } from "./viewModel";
@@ -50,7 +51,7 @@ export const engineSlice = createSlice({
       state.view = project(state.engine as any as Engine);
       state.lastUpdate = new Date().getTime();
     },
-    tick: {
+    tickWithSettings: {
       reducer(state, action: PayloadAction<TickPayload>) {
         const { now, autoRestart, autoRestartOnFailure } = action.payload;
         const dt = now - state.lastUpdate;
@@ -154,7 +155,6 @@ export const engineSlice = createSlice({
 export const {
   hardReset,
   startLoop,
-  tick,
   nextTask,
   pushTaskToQueue,
   modifyBatchCount,
@@ -162,6 +162,11 @@ export const {
   moveTask,
   removeTask,
 } = engineSlice.actions;
+
+export const tick = (): AppThunkAction => (dispatch, getState) => {
+  const { settings } = getState();
+  dispatch(engineSlice.actions.tickWithSettings(settings));
+};
 
 function checkBounds(queue: TaskQueue, index: number) {
   if (index < 0 || index >= queue.length) {
