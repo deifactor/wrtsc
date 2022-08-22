@@ -98,7 +98,7 @@ const App = () => {
           </TabList>
           <hr className="border-gray-400 my-4" />
           <TabPanel>
-            <div className="flex flex-row h-full space-x-12">
+            <div className="flex flex-row h-full space-x-8">
               <TaskQueueEditor className="h-full w-3/5" />
               <div className="w-px bg-gray-800" />
               <ScheduleDisplay className="h-full w-2/5" />
