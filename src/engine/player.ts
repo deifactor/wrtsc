@@ -129,3 +129,11 @@ export const LOOP_FLAG_IDS = ["shipHijacked"] as const;
  * can be positive or negative.
  */
 export type LoopFlagId = typeof LOOP_FLAG_IDS[number];
+
+export const MILESTONE_IDS = ["shipHijacked"] as const;
+/**
+ * A `Milestone` indicates that the player has done something in particular.
+ * Think 'acheivement', but not necessarily something that actually corresponds
+ * to a conventional one. These unlock stories, make things visible, etc.
+ */
+export type MilestoneId = typeof MILESTONE_IDS[number];

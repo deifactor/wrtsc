@@ -15,6 +15,7 @@ import {
   ProgressId,
   RESOURCES,
   RESOURCE_IDS,
+  MilestoneId,
 } from "./player";
 import { Schedule } from "./schedule";
 import { Task } from "./task";
@@ -67,6 +68,12 @@ export class Engine {
   flags: Record<LoopFlagId, boolean> = {
     shipHijacked: false,
   };
+
+  // It *says* it can handle sets, but that doesn't appear to be true...
+  @Transform((params: { value: MilestoneId[] }) => new Set(...params.value), {
+    toClassOnly: true,
+  })
+  private readonly _milestones: Set<MilestoneId> = new Set();
 
   zoneKind: ZoneKind = RUINS.kind;
 
@@ -129,6 +136,14 @@ export class Engine {
       ) &&
       task.extraCheck(this)
     );
+  }
+
+  hasMilestone(milestone: MilestoneId) {
+    return this._milestones.has(milestone);
+  }
+
+  addMilestone(milestone: MilestoneId) {
+    this._milestones.add(milestone);
   }
 
   get combat(): number {

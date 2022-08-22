@@ -219,6 +219,9 @@ export const HIJACK_SHIP: Task = {
     resources: { qhLockoutAttempts: 12 },
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
+  extraPerform: (engine) => {
+    engine.addMilestone("shipHijacked");
+  },
   trainedSkills: ["lethality"],
 };
 
@@ -232,7 +235,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
-  visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
+  visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: { resources: { qhLockoutAttempts: 1 } },
   rewards: { progress: { qhLockout: 1024 * 10 } },
 };
