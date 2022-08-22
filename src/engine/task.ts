@@ -134,7 +134,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   ...defaults,
   kind: "dischargeTeracapacitor",
   name: "Discharge Teracapacitor",
-  shortName: "DSCH_TER",
+  shortName: "DIS_TERA",
   cost: () => 2000,
   description: `Gives 200 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
   flavor:
@@ -216,7 +216,7 @@ export const HIJACK_SHIP: Task = {
   ...defaults,
   kind: "hijackShip",
   name: "Hijack Ship",
-  shortName: "HIJACK",
+  shortName: "HJCK_SHP",
   cost: (engine) =>
     Math.max(
       24000 -
@@ -265,7 +265,7 @@ export const STRAFING_RUN: Task = {
   ...defaults,
   kind: "strafingRun",
   name: "Strafing Run",
-  shortName: "STRAFE",
+  shortName: "STRAF_RN",
   cost: () => 6000,
   description:
     "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
@@ -283,7 +283,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   ...defaults,
   kind: "dismantleSensorDrones",
   name: "Dismantle Sensor Drones",
-  shortName: "DSMNTL",
+  shortName: "DSMN_DRN",
   cost: () => 500,
   description:
     "Use your stolen ship to fly to your sensor drone array. Each drone dismantled provides 3000 AEU.",
