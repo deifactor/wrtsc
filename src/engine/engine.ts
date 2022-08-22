@@ -143,8 +143,7 @@ export class Engine {
       ) &&
       entries(task.required.flags || {}).every(
         ([id, value]) => this.flags[id] === value
-      ) &&
-      task.extraCheck(this)
+      )
     );
   }
 

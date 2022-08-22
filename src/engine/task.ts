@@ -25,7 +25,6 @@ const always = () => true;
 
 const defaults = {
   visible: always,
-  extraCheck: always,
   extraPerform: () => {},
   requiredProgress: {},
   requiredLoopFlags: {},
@@ -74,11 +73,6 @@ export type Task = {
    * even though it's unique, because the type inference works better this way.
    */
   trainedSkills: SkillId[];
-  /**
-   * An extra predicate indicating whether the action can be taken. This is on
-   * top of any requirements.
-   */
-  extraCheck: (engine: Engine) => boolean;
   /**
    * Number of times this task can be performed in a loop. This is for tasks
    * such as Scavenge Energy and Link Patrol Drones that effectively just spend
