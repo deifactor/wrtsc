@@ -69,7 +69,7 @@ export const TaskTooltip = React.memo(({ kind }: Props) => {
       <p className="font-bold">{task.name}</p>
       <p className="my-2">{task.description}</p>
       <p>
-        <strong>Cost:</strong> {cost}
+        <strong>Cost:</strong> {cost} AEU
       </p>
       {requiresSection}
       {rewardsSection}
