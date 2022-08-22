@@ -44,22 +44,25 @@ export const Intro = ({ onFinished }: Props) => {
       ? `T-${line.timestamp!.toString(16).padStart(4, "0").toUpperCase()}`
       : "T+????";
   const next = nextPosition(current);
+  // We use the outer div to center the 'dialog box'.
   return (
-    <div className="font-mono w-[60rem] space-y-4 p-8 m-8 bg-black/80">
-      <p className="h-32 overflow-y-auto text-lg">
-        <span className="font-bold">{timestamp}</span>:{" "}
-        {message.substring(0, current.length)}
-      </p>
-      <div className="flex justify-between">
-        <Button onClick={() => setCurrent(previousPosition(current))}>
-          Previous
-        </Button>
-        <Button
-          onClick={() => (next ? setCurrent(next.state) : onFinished())}
-          state={state === "advancing" ? "locked" : "active"}
-        >
-          Next
-        </Button>
+    <div className="h-full flex items-center justify-center">
+      <div className="font-mono border border-gray-500 w-[60rem] space-y-4 p-8 m-8 bg-black/80">
+        <p className="h-32 overflow-y-auto text-lg">
+          <span className="font-bold">{timestamp}</span>:{" "}
+          {message.substring(0, current.length)}
+        </p>
+        <div className="flex justify-between">
+          <Button onClick={() => setCurrent(previousPosition(current))}>
+            Previous
+          </Button>
+          <Button
+            onClick={() => (next ? setCurrent(next.state) : onFinished())}
+            state={state === "advancing" ? "locked" : "active"}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
