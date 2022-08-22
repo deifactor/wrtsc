@@ -74,7 +74,7 @@ export class Engine {
 
   // It *says* it can handle sets, but that doesn't appear to be true...
   @Expose()
-  @Transform((params: { value: MilestoneId[] }) => new Set(...params.value), {
+  @Transform((params: { value: MilestoneId[] }) => new Set(params.value), {
     toClassOnly: true,
   })
   private readonly _milestones: Set<MilestoneId> = new Set();
