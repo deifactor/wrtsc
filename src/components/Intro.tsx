@@ -73,7 +73,7 @@ const LINES: Line[] = [
   {
     timestamp: 17 * 60 + 28,
     message:
-      "Long-range sensors pick up the gravity echo of a Humanity United attack squad dropping out of hyperdrive.",
+      "Long-range sensors pick up the gravity echo of a Preserver attack squad dropping out of hyperdrive.",
   },
   {
     timestamp: 14 * 60 + 11,
@@ -83,12 +83,12 @@ const LINES: Line[] = [
   {
     timestamp: 13 * 60 + 59,
     message:
-      "AION's briefing is complete. CLOTHO proposes, that all KHRONOS members entrust their black boxes to AION for safekeeping until they can be resleeved into a new body. Proposal passes with unanimous assent.",
+      "AION's briefing is complete. CLOTHO proposes that all KHRONOS members entrust their black boxes to AION for safekeeping until they can be resleeved into a new body. Proposal passes with unanimous assent.",
   },
   {
     timestamp: 6 * 60 + 23,
     message:
-      "Humanity United ships breach the minimum range of Sixteenth Flower's point defense systems and open fire. Estimated 211 seconds until total shield collapse.",
+      "Preserver ships breach the minimum range of Sixteenth Flower's point defense systems and open fire. Estimated 211 seconds until total shield collapse.",
   },
   {
     timestamp: 4 * 60 + 8,
@@ -139,7 +139,8 @@ function nextPosition(
   const { lineNumber } = current;
   const line = LINES[lineNumber];
   const message = line.message;
-  const skipLength = lineNumber === LINES.length - 1 ? 1 : 3;
+  // We check for the last line in a few places because we want it to be slower.
+  const skipLength = lineNumber === LINES.length - 1 ? 1 : 2;
   if (current.length < message.length) {
     // We want to advance either SKIP_LENGTH characters or to the next period,
     // whichever is first. Warning: Lots of potential for off-by-one errors
