@@ -3,6 +3,7 @@ import { SimulationStep, TASKS } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
+import { FiMaximize } from "react-icons/fi";
 import { RiDeleteBackFill } from "react-icons/ri";
 import React from "react";
 import { TaskTooltip } from "./TaskTooltip";
@@ -33,9 +34,17 @@ const TaskQueueEditor = React.memo((props: Props) => {
     const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
     const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
     const remove = () => dispatch(removeTask(index));
-    const setToMaxButton = TASKS[entry.task].maxIterations && (
-      <Button size="xs" onClick={() => dispatch(setBatchCountToMax(index))}>
-        Max
+    const maxClass = classNames({
+      invisible: !TASKS[entry.task].maxIterations,
+    });
+    // We always show the button for consistent sizing.
+    const setToMaxButton = (
+      <Button
+        className={maxClass}
+        size="xs"
+        onClick={() => dispatch(setBatchCountToMax(index))}
+      >
+        <FiMaximize />
       </Button>
     );
     const step: SimulationStep | undefined = simulation[index];
