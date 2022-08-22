@@ -232,7 +232,7 @@ export const HIJACK_SHIP: Task = {
   },
   rewards: {
     flags: { shipHijacked: true },
-    resources: { qhLockoutAttempts: 12 },
+    resources: { qhLockoutAttempts: 8 },
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
@@ -248,12 +248,12 @@ export const DISABLE_LOCKOUTS: Task = {
   shortName: "OVR_LOCK",
   cost: () => 800,
   description:
-    "Can only be performed 12 times in a loop. Requires Ship Hijacked.",
+    "Hack your stolen ship to bring the weapons, thrusters, and jump drive online.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: { resources: { qhLockoutAttempts: 1 } },
-  rewards: { progress: { qhLockout: 1024 } },
+  rewards: { progress: { qhLockout: 128 } },
 };
 
 export const STRAFING_RUN: Task = {
@@ -265,7 +265,7 @@ export const STRAFING_RUN: Task = {
   description: "Clean up the remaining Preservers.",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
-  visible: (engine) => engine.progress.qhLockout.level >= 25,
+  visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 50 },
@@ -283,7 +283,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     "Use your stolen ship to fly to your sensor drone array and dismantle it for energy.",
   flavor:
     "There is nothing left for them to monitor. The Sixteenth Flower is gone.",
-  visible: (engine) => engine.progress.qhLockout.level >= 10,
+  visible: (engine) => engine.hasMilestone("shipHijacked"),
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 25 },
