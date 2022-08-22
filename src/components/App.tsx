@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { Button } from "./common/Button";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
@@ -10,7 +9,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import { startLoop, tick, nextTask, hardReset } from "../engineStore";
+import { tick, hardReset } from "../engineStore";
 import { useAppDispatch } from "../store";
 import { Engine } from "../engine";
 
@@ -80,10 +79,7 @@ const App = () => {
   return (
     <div className="app flex space-x-10 p-4 items-start h-full">
       <Panel className="w-3/12">
-        <h1>Stats</h1>
         <PlayerDisplay />
-        <Button onClick={() => dispatch(startLoop())}>Start</Button>
-        <Button onClick={() => dispatch(nextTask())}>Next</Button>
       </Panel>
 
       <Panel className="w-8/12 h-full">
