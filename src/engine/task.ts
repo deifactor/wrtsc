@@ -62,7 +62,7 @@ export type Task = {
    */
   visible: (engine: Engine) => boolean;
   required: Requirements;
-  rewards: Rewards;
+  rewards: (engine: Engine) => Rewards;
   /** Skills that performing this task trains: map from skill to amount of XP. */
   trainedSkills: Partial<Record<SkillId, number>>;
   /**
@@ -93,7 +93,7 @@ export const EXPLORE_RUINS: Task = {
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   required: {},
-  rewards: { progress: { ruinsExploration: 1024 } },
+  rewards: () => ({ progress: { ruinsExploration: 1024 } }),
   extraPerform: (engine) => {
     engine.progress.ruinsExploration.addXp(
       (exploreMultiplier(engine) - 1) * 1024
@@ -117,7 +117,7 @@ export const SCAVENGE_BATTERIES: Task = {
     engine.addEnergy(BATTERY_AMOUNT);
   },
   required: { resources: { ruinsBatteries: 1 } },
-  rewards: {},
+  rewards: () => ({}),
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
   trainedSkills: { energyTransfer: 16 },
@@ -133,7 +133,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
   required: { resources: { teracapacitors: 1 } },
-  rewards: {},
+  rewards: () => ({}),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
   extraPerform: (engine) => {
@@ -156,7 +156,7 @@ export const LINK_SENSOR_DRONES: Task = {
     resources: { unlinkedSensorDrones: 1 },
     progress: { ruinsExploration: 5 },
   },
-  rewards: { resources: { linkedSensorDrones: 1 } },
+  rewards: () => ({ resources: { linkedSensorDrones: 1 } }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 1,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
   trainedSkills: { datalink: 64 },
@@ -172,7 +172,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
-  rewards: { progress: { patrolRoutesObserved: 1024 } },
+  rewards: () => ({ progress: { patrolRoutesObserved: 1024 } }),
   extraPerform: (engine) => {
     engine.progress.patrolRoutesObserved.addXp(
       (exploreMultiplier(engine) - 1) * 1024
@@ -196,12 +196,12 @@ export const KILL_SCOUT: Task = {
     resources: { scouts: 1 },
     progress: { patrolRoutesObserved: 10 },
   },
-  rewards: {
+  rewards: () => ({
     resources: {
       weaponSalvage: 1,
       unoccupiedShips: 1,
     },
-  },
+  }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 256 },
@@ -229,10 +229,10 @@ export const HIJACK_SHIP: Task = {
     resources: { unoccupiedShips: 1 },
     progress: { patrolRoutesObserved: 15 },
   },
-  rewards: {
+  rewards: () => ({
     flags: { shipHijacked: true },
     resources: { qhLockoutAttempts: LOCKOUTS_PER_SHIP },
-  },
+  }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
     engine.addMilestone("shipHijacked");
@@ -255,7 +255,7 @@ export const DISABLE_LOCKOUTS: Task = {
   maxIterations: (engine) =>
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
-  rewards: { progress: { qhLockout: 1024 } },
+  rewards: () => ({ progress: { qhLockout: 1024 } }),
   trainedSkills: { datalink: 64 },
 };
 
@@ -274,7 +274,7 @@ export const STRAFING_RUN: Task = {
     flags: { shipHijacked: true },
     progress: { qhLockout: 50 },
   },
-  rewards: {},
+  rewards: () => ({}),
   trainedSkills: { spatial: 128 },
 };
 
@@ -294,7 +294,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     progress: { qhLockout: 25 },
     resources: { linkedSensorDrones: 1 },
   },
-  rewards: {},
+  rewards: () => ({}),
   extraPerform: (engine) => engine.addEnergy(3000),
   trainedSkills: { energyTransfer: 16, datalink: 16 },
 };
@@ -312,7 +312,7 @@ export const LEAVE_RUINS: Task = {
     flags: { shipHijacked: true },
     progress: { qhLockout: 100 },
   },
-  rewards: {},
+  rewards: () => ({}),
   extraPerform: (engine) => {
     engine.zoneKind = "phobosDeimos";
   },
@@ -329,7 +329,7 @@ export const COMPLETE_RUINS: Task = {
   description: "Instantly complete everything in the Ruins.",
   flavor: "Existential debugger engaged.",
   required: {},
-  rewards: {},
+  rewards: () => ({}),
   extraPerform: (engine) => {
     for (const kind of [
       "ruinsExploration",

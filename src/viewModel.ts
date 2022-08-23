@@ -10,6 +10,7 @@ import {
   TaskKind,
   TASKS,
   Task,
+  Rewards,
 } from "./engine";
 import { SkillId } from "./engine/skills";
 import { ZoneKind } from "./engine/zone";
@@ -50,6 +51,7 @@ export type TaskView = {
   visible: boolean;
   canAddToQueue: boolean;
   shortName: string;
+  rewards: Rewards;
 };
 
 export type EngineView = {
@@ -99,6 +101,7 @@ export function project(engine: Engine): EngineView {
       visible: task.visible(engine),
       canAddToQueue: canAddToQueue(engine, task),
       shortName: task.shortName,
+      rewards: task.rewards(engine),
     })),
   };
 }
@@ -145,16 +148,15 @@ function findVisibles(engine: Engine): {
   Object.values(TASKS)
     .filter((task) => task.visible(engine))
     .forEach((task) => {
+      const rewards = task.rewards(engine);
       keys(task.required.resources || {}).forEach(
         resources.add.bind(resources)
       );
-      keys(task.rewards.resources || {}).forEach(resources.add.bind(resources));
+      keys(rewards.resources || {}).forEach(resources.add.bind(resources));
       keys(task.required.progress || {}).forEach(
         progresses.add.bind(progresses)
       );
-      keys(task.rewards.progress || {}).forEach(
-        progresses.add.bind(progresses)
-      );
+      keys(rewards.progress || {}).forEach(progresses.add.bind(progresses));
     });
   return { resources, progresses };
 }

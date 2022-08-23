@@ -18,6 +18,7 @@ interface Props {
 export const TaskTooltip = React.memo(({ kind }: Props) => {
   const task = TASKS[kind];
   const cost = useEngineSelector((engine) => engine.tasks[kind].cost);
+  const rewards = useEngineSelector((engine) => engine.tasks[kind].rewards);
   const trainingSection = Object.keys(task.trainedSkills).length !== 0 && (
     <p>
       <strong>Trains:</strong>{" "}
@@ -48,10 +49,10 @@ export const TaskTooltip = React.memo(({ kind }: Props) => {
   );
 
   const rewardsFrags = [
-    ...entries(task.rewards.progress || {}).map(
+    ...entries(rewards.progress || {}).map(
       ([progress]) => `${PROGRESS_NAME[progress]} progress`
     ),
-    ...entries(task.rewards.resources || {}).map(
+    ...entries(rewards.resources || {}).map(
       ([resource, amount]) => `${amount}x ${RESOURCES[resource].name}`
     ),
   ];

@@ -134,16 +134,17 @@ export class Engine {
   }
 
   perform(task: Task) {
+    const rewards = task.rewards(this);
     entries(task.required.resources || {}).forEach(([res, value]) => {
       this.resources[res] -= value;
     });
-    entries(task.rewards.resources || {}).forEach(([res, value]) => {
+    entries(rewards.resources || {}).forEach(([res, value]) => {
       this.resources[res] += value;
     });
-    entries(task.rewards.progress || {}).forEach(([progress, xp]) => {
+    entries(rewards.progress || {}).forEach(([progress, xp]) => {
       this.progress[progress].addXp(xp);
     });
-    entries(task.rewards.flags || {}).forEach(([flag, value]) => {
+    entries(rewards.flags || {}).forEach(([flag, value]) => {
       this.flags[flag] = value;
     });
     task.extraPerform(this);
