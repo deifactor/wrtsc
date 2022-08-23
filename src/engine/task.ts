@@ -89,7 +89,7 @@ export const EXPLORE_RUINS: Task = {
   shortName: "XPL_RUIN",
   cost: () => 2000,
   description:
-    "Increases amount of weapons and batteries that can be scavenged. 50% more progress with Ship Hijacked.",
+    "Increases amount of weapons and batteries that can be scavenged. 2.5x progress with Ship Hijacked.",
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   required: {},
@@ -367,7 +367,7 @@ export const TASKS: Record<TaskKind, Task> = {
 
 function exploreMultiplier(engine: Engine): number {
   const droneBonus = Math.sqrt(1 + engine.resources.linkedSensorDrones) - 1;
-  const shipBonus = engine.flags.shipHijacked ? 0.5 : 0;
+  const shipBonus = engine.flags.shipHijacked ? 1.5 : 0;
   const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 32);
   return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
 }
