@@ -229,10 +229,15 @@ export const HIJACK_SHIP: Task = {
     resources: { unoccupiedShips: 1 },
     progress: { patrolRoutesObserved: 15 },
   },
-  rewards: () => ({
-    flags: { shipHijacked: true },
-    resources: { qhLockoutAttempts: LOCKOUTS_PER_SHIP },
-  }),
+  rewards: (engine) => {
+    const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 64);
+    return {
+      flags: { shipHijacked: true },
+      resources: {
+        qhLockoutAttempts: Math.floor(LOCKOUTS_PER_SHIP * (1 + datalinkBonus)),
+      },
+    };
+  },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
     engine.addMilestone("shipHijacked");
