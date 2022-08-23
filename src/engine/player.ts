@@ -48,6 +48,7 @@ export const SKILL_IDS = [
   // Note that this is not explicitly trained; anything that trains any skill
   // trains it.
   "metacognition",
+  // Gives a bonus to anything that adds energy to the player.
   "energyTransfer",
 ] as const;
 export type SkillId = typeof SKILL_IDS[number];

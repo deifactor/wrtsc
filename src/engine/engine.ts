@@ -263,6 +263,9 @@ export class Engine {
   }
 
   addEnergy(amount: number) {
+    amount *=
+      1 + Math.log(1 + this.skills.energyTransfer.level / 128) / Math.log(2);
+    amount = Math.floor(amount);
     this._energy += amount;
     this._totalEnergy += amount;
   }
