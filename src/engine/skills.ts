@@ -1,3 +1,5 @@
+import { Engine } from "./engine";
+
 /** Skills are trained by performing tasks that are marked as training that skill. */
 export class Skill {
   public xp: number = 0;
@@ -37,3 +39,7 @@ export const SKILL_NAME: Record<SkillId, string> = {
   metacognition: "Metacognition",
   energyTransfer: "Energy Transfer",
 };
+
+export function datalinkBonus(engine: Engine): number {
+  return Math.log2(1 + engine.skills.datalink.level / 128);
+}

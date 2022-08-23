@@ -361,7 +361,8 @@ export const TASKS: Record<TaskKind, Task> = {
 };
 
 function exploreMultiplier(engine: Engine): number {
-  const droneMultiplier = Math.sqrt(1 + engine.resources.linkedSensorDrones);
-  const shipMultiplier = engine.flags.shipHijacked ? 1.5 : 1;
-  return droneMultiplier * shipMultiplier;
+  const droneBonus = Math.sqrt(1 + engine.resources.linkedSensorDrones) - 1;
+  const shipBonus = engine.flags.shipHijacked ? 0.5 : 0;
+  const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 32);
+  return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
 }
