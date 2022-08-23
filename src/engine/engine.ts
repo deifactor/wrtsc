@@ -95,6 +95,9 @@ export class Engine {
 
   schedule: Schedule = new Schedule([], this);
 
+  /** `undefined` means the task is not finished yet. */
+  completions: { amount: number; success: boolean | undefined }[] = [];
+
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
 
@@ -124,6 +127,7 @@ export class Engine {
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new Schedule(queue, this);
+    this.completions = queue.map(() => ({ amount: 0, success: undefined }));
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
@@ -200,20 +204,37 @@ export class Engine {
         return { ok: true };
       }
       if (!this.canPerform(this.schedule.task)) {
+        this.markFailure(this.schedule.task.index);
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
       this.removeEnergy(ticked);
       this._timeInLoop += ticked;
       if (this.schedule.taskDone) {
+        this.markSuccess(this.schedule.task.index);
         this.nextTask();
       }
       duration = Math.min(this.energy, duration - ticked);
     }
     if (this.energy <= 0 && this.schedule.task) {
+      this.markFailure(this.schedule.task.index);
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
+  }
+
+  markSuccess(batchIndex: number) {
+    this.completions[batchIndex].amount++;
+    if (
+      this.completions[batchIndex].amount ===
+      this.schedule.queue[batchIndex].count
+    ) {
+      this.completions[batchIndex].success = true;
+    }
+  }
+
+  markFailure(batchIndex: number) {
+    this.completions[batchIndex].success = false;
   }
 
   simulation(tasks: TaskQueue): SimulationResult {

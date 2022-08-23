@@ -30,7 +30,12 @@ export type ProgressView = Record<
 >;
 export type ScheduleView = {
   /** `completed` is the number of iterations of that task that has been completed. */
-  tasks: { kind: TaskKind; count: number; completed: number }[];
+  tasks: {
+    kind: TaskKind;
+    count: number;
+    completed: number;
+    success: boolean | undefined;
+  }[];
   currentTask?: {
     index: number;
     iteration: number;
@@ -104,7 +109,8 @@ function projectSchedule(engine: Engine): ScheduleView {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       kind: task,
       count,
-      completed: schedule.completions(index),
+      completed: engine.completions[index].amount,
+      success: engine.completions[index].success,
     })),
     currentTask: schedule.task && {
       index: schedule.task.index,

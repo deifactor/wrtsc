@@ -17,25 +17,23 @@ export const ScheduleDisplay = (props: Props) => {
 
   const entries = schedule.tasks.map((entry, idx) => {
     let progressInner;
-    if (idx === schedule.currentTask?.index) {
+    if (entry.success === false) {
+      progressInner = <span className="text-red-400">[FAIL]</span>;
+    } else if (idx === schedule.currentTask?.index) {
       const completionFraction =
         schedule.currentTask.progress / schedule.currentTask.cost;
       progressInner = formatCompletion(completionFraction);
     } else if (!schedule.currentTask || idx < schedule.currentTask.index) {
       progressInner = (
         <span>
-          <span className="text-green-400">[ OK!]</span>
+          <span className="text-green-400">[ OK ]</span>
         </span>
       );
     } else {
-      progressInner = null;
+      progressInner = <span>[{"    "}]</span>;
     }
+
     // We need whitespace-pre here because we pad with spaces.
-    const progressSpan = (
-      <span className="inline-block ml-auto whitespace-pre font-bold">
-        {progressInner}
-      </span>
-    );
     // eslint-disable-next-line react/no-array-index-key
     return (
       <div className="flex items-center font-mono h-10" key={idx}>
@@ -43,7 +41,9 @@ export const ScheduleDisplay = (props: Props) => {
           <TaskIcon className="inline" task={entry.kind} /> {entry.completed}/
           {entry.count}{" "}
         </span>
-        {progressSpan}
+        <span className="inline-block ml-auto whitespace-pre font-bold">
+          {progressInner}
+        </span>
       </div>
     );
   });

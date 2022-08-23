@@ -7,6 +7,8 @@ export type Reusable =
   | string
   | number
   | boolean
+  | undefined
+  | null
   | { [P in string]: Reusable } // can't use Record here for some reason
   | Reusable[];
 
