@@ -1,5 +1,5 @@
 import React from "react";
-import { SkillId, SKILL_NAME } from "../engine";
+import { SkillId, SKILL_NAME } from "../engine/skills";
 import { startLoop } from "../engineStore";
 import { useAppDispatch, useEngineSelector } from "../store";
 import { Button } from "./common/Button";

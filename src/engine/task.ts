@@ -1,11 +1,6 @@
 import { Engine } from "./engine";
-import {
-  LoopFlagId,
-  ResourceId,
-  SkillId,
-  ProgressId,
-  RESOURCES,
-} from "./player";
+import { LoopFlagId, ResourceId, ProgressId, RESOURCES } from "./player";
+import { SkillId } from "./skills";
 
 export type TaskKind =
   | "exploreRuins"

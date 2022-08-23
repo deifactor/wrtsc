@@ -17,10 +17,9 @@ import {
   RESOURCES,
   RESOURCE_IDS,
   MilestoneId,
-  Skill,
-  SkillId,
 } from "./player";
 import { Schedule } from "./schedule";
+import { Skill, SkillId } from "./skills";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneKind } from "./zone";

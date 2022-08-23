@@ -1,6 +1,5 @@
 import {
   TASKS,
-  SKILL_NAME,
   ProgressId,
   PROGRESS_NAME,
   RESOURCES,
@@ -10,6 +9,7 @@ import {
 import React from "react";
 import { useEngineSelector } from "../store";
 import { entries } from "../records";
+import { SKILL_NAME } from "../engine/skills";
 
 interface Props {
   kind: TaskKind;

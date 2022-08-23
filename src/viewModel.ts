@@ -10,8 +10,8 @@ import {
   TaskKind,
   TASKS,
   Task,
-  SkillId,
 } from "./engine";
+import { SkillId } from "./engine/skills";
 import { ZoneKind } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
 
