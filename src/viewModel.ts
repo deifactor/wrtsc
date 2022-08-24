@@ -39,7 +39,6 @@ export type ScheduleView = {
   }[];
   currentTask?: {
     index: number;
-    iteration: number;
     cost: number;
     progress: number;
   };
@@ -118,7 +117,6 @@ function projectSchedule(engine: Engine): ScheduleView {
     currentTask: schedule.task && {
       index: schedule.task.index,
       cost: schedule.task.cost(engine),
-      iteration: schedule.task.iteration,
       progress: schedule.task.cost(engine) - schedule.timeLeftOnTask,
     },
   };

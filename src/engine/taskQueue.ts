@@ -9,8 +9,6 @@ export interface TaskBatch {
 export type TaskQueuePointer = Readonly<
   Task & {
     index: number;
-    iteration: number;
-    count: number;
   }
 >;
 
@@ -42,8 +40,6 @@ export class TaskQueueIterator implements IterableIterator<TaskQueuePointer> {
     }
     return {
       index: this.index,
-      iteration: this.iteration,
-      count: entry.count,
       ...TASKS[entry.task],
     };
   }

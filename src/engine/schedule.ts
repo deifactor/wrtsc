@@ -34,20 +34,6 @@ export class Schedule {
     return Boolean(this.task && this.timeLeftOnTask === 0);
   }
 
-  completions(index: number): number {
-    const { task } = this;
-    if (task == null) {
-      return this.queue[index].count;
-    }
-    if (index < task.index) {
-      return this.queue[index].count;
-    }
-    if (index === task.index) {
-      return task.iteration;
-    }
-    return 0;
-  }
-
   /**
    * Ticks the progress on the current task by the given amount. Returns the
    * amount that was actually ticked.
