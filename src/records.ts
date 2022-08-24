@@ -28,3 +28,15 @@ export function mapValues<K extends string | number | symbol, U, V>(
   });
   return mapped;
 }
+
+/** Construct a record from the list of its potential keys. The list *must* be exhaustive! */
+export function makeValues<K extends string | number | symbol, V>(
+  keys: readonly K[],
+  func: (key: K) => V
+): Record<K, V> {
+  const mapped = {} as Record<K, V>;
+  for (const key of keys) {
+    mapped[key] = func(key);
+  }
+  return mapped;
+}

@@ -7,7 +7,7 @@ import {
   plainToInstance,
   Transform,
 } from "class-transformer";
-import { entries, mapValues } from "../records";
+import { entries, makeValues } from "../records";
 
 import {
   Progress,
@@ -17,9 +17,10 @@ import {
   RESOURCES,
   RESOURCE_IDS,
   MilestoneId,
+  PROGRESS_IDS,
 } from "./player";
 import { Schedule } from "./schedule";
-import { Skill, SkillId } from "./skills";
+import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneKind } from "./zone";
@@ -58,39 +59,22 @@ const INITIAL_ENERGY = 5000;
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 @Exclude()
 export class Engine {
-  /** The current schedule. Note that its task queue is *not* the same as `taskQueue`. */
+  // Saved player state.
   @Expose()
   @Transform(_convertRecord(Progress), { toClassOnly: true })
-  readonly progress: Record<ProgressId, Progress> = {
-    ruinsExploration: new Progress(),
-    patrolRoutesObserved: new Progress(),
-    qhLockout: new Progress(),
-  };
-
+  readonly progress: Record<ProgressId, Progress>;
   @Expose()
   @Transform(_convertRecord(Skill), { toClassOnly: true })
-  readonly skills: Record<SkillId, Skill> = {
-    lethality: new Skill(),
-    ergodicity: new Skill(),
-    datalink: new Skill(),
-    spatial: new Skill(),
-    metacognition: new Skill(),
-    energyTransfer: new Skill(),
-  };
-
-  resources: Record<ResourceId, number>;
-
-  flags: Record<LoopFlagId, boolean> = {
-    shipHijacked: false,
-  };
-
-  // It *says* it can handle sets, but that doesn't appear to be true...
+  readonly skills: Record<SkillId, Skill>;
   @Expose()
   @Transform((params: { value: MilestoneId[] }) => new Set(params.value), {
     toClassOnly: true,
   })
   private readonly _milestones: Set<MilestoneId> = new Set();
 
+  // Unsaved player state that's adjusted as we go through a loop.
+  resources: Record<ResourceId, number>;
+  flags: Record<LoopFlagId, boolean>;
   zoneKind: ZoneKind = RUINS.kind;
 
   schedule: Schedule = new Schedule([], this);
@@ -100,14 +84,19 @@ export class Engine {
 
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
-
   private _energy: number = INITIAL_ENERGY;
-
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
 
   constructor() {
-    this.resources = mapValues(RESOURCES, (res) => res.initial(this));
+    this.resources = makeValues(RESOURCE_IDS, (res) =>
+      RESOURCES[res].initial(this)
+    );
+    this.progress = makeValues(PROGRESS_IDS, () => new Progress());
+    this.skills = makeValues(SKILL_IDS, () => new Skill());
+    this.flags = {
+      shipHijacked: false,
+    };
   }
 
   get energy(): number {
