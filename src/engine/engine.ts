@@ -136,6 +136,10 @@ export class Engine {
     entries(rewards.flags || {}).forEach(([flag, value]) => {
       this.flags[flag] = value;
     });
+    entries(task.trainedSkills).forEach(([id, xp]) => {
+      this.skills[id].addXp(xp);
+      this.skills.metacognition.addXp(xp);
+    });
     task.extraPerform(this);
   }
 
