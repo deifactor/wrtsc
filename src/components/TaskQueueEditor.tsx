@@ -1,5 +1,6 @@
 import { Button } from "./common/Button";
 import { SimulationStep, TASKS } from "../engine";
+import { TaskKind } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
@@ -16,6 +17,25 @@ import {
 } from "../engineStore";
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
+
+const AddTaskButton = React.memo(({ id }: { id: TaskKind }) => {
+  const dispatch = useAppDispatch();
+  const canAddToQueue = useAppSelector(
+    (store) => store.engine.view.tasks[id].canAddToQueue
+  );
+  return (
+    <Button
+      className="font-mono whitespace-pre"
+      key={id}
+      icon={ICONS[id]}
+      onClick={() => dispatch(pushTaskToQueue(id))}
+      tooltip={<TaskTooltip kind={id} />}
+      state={canAddToQueue ? "active" : "locked"}
+    >
+      {TASKS[id].shortName.padEnd(8)}
+    </Button>
+  );
+});
 
 const TaskQueueItem = React.memo(({ index }: { index: number }) => {
   const dispatch = useAppDispatch();
@@ -80,27 +100,13 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
 });
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
-  const dispatch = useAppDispatch();
   const { className } = props;
   const length = useAppSelector((store) => store.engine.nextQueue.length);
   const indices = Array.from(Array(length).keys());
 
   const addButtons = useEngineSelector((engine) => Object.values(engine.tasks))
     .filter((task) => task.visible)
-    .map((task) => {
-      return (
-        <Button
-          className="font-mono whitespace-pre"
-          key={task.kind}
-          icon={ICONS[task.kind]}
-          onClick={() => dispatch(pushTaskToQueue(task.kind))}
-          tooltip={<TaskTooltip kind={task.kind} />}
-          state={task.canAddToQueue ? "active" : "locked"}
-        >
-          {task.shortName.padEnd(8)}
-        </Button>
-      );
-    });
+    .map((task) => <AddTaskButton key={task.kind} id={task.kind} />);
   // For reasons I don't understand, without the flex having an icon messes with
   // vertical alignment.
   return (
