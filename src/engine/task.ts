@@ -42,6 +42,8 @@ export type Rewards = {
   resources?: Partial<Record<ResourceId, number>>;
   /** Sets the flags to the given values. */
   flags?: Partial<Record<LoopFlagId, boolean>>;
+  /** Energy to add. */
+  energy?: number;
 };
 /** A task, something that goes in the task queue. */
 export type Task = {
@@ -93,12 +95,9 @@ export const EXPLORE_RUINS: Task = {
   flavor:
     "Current loadout insufficient for mission. Recommend recovering as much materiel as viable.",
   required: {},
-  rewards: () => ({ progress: { ruinsExploration: 1024 } }),
-  extraPerform: (engine) => {
-    engine.progress.ruinsExploration.addXp(
-      (exploreMultiplier(engine) - 1) * 1024
-    );
-  },
+  rewards: (engine) => ({
+    progress: { ruinsExploration: exploreMultiplier(engine) * 1024 },
+  }),
   trainedSkills: { ergodicity: 128 },
 };
 
@@ -113,11 +112,8 @@ export const SCAVENGE_BATTERIES: Task = {
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
-  extraPerform: (engine) => {
-    engine.addEnergy(BATTERY_AMOUNT);
-  },
   required: { resources: { ruinsBatteries: 1 } },
-  rewards: () => ({}),
+  rewards: () => ({ energy: BATTERY_AMOUNT }),
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
   trainedSkills: { energyTransfer: 16 },
@@ -133,12 +129,9 @@ export const DRAIN_TERACAPACITOR: Task = {
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
   required: { resources: { teracapacitors: 1 } },
-  rewards: () => ({}),
+  rewards: (engine) => ({ energy: Math.min(25600, engine.timeInLoop / 5) }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
-  extraPerform: (engine) => {
-    engine.addEnergy(Math.min(25600, engine.timeInLoop / 5));
-  },
   trainedSkills: { energyTransfer: 128 },
 };
 
@@ -172,12 +165,9 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
-  rewards: () => ({ progress: { patrolRoutesObserved: 1024 } }),
-  extraPerform: (engine) => {
-    engine.progress.patrolRoutesObserved.addXp(
-      (exploreMultiplier(engine) - 1) * 1024
-    );
-  },
+  rewards: (engine) => ({
+    progress: { patrolRoutesObserved: exploreMultiplier(engine) * 1024 },
+  }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   trainedSkills: { ergodicity: 128 },
 };
@@ -299,8 +289,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     progress: { qhLockout: 25 },
     resources: { linkedSensorDrones: 1 },
   },
-  rewards: () => ({}),
-  extraPerform: (engine) => engine.addEnergy(3000),
+  rewards: () => ({ energy: 3000 }),
   trainedSkills: { energyTransfer: 16, datalink: 16 },
 };
 
