@@ -79,7 +79,7 @@ export class Engine {
   flags: Record<LoopFlagId, boolean>;
   zoneKind: ZoneKind = RUINS.kind;
 
-  schedule: QueueSchedule = new QueueSchedule([], this);
+  schedule: QueueSchedule = new QueueSchedule([]);
 
   /** `undefined` means the task is not finished yet. */
   completions: { amount: number; success: boolean | undefined }[] = [];
@@ -119,7 +119,7 @@ export class Engine {
   startLoop(queue: TaskQueue) {
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
-    this.schedule = new QueueSchedule(queue, this);
+    this.schedule = new QueueSchedule(queue);
     this.completions = queue.map(() => ({ amount: 0, success: undefined }));
     this.timeLeftOnTask = this.schedule.task?.cost(this);
     for (const resource of RESOURCE_IDS) {

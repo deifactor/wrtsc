@@ -1,4 +1,3 @@
-import { Engine } from "./engine";
 import { Task, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 
@@ -15,13 +14,11 @@ export interface Stats {
 export class QueueSchedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
-  readonly engine: Engine;
   index = 0;
   iteration = 0;
 
-  constructor(queue: TaskQueue, engine: Engine) {
+  constructor(queue: TaskQueue) {
     this.queue = queue;
-    this.engine = engine;
   }
 
   get task(): Task | undefined {
