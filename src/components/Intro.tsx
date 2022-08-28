@@ -56,6 +56,7 @@ export const Intro = ({ onFinished }: Props) => {
           <Button onClick={() => setCurrent(previousPosition(current))}>
             Previous
           </Button>
+          <Button onClick={onFinished}>Skip</Button>
           <Button
             onClick={() => (next ? setCurrent(next.state) : onFinished())}
             state={state === "advancing" ? "locked" : "active"}
