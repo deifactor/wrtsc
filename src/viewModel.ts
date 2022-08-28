@@ -123,7 +123,7 @@ function projectSchedule(engine: Engine): ScheduleView {
       success: engine.completions[index].success,
     })),
     currentTask: schedule.task && {
-      index: schedule.task.index,
+      index: schedule.index,
       cost: schedule.task.cost(engine),
       progress: schedule.task.cost(engine) - engine.timeLeftOnTask!,
     },

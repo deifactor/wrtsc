@@ -209,7 +209,7 @@ export class Engine {
         return { ok: true };
       }
       if (!this.canPerform(this.schedule.task)) {
-        this.markFailure(this.schedule.task.index);
+        this.markFailure(this.schedule.index);
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
@@ -218,13 +218,13 @@ export class Engine {
       this.timeAcrossAllLoops += ticked;
       this.timeLeftOnTask! -= ticked;
       if (this.timeLeftOnTask === 0) {
-        this.markSuccess(this.schedule.task.index);
+        this.markSuccess(this.schedule.index);
         this.nextTask();
       }
       duration = Math.min(this.energy, duration - ticked);
     }
     if (this.energy <= 0 && this.schedule.task) {
-      this.markFailure(this.schedule.task.index);
+      this.markFailure(this.schedule.index);
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
@@ -254,10 +254,12 @@ export class Engine {
   private simulationImpl(tasks: TaskQueue): SimulationResult {
     const result: SimulationResult = [];
     this.startLoop(tasks);
+    debugger;
     while (this.schedule.task) {
-      const task = this.schedule.task;
+      // need to get the index *before* we tick, since that can advance the index.
+      const index = this.schedule.index;
       const { ok } = this.tickTime(Math.max(this.schedule.task.cost(this), 1));
-      result[task.index] = {
+      result[index] = {
         ok: ok,
         energy: this.energy,
       };

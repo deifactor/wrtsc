@@ -1,5 +1,6 @@
 import { Engine } from "./engine";
-import { TaskQueue, TaskQueueIterator, TaskQueuePointer } from "./taskQueue";
+import { Task, TASKS } from "./task";
+import { TaskQueue } from "./taskQueue";
 
 export interface Stats {
   completions: number;
@@ -15,17 +16,17 @@ export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
   readonly engine: Engine;
-
-  private readonly iter: TaskQueueIterator;
+  index = 0;
+  iteration = 0;
 
   constructor(queue: TaskQueue, engine: Engine) {
     this.queue = queue;
     this.engine = engine;
-    this.iter = new TaskQueueIterator(this.queue);
   }
 
-  get task(): TaskQueuePointer | undefined {
-    return this.iter.peek;
+  get task(): Task | undefined {
+    const id = this.queue[this.index]?.task;
+    return id && TASKS[id];
   }
 
   /**
@@ -33,6 +34,13 @@ export class Schedule {
    * succeeded or not.
    */
   next(): void {
-    this.iter.next();
+    if (this.task === undefined) {
+      return;
+    }
+    this.iteration += 1;
+    if (this.iteration >= this.queue[this.index].count) {
+      this.index += 1;
+      this.iteration = 0;
+    }
   }
 }
