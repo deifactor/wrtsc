@@ -7,7 +7,7 @@ export type Settings = {
    * Whether or not to auto restart if the loop failed. Only has an effect if
    * autoRestart is true.
    */
-  autoRestartOnFailure: boolean;
+  pauseOnFailure: boolean;
   /**
    * If true, then we tick the time at 1000 times the normal rate. This also
    * disables both autorestart settings.
@@ -19,15 +19,15 @@ export const settingsSlice = createSlice({
   name: "settings",
   initialState: (): Settings => ({
     autoRestart: true,
-    autoRestartOnFailure: false,
+    pauseOnFailure: true,
     speedrunMode: false,
   }),
   reducers: {
     setAutoRestart: (state, action: PayloadAction<boolean>) => {
       state.autoRestart = action.payload;
     },
-    setAutoRestartOnFailure: (state, action: PayloadAction<boolean>) => {
-      state.autoRestartOnFailure = action.payload;
+    setPauseOnFailure: (state, action: PayloadAction<boolean>) => {
+      state.pauseOnFailure = action.payload;
     },
     setSpeedrunMode: (state, action: PayloadAction<boolean>) => {
       state.speedrunMode = action.payload;
@@ -35,5 +35,5 @@ export const settingsSlice = createSlice({
   },
 });
 
-export const { setAutoRestart, setAutoRestartOnFailure, setSpeedrunMode } =
+export const { setAutoRestart, setPauseOnFailure, setSpeedrunMode } =
   settingsSlice.actions;

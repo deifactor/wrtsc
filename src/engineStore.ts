@@ -15,6 +15,7 @@ export const engineSlice = createSlice({
       nextQueue: [] as TaskQueue,
       simulation: [] as SimulationResult,
       lastUpdate: new Date().getTime(),
+      paused: false,
     };
   },
   reducers: {
@@ -28,6 +29,10 @@ export const engineSlice = createSlice({
 
     setView: (state, action: PayloadAction<EngineView>) => {
       state.view = action.payload;
+    },
+
+    setPaused: (state, action: PayloadAction<boolean>) => {
+      state.paused = action.payload;
     },
 
     /**
@@ -107,6 +112,7 @@ export const {
   setBatchCountToMax,
   moveTask,
   removeTask,
+  setPaused,
 } = engineSlice.actions;
 
 // Whenever we modify the task queue, update the simulation. In the future we
@@ -134,17 +140,20 @@ export const tick: () => AppThunkAction =
   (dispatch, getState, { engine }) => {
     const now = new Date().getTime();
     const speedrunMode = getState().settings.speedrunMode;
-    const { autoRestart, autoRestartOnFailure } = getState().settings;
     const dt = (speedrunMode ? 1000 : 1) * (now - getState().engine.lastUpdate);
+    dispatch(engineSlice.actions.setLastUpdate(now));
+    if (getState().engine.paused) {
+      return;
+    }
+    const { autoRestart, pauseOnFailure } = getState().settings;
     const { ok } = engine.tickTime(dt);
-    const shouldRestart =
-      (!ok && autoRestartOnFailure) ||
-      (ok && !engine.schedule.task && autoRestart);
-    if (!speedrunMode && shouldRestart) {
+    if (!ok && pauseOnFailure) {
+      dispatch(setPaused(true));
+    }
+    if (!speedrunMode && ok && !engine.schedule.task && autoRestart) {
       engine.startLoop(getState().engine.nextQueue);
       dispatch(startLoop());
     }
-    dispatch(engineSlice.actions.setLastUpdate(now));
     dispatch(engineSlice.actions.setView(project(engine)));
   };
 
@@ -154,6 +163,7 @@ export const startLoop: () => AppThunkAction =
     engine.startLoop(getState().engine.nextQueue);
     engine.saveToStorage();
     dispatch(engineSlice.actions.setLastUpdate(new Date().getTime()));
+    dispatch(setPaused(false));
   };
 
 export const hardReset: () => AppThunkAction =

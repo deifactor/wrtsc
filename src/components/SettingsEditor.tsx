@@ -1,6 +1,6 @@
 import {
   setAutoRestart,
-  setAutoRestartOnFailure,
+  setPauseOnFailure,
   setSpeedrunMode,
 } from "../settingsStore";
 import { useAppDispatch, useAppSelector } from "../store";
@@ -15,7 +15,7 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
   const dispatch = useAppDispatch();
   const autoRestart = useAppSelector((store) => store.settings.autoRestart);
   const autoRestartOnFailure = useAppSelector(
-    (store) => store.settings.autoRestartOnFailure
+    (store) => store.settings.pauseOnFailure
   );
   const speedrunMode = useAppSelector((store) => store.settings.speedrunMode);
   return (
@@ -31,7 +31,7 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
       </Switch>
       <Switch
         checked={autoRestartOnFailure}
-        onChange={(checked) => dispatch(setAutoRestartOnFailure(checked))}
+        onChange={(checked) => dispatch(setPauseOnFailure(checked))}
       >
         Auto-restart on failure
       </Switch>
