@@ -19,7 +19,7 @@ import {
   MilestoneId,
   PROGRESS_IDS,
 } from "./player";
-import { Schedule } from "./schedule";
+import { QueueSchedule } from "./schedule";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
@@ -79,7 +79,7 @@ export class Engine {
   flags: Record<LoopFlagId, boolean>;
   zoneKind: ZoneKind = RUINS.kind;
 
-  schedule: Schedule = new Schedule([], this);
+  schedule: QueueSchedule = new QueueSchedule([], this);
 
   /** `undefined` means the task is not finished yet. */
   completions: { amount: number; success: boolean | undefined }[] = [];
@@ -119,7 +119,7 @@ export class Engine {
   startLoop(queue: TaskQueue) {
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
-    this.schedule = new Schedule(queue, this);
+    this.schedule = new QueueSchedule(queue, this);
     this.completions = queue.map(() => ({ amount: 0, success: undefined }));
     this.timeLeftOnTask = this.schedule.task?.cost(this);
     for (const resource of RESOURCE_IDS) {

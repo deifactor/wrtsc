@@ -12,7 +12,7 @@ export interface Stats {
  * far. (Currently that will be `count` for any task already executed, but
  * eventually we'll have tasks that can fail.)
  */
-export class Schedule {
+export class QueueSchedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
   readonly engine: Engine;
