@@ -89,7 +89,7 @@ export const EXPLORE_RUINS: Task = {
   kind: "exploreRuins",
   name: "Explore Ruins",
   shortName: "XPL_RUIN",
-  cost: () => 2000,
+  cost: () => 4000,
   description:
     "Increases amount of weapons and batteries that can be scavenged. 2.5x progress with Ship Hijacked.",
   flavor:
@@ -160,7 +160,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
-  cost: () => 3000,
+  cost: () => 4000,
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
