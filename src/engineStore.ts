@@ -151,6 +151,7 @@ export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
     engine.startLoop(getState().engine.nextQueue);
+    engine.saveToStorage();
     dispatch(engineSlice.actions.setLastUpdate(new Date().getTime()));
   };
 
