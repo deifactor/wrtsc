@@ -133,13 +133,14 @@ export const tick: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
     const now = new Date().getTime();
+    const speedrunMode = getState().settings.speedrunMode;
     const { autoRestart, autoRestartOnFailure } = getState().settings;
-    const dt = now - getState().engine.lastUpdate;
+    const dt = (speedrunMode ? 1000 : 1) * (now - getState().engine.lastUpdate);
     const { ok } = engine.tickTime(dt);
     const shouldRestart =
       (!ok && autoRestartOnFailure) ||
       (ok && !engine.schedule.task && autoRestart);
-    if (shouldRestart) {
+    if (!speedrunMode && shouldRestart) {
       engine.startLoop(getState().engine.nextQueue);
       dispatch(startLoop());
     }

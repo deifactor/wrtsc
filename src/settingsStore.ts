@@ -8,6 +8,11 @@ export type Settings = {
    * autoRestart is true.
    */
   autoRestartOnFailure: boolean;
+  /**
+   * If true, then we tick the time at 1000 times the normal rate. This also
+   * disables both autorestart settings.
+   */
+  speedrunMode: boolean;
 };
 
 export const settingsSlice = createSlice({
@@ -15,6 +20,7 @@ export const settingsSlice = createSlice({
   initialState: (): Settings => ({
     autoRestart: true,
     autoRestartOnFailure: false,
+    speedrunMode: false,
   }),
   reducers: {
     setAutoRestart: (state, action: PayloadAction<boolean>) => {
@@ -23,8 +29,11 @@ export const settingsSlice = createSlice({
     setAutoRestartOnFailure: (state, action: PayloadAction<boolean>) => {
       state.autoRestartOnFailure = action.payload;
     },
+    setSpeedrunMode: (state, action: PayloadAction<boolean>) => {
+      state.speedrunMode = action.payload;
+    },
   },
 });
 
-export const { setAutoRestart, setAutoRestartOnFailure } =
+export const { setAutoRestart, setAutoRestartOnFailure, setSpeedrunMode } =
   settingsSlice.actions;
