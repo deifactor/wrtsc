@@ -140,6 +140,7 @@ export class Engine {
       this.skills[id].addXp(xp);
       this.skills.metacognition.addXp(xp);
     });
+    rewards.energy && this.addEnergy(rewards.energy);
     task.extraPerform(this);
   }
 
