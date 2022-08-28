@@ -69,6 +69,7 @@ export type EngineView = {
   combat: number;
   schedule: ScheduleView;
   tasks: Record<TaskKind, TaskView>;
+  timeAcrossAllLoops: number;
 };
 
 export function project(engine: Engine): EngineView {
@@ -108,6 +109,7 @@ export function project(engine: Engine): EngineView {
       rewards: task.rewards(engine),
       maxIterations: task.maxIterations && task.maxIterations(engine),
     })),
+    timeAcrossAllLoops: engine.timeAcrossAllLoops,
   };
 }
 

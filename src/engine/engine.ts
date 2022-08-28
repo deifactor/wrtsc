@@ -71,6 +71,8 @@ export class Engine {
     toClassOnly: true,
   })
   private readonly _milestones: Set<MilestoneId> = new Set();
+  @Expose()
+  timeAcrossAllLoops: number = 0;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
@@ -167,7 +169,11 @@ export class Engine {
   }
 
   get combat(): number {
-    return this.resources.weaponSalvage;
+    return (
+      (1 + this.skills.lethality.level / 10) *
+        (1 + this.resources.weaponSalvage) -
+      1
+    );
   }
 
   /** Iterate to the next task. This includes performing the current task. */
@@ -205,6 +211,7 @@ export class Engine {
       const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
       this.removeEnergy(ticked);
       this._timeInLoop += ticked;
+      this.timeAcrossAllLoops += ticked;
       if (this.schedule.taskDone) {
         this.markSuccess(this.schedule.task.index);
         this.nextTask();

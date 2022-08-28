@@ -26,11 +26,15 @@ export const PlayerDisplay = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
   const combat = useEngineSelector((engine) => engine.combat);
+  const totalTime = useEngineSelector((engine) => engine.timeAcrossAllLoops);
   return (
     <div>
       <h1>Stats</h1>
       <div>
         <strong>AEU</strong>: {energy.toFixed(0)}
+      </div>
+      <div>
+        <strong>T_total</strong>: {(totalTime / 1000).toFixed(0)}
       </div>
       <ResourceDisplay kind="linkedSensorDrones" />
       <ResourceDisplay kind="qhLockoutAttempts" />
