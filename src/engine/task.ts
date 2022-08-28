@@ -166,7 +166,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
   rewards: (engine) => ({
-    progress: { patrolRoutesObserved: exploreMultiplier(engine) * 1024 },
+    progress: { patrolRoutesObserved: exploreMultiplier(engine) * 128 },
   }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   trainedSkills: { ergodicity: 128 },
