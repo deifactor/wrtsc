@@ -89,14 +89,14 @@ export class Engine {
   private _totalEnergy: number = INITIAL_ENERGY;
 
   constructor() {
-    this.resources = makeValues(RESOURCE_IDS, (res) =>
-      RESOURCES[res].initial(this)
-    );
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
     this.skills = makeValues(SKILL_IDS, () => new Skill());
     this.flags = {
       shipHijacked: false,
     };
+    this.resources = makeValues(RESOURCE_IDS, (res) =>
+      RESOURCES[res].initial(this)
+    );
   }
 
   get energy(): number {
