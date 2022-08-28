@@ -34,8 +34,8 @@ export type ScheduleView = {
   tasks: {
     kind: TaskKind;
     count: number;
-    completed: number;
-    success: boolean | undefined;
+    success: number;
+    failure: number;
   }[];
   currentTask?: {
     index: number;
@@ -119,8 +119,8 @@ function projectSchedule(engine: Engine): ScheduleView {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       kind: task,
       count,
-      completed: engine.schedule.completions[index].amount,
       success: engine.schedule.completions[index].success,
+      failure: engine.schedule.completions[index].failure,
     })),
     currentTask: schedule.task && {
       index: schedule.index,

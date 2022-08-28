@@ -203,6 +203,7 @@ export class Engine {
       this.timeAcrossAllLoops += ticked;
       this.timeLeftOnTask! -= ticked;
       if (this.timeLeftOnTask === 0) {
+        this.perform(this.schedule.task);
         this.schedule.next(true);
         this.timeLeftOnTask = this.schedule.task?.cost(this);
       }
@@ -225,7 +226,6 @@ export class Engine {
   private simulationImpl(tasks: TaskQueue): SimulationResult {
     const result: SimulationResult = [];
     this.startLoop(tasks);
-    debugger;
     while (this.schedule.task) {
       // need to get the index *before* we tick, since that can advance the index.
       const index = this.schedule.index;

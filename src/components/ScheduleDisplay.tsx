@@ -17,7 +17,7 @@ export const ScheduleDisplay = (props: Props) => {
 
   const entries = schedule.tasks.map((entry, idx) => {
     let progressInner;
-    if (entry.success === false) {
+    if (entry.failure) {
       progressInner = <span className="text-red-400">[FAIL]</span>;
     } else if (idx === schedule.currentTask?.index) {
       const completionFraction =
@@ -38,8 +38,8 @@ export const ScheduleDisplay = (props: Props) => {
     return (
       <div className="flex items-center font-mono h-10" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline" task={entry.kind} /> {entry.completed}/
-          {entry.count}{" "}
+          <TaskIcon className="inline" task={entry.kind} />{" "}
+          {entry.success + entry.failure}/{entry.count}{" "}
         </span>
         <span className="inline-block ml-auto whitespace-pre font-bold">
           {progressInner}
