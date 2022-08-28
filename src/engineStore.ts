@@ -18,18 +18,6 @@ export const engineSlice = createSlice({
     };
   },
   reducers: {
-    hardReset: () => {
-      const engine = new Engine();
-      return {
-        view: project(engine),
-        settings: { autoRestart: true },
-        nextQueue: [],
-        simulation: [],
-        // TODO: not actually pure!
-        lastUpdate: new Date().getTime(),
-      };
-    },
-
     setSimulation: (state, action: PayloadAction<SimulationResult>) => {
       state.simulation = action.payload;
     },
@@ -114,7 +102,6 @@ export const engineSlice = createSlice({
 });
 
 export const {
-  hardReset,
   pushTaskToQueue,
   modifyBatchCount,
   setBatchCountToMax,
@@ -165,6 +152,12 @@ export const startLoop: () => AppThunkAction =
   (dispatch, getState, { engine }) => {
     engine.startLoop(getState().engine.nextQueue);
     dispatch(engineSlice.actions.setLastUpdate(new Date().getTime()));
+  };
+
+export const hardReset: () => AppThunkAction =
+  () => (dispatch, _getState, extra) => {
+    extra.engine = new Engine();
+    dispatch(startLoop());
   };
 
 function checkBounds(queue: TaskQueue, index: number) {
