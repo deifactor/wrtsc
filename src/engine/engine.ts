@@ -81,9 +81,6 @@ export class Engine {
 
   schedule: QueueSchedule = new QueueSchedule([]);
 
-  /** `undefined` means the task is not finished yet. */
-  completions: { amount: number; success: boolean | undefined }[] = [];
-
   timeLeftOnTask: number | undefined = undefined;
 
   /** Time, in milliseconds, since the start of the loop. */
@@ -120,7 +117,6 @@ export class Engine {
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new QueueSchedule(queue);
-    this.completions = queue.map(() => ({ amount: 0, success: undefined }));
     this.timeLeftOnTask = this.schedule.task?.cost(this);
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
@@ -179,17 +175,6 @@ export class Engine {
     );
   }
 
-  /** Iterate to the next task. This includes performing the current task. */
-  nextTask() {
-    entries(this.schedule.task!.trainedSkills).forEach(([id, xp]) => {
-      this.skills[id].addXp(xp);
-      this.skills.metacognition.addXp(xp / 10);
-    });
-    this.perform(this.schedule.task!);
-    this.schedule.next();
-    this.timeLeftOnTask = this.schedule.task?.cost(this);
-  }
-
   /**
    * Advance the simulation by this many milliseconds. Returns an indication of
    * whether there was an error in the simulation.
@@ -209,7 +194,7 @@ export class Engine {
         return { ok: true };
       }
       if (!this.canPerform(this.schedule.task)) {
-        this.markFailure(this.schedule.index);
+        this.schedule.next(false);
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
@@ -218,30 +203,16 @@ export class Engine {
       this.timeAcrossAllLoops += ticked;
       this.timeLeftOnTask! -= ticked;
       if (this.timeLeftOnTask === 0) {
-        this.markSuccess(this.schedule.index);
-        this.nextTask();
+        this.schedule.next(true);
+        this.timeLeftOnTask = this.schedule.task?.cost(this);
       }
       duration = Math.min(this.energy, duration - ticked);
     }
     if (this.energy <= 0 && this.schedule.task) {
-      this.markFailure(this.schedule.index);
+      this.schedule.next(false);
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
-  }
-
-  markSuccess(batchIndex: number) {
-    this.completions[batchIndex].amount++;
-    if (
-      this.completions[batchIndex].amount ===
-      this.schedule.queue[batchIndex].count
-    ) {
-      this.completions[batchIndex].success = true;
-    }
-  }
-
-  markFailure(batchIndex: number) {
-    this.completions[batchIndex].success = false;
   }
 
   simulation(tasks: TaskQueue): SimulationResult {

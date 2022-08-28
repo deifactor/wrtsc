@@ -16,9 +16,15 @@ export class QueueSchedule {
   readonly queue: TaskQueue;
   index = 0;
   iteration = 0;
+  /** `undefined` means the task is not finished yet. */
+  completions: { amount: number; success: boolean | undefined }[] = [];
 
   constructor(queue: TaskQueue) {
     this.queue = queue;
+    this.completions = queue.map(() => ({
+      amount: 0,
+      success: undefined,
+    }));
   }
 
   get task(): Task | undefined {
@@ -30,12 +36,20 @@ export class QueueSchedule {
    * Advances to the next task. Argument indicates whether the current task
    * succeeded or not.
    */
-  next(): void {
+  next(succeeded: boolean): void {
     if (this.task === undefined) {
       return;
     }
+    if (succeeded) {
+      this.completions[this.index].amount++;
+    } else {
+      this.completions[this.index].success = false;
+    }
     this.iteration += 1;
     if (this.iteration >= this.queue[this.index].count) {
+      if (this.completions[this.index].success === undefined) {
+        this.completions[this.index].success = true;
+      }
       this.index += 1;
       this.iteration = 0;
     }

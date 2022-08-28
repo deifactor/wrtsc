@@ -119,8 +119,8 @@ function projectSchedule(engine: Engine): ScheduleView {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       kind: task,
       count,
-      completed: engine.completions[index].amount,
-      success: engine.completions[index].success,
+      completed: engine.schedule.completions[index].amount,
+      success: engine.schedule.completions[index].success,
     })),
     currentTask: schedule.task && {
       index: schedule.index,
