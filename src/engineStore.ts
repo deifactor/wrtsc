@@ -16,7 +16,9 @@ export const engineSlice = createSlice({
   initialState: () => {
     const engine = Engine.loadFromStorage();
     return {
-      engine,
+      // This is a function that closes over a constant variable to prevent the
+      // type inference from converting it to a WritableDraft<Engine>.
+      engine: () => engine,
       view: project(engine),
       nextQueue: [] as TaskQueue,
       simulation: [] as SimulationResult,
@@ -32,7 +34,7 @@ export const engineSlice = createSlice({
     hardReset: () => {
       const engine = new Engine();
       return {
-        engine: engine,
+        engine: () => engine,
         view: project(engine),
         settings: { autoRestart: true },
         nextQueue: [],
@@ -41,32 +43,32 @@ export const engineSlice = createSlice({
       };
     },
     startLoop: (state) => {
-      state.engine.startLoop(original(state.nextQueue)!);
-      state.simulation = state.engine.simulation(state.nextQueue);
-      state.view = project(state.engine as any as Engine);
+      state.engine().startLoop(original(state.nextQueue)!);
+      state.simulation = state.engine().simulation(state.nextQueue);
+      state.view = project(state.engine() as any as Engine);
       state.lastUpdate = new Date().getTime();
-      state.engine.saveToStorage();
+      state.engine().saveToStorage();
     },
     nextTask: (state) => {
-      state.engine.nextTask();
-      state.view = project(state.engine as any as Engine);
+      state.engine().nextTask();
+      state.view = project(state.engine() as any as Engine);
       state.lastUpdate = new Date().getTime();
     },
     tickWithSettings: {
       reducer(state, action: PayloadAction<TickPayload>) {
         const { now, autoRestart, autoRestartOnFailure } = action.payload;
         const dt = now - state.lastUpdate;
-        const { ok } = state.engine.tickTime(dt);
+        const { ok } = state.engine().tickTime(dt);
         const shouldRestart =
           (!ok && autoRestartOnFailure) ||
-          (ok && !state.engine.schedule.task && autoRestart);
+          (ok && !state.engine().schedule.task && autoRestart);
         if (shouldRestart) {
-          state.simulation = state.engine.simulation(state.nextQueue);
-          state.engine.startLoop(original(state.nextQueue)!);
-          state.engine.saveToStorage();
+          state.simulation = state.engine().simulation(state.nextQueue);
+          state.engine().startLoop(original(state.nextQueue)!);
+          state.engine().saveToStorage();
         }
         state.lastUpdate = now;
-        state.view = project(state.engine as any as Engine);
+        state.view = project(state.engine() as any as Engine);
       },
       prepare(payload: {
         autoRestart: boolean;
@@ -89,7 +91,7 @@ export const engineSlice = createSlice({
       } else {
         queue.push({ task: kind, count: 1 });
       }
-      state.simulation = state.engine.simulation(state.nextQueue);
+      state.simulation = state.engine().simulation(state.nextQueue);
     },
 
     /**
@@ -108,7 +110,7 @@ export const engineSlice = createSlice({
       if (entry.count <= 0) {
         queue.splice(index, 1);
       }
-      state.simulation = state.engine.simulation(state.nextQueue);
+      state.simulation = state.engine().simulation(state.nextQueue);
     },
 
     /**
@@ -119,10 +121,10 @@ export const engineSlice = createSlice({
       const index = action.payload;
       const queue = state.nextQueue;
       const maxIterations = TASKS[queue[index].task].maxIterations!(
-        state.engine as any
+        state.engine() as any
       );
       queue[index].count = maxIterations;
-      state.simulation = state.engine.simulation(state.nextQueue);
+      state.simulation = state.engine().simulation(state.nextQueue);
     },
 
     /**
@@ -139,7 +141,7 @@ export const engineSlice = createSlice({
       const entry = queue[from];
       queue.splice(from, 1);
       queue.splice(to, 0, entry);
-      state.simulation = state.engine.simulation(state.nextQueue);
+      state.simulation = state.engine().simulation(state.nextQueue);
     },
 
     /** Removes a task entirely from the queue. */
@@ -148,7 +150,7 @@ export const engineSlice = createSlice({
       const index = action.payload;
       checkBounds(queue, index);
       queue.splice(index, 1);
-      state.simulation = state.engine.simulation(state.nextQueue);
+      state.simulation = state.engine().simulation(state.nextQueue);
     },
   },
 });
