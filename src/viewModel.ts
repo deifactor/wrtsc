@@ -44,6 +44,10 @@ export type ScheduleView = {
   };
 };
 
+/**
+ * Fields here generally correspond to the fields on `Task` that are functions
+ * of the engine state.
+ */
 export type TaskView = {
   kind: TaskKind;
   cost: number;
@@ -51,6 +55,7 @@ export type TaskView = {
   canAddToQueue: boolean;
   shortName: string;
   rewards: Rewards;
+  maxIterations: number | undefined;
 };
 
 export type EngineView = {
@@ -101,6 +106,7 @@ export function project(engine: Engine): EngineView {
       canAddToQueue: canAddToQueue(engine, task),
       shortName: task.shortName,
       rewards: task.rewards(engine),
+      maxIterations: task.maxIterations && task.maxIterations(engine),
     })),
   };
 }
