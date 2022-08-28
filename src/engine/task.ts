@@ -116,7 +116,7 @@ export const SCAVENGE_BATTERIES: Task = {
   rewards: () => ({ energy: BATTERY_AMOUNT }),
   visible: (engine) => engine.progress.ruinsExploration.level > 0,
   maxIterations: (engine) => RESOURCES.ruinsBatteries.initial(engine),
-  trainedSkills: { energyTransfer: 16 },
+  trainedSkills: { energyTransfer: 2 },
 };
 
 export const DRAIN_TERACAPACITOR: Task = {
@@ -132,7 +132,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   rewards: (engine) => ({ energy: Math.min(25600, engine.timeInLoop / 5) }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
-  trainedSkills: { energyTransfer: 128 },
+  trainedSkills: { energyTransfer: 8 },
 };
 
 export const LINK_SENSOR_DRONES: Task = {
@@ -152,7 +152,7 @@ export const LINK_SENSOR_DRONES: Task = {
   rewards: () => ({ resources: { linkedSensorDrones: 1 } }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 1,
   maxIterations: (engine) => RESOURCES.unlinkedSensorDrones.initial(engine),
-  trainedSkills: { datalink: 64 },
+  trainedSkills: { datalink: 4 },
 };
 
 export const OBSERVE_PATROL_ROUTES: Task = {
@@ -169,7 +169,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     progress: { patrolRoutesObserved: exploreMultiplier(engine) * 128 },
   }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
-  trainedSkills: { ergodicity: 128 },
+  trainedSkills: { ergodicity: 8 },
 };
 
 export const KILL_SCOUT: Task = {
@@ -194,7 +194,7 @@ export const KILL_SCOUT: Task = {
   }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: { lethality: 256 },
+  trainedSkills: { lethality: 16 },
 };
 
 const LOCKOUTS_PER_SHIP = 8;
@@ -233,7 +233,7 @@ export const HIJACK_SHIP: Task = {
     engine.addMilestone("shipHijacked");
   },
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: { lethality: 512, spatial: 512 },
+  trainedSkills: { lethality: 128, spatial: 128 },
 };
 
 export const DISABLE_LOCKOUTS: Task = {
@@ -251,7 +251,7 @@ export const DISABLE_LOCKOUTS: Task = {
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
   rewards: () => ({ progress: { qhLockout: 1024 } }),
-  trainedSkills: { datalink: 64 },
+  trainedSkills: { datalink: 4 },
 };
 
 export const STRAFING_RUN: Task = {

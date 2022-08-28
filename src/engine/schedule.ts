@@ -15,7 +15,6 @@ export class Schedule {
   // Don't mutate this.
   readonly queue: TaskQueue;
   readonly engine: Engine;
-  timeLeftOnTask: number = 0;
 
   private readonly iter: TaskQueueIterator;
 
@@ -23,25 +22,10 @@ export class Schedule {
     this.queue = queue;
     this.engine = engine;
     this.iter = new TaskQueueIterator(this.queue);
-    this.timeLeftOnTask = this.task ? this.task.cost(engine) : 0;
   }
 
   get task(): TaskQueuePointer | undefined {
     return this.iter.peek;
-  }
-
-  get taskDone(): boolean {
-    return Boolean(this.task && this.timeLeftOnTask === 0);
-  }
-
-  /**
-   * Ticks the progress on the current task by the given amount. Returns the
-   * amount that was actually ticked.
-   */
-  tickTime(amount: number): number {
-    amount = Math.min(amount, this.timeLeftOnTask);
-    this.timeLeftOnTask -= amount;
-    return amount;
   }
 
   /**
@@ -50,6 +34,5 @@ export class Schedule {
    */
   next(): void {
     this.iter.next();
-    this.timeLeftOnTask = this.task ? this.task.cost(this.engine) : 0;
   }
 }

@@ -84,6 +84,8 @@ export class Engine {
   /** `undefined` means the task is not finished yet. */
   completions: { amount: number; success: boolean | undefined }[] = [];
 
+  timeLeftOnTask: number | undefined = undefined;
+
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
   private _energy: number = INITIAL_ENERGY;
@@ -119,6 +121,7 @@ export class Engine {
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     this.schedule = new Schedule(queue, this);
     this.completions = queue.map(() => ({ amount: 0, success: undefined }));
+    this.timeLeftOnTask = this.schedule.task?.cost(this);
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
@@ -184,6 +187,7 @@ export class Engine {
     });
     this.perform(this.schedule.task!);
     this.schedule.next();
+    this.timeLeftOnTask = this.schedule.task?.cost(this);
   }
 
   /**
@@ -208,11 +212,12 @@ export class Engine {
         this.markFailure(this.schedule.task.index);
         return { ok: false, reason: "taskFailed" };
       }
-      const ticked = this.schedule.tickTime(Math.min(this.energy, duration));
+      const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
       this.removeEnergy(ticked);
       this._timeInLoop += ticked;
       this.timeAcrossAllLoops += ticked;
-      if (this.schedule.taskDone) {
+      this.timeLeftOnTask! -= ticked;
+      if (this.timeLeftOnTask === 0) {
         this.markSuccess(this.schedule.task.index);
         this.nextTask();
       }
