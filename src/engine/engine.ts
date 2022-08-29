@@ -1,13 +1,4 @@
-import {
-  ClassConstructor,
-  Exclude,
-  Expose,
-  instanceToInstance,
-  instanceToPlain,
-  plainToInstance,
-  Transform,
-} from "class-transformer";
-import { entries, makeValues } from "../records";
+import { entries, makeValues, mapValues } from "../records";
 
 import {
   Progress,
@@ -45,34 +36,15 @@ export type SimulationStep = {
 
 export type SimulationResult = SimulationStep[];
 
-function _convertRecord<T>(cls: ClassConstructor<T>) {
-  return function (params: { value: any }): Record<string, T> {
-    const obj = params.value;
-    Object.keys(obj).forEach((key) => {
-      obj[key] = plainToInstance(cls, obj[key]);
-    });
-    return obj as Record<string, T>;
-  };
-}
 const INITIAL_ENERGY = 5000;
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
-@Exclude()
 export class Engine {
   // Saved player state.
-  @Expose()
-  @Transform(_convertRecord(Progress), { toClassOnly: true })
   readonly progress: Record<ProgressId, Progress>;
-  @Expose()
-  @Transform(_convertRecord(Skill), { toClassOnly: true })
   readonly skills: Record<SkillId, Skill>;
-  @Expose()
-  @Transform((params: { value: MilestoneId[] }) => new Set(params.value), {
-    toClassOnly: true,
-  })
-  private readonly _milestones: Set<MilestoneId> = new Set();
-  @Expose()
-  timeAcrossAllLoops: number = 0;
+  private readonly _milestones: Set<MilestoneId>;
+  timeAcrossAllLoops: number;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
@@ -89,9 +61,23 @@ export class Engine {
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
 
-  constructor() {
+  constructor(save?: GameSave) {
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
     this.skills = makeValues(SKILL_IDS, () => new Skill());
+    this._milestones = new Set();
+    this.timeAcrossAllLoops = 0;
+    if (save) {
+      entries(save.progress).forEach(([id, { xp, level }]) => {
+        this.progress[id].xp = xp;
+        this.progress[id].level = level;
+      });
+      entries(save.skills).forEach(([id, { xp, level }]) => {
+        this.skills[id].xp = xp;
+        this.skills[id].level = level;
+      });
+      this._milestones = new Set(save.milestones);
+      this.timeAcrossAllLoops = save.timeAcrossAllLoops;
+    }
     this.flags = {
       shipHijacked: false,
     };
@@ -218,7 +204,7 @@ export class Engine {
 
   simulation(tasks: TaskQueue): SimulationResult {
     // Deep-copy the engine into a new state
-    const sim = instanceToInstance(this);
+    const sim = new Engine(this.toSave());
     return sim.simulationImpl(tasks);
   }
 
@@ -241,27 +227,6 @@ export class Engine {
     return result;
   }
 
-  save(): GameSave {
-    return instanceToPlain(this);
-  }
-
-  saveToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.save()));
-  }
-
-  static hasSave(): boolean {
-    return Boolean(localStorage.getItem(STORAGE_KEY));
-  }
-
-  static loadFromStorage(): Engine {
-    const stringified = localStorage.getItem(STORAGE_KEY);
-    if (stringified) {
-      return plainToInstance(Engine, JSON.parse(stringified));
-    } else {
-      return new Engine();
-    }
-  }
-
   addEnergy(amount: number) {
     amount *=
       1 + Math.log(1 + this.skills.energyTransfer.level / 128) / Math.log(2);
@@ -273,6 +238,43 @@ export class Engine {
   removeEnergy(amount: number) {
     this._energy -= amount;
   }
+
+  toSave(): GameSave {
+    return {
+      progress: mapValues(this.progress, (progress) => ({
+        xp: progress.xp,
+        level: progress.level,
+      })),
+      skills: mapValues(this.skills, (skill) => ({
+        xp: skill.xp,
+        level: skill.level,
+      })),
+      milestones: Array.from(this._milestones),
+      timeAcrossAllLoops: this.timeAcrossAllLoops,
+    };
+  }
+
+  saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.toSave()));
+  }
+
+  static hasSave(): boolean {
+    return Boolean(localStorage.getItem(STORAGE_KEY));
+  }
+
+  static loadFromStorage(): Engine {
+    const stringified = localStorage.getItem(STORAGE_KEY);
+    if (stringified) {
+      return new Engine(JSON.parse(stringified) as GameSave);
+    } else {
+      return new Engine();
+    }
+  }
 }
 
-type GameSave = Record<string, any>;
+export type GameSave = {
+  progress: Record<ProgressId, { xp: number; level: number }>;
+  skills: Record<SkillId, { xp: number; level: number }>;
+  milestones: MilestoneId[];
+  timeAcrossAllLoops: number;
+};
