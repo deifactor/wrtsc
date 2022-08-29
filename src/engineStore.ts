@@ -1,16 +1,16 @@
 import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { Engine, TaskQueue, TaskKind, SimulationResult } from "./engine";
+import { QueueEngine, TaskQueue, TaskKind, SimulationResult } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { startAppListening } from "./listener";
 
 export const engineSlice = createSlice({
   name: "engine",
   initialState: () => {
-    const engine = Engine.loadFromStorage();
+    const engine = QueueEngine.loadFromStorage();
     return {
       // This is a function that closes over a constant variable to prevent the
-      // type inference from converting it to a WritableDraft<Engine>.
+      // type inference from converting it to a WritableDraft<QueueEngine>.
       view: project(engine),
       nextQueue: [] as TaskQueue,
       simulation: [] as SimulationResult,
@@ -150,7 +150,7 @@ export const tick: () => AppThunkAction =
     if (!ok && pauseOnFailure) {
       dispatch(setPaused(true));
     }
-    if (!speedrunMode && ok && !engine.schedule.task && autoRestart) {
+    if (!speedrunMode && ok && !engine.task && autoRestart) {
       engine.startLoop(getState().engine.nextQueue);
       dispatch(startLoop());
     }
@@ -168,7 +168,7 @@ export const startLoop: () => AppThunkAction =
 
 export const hardReset: () => AppThunkAction =
   () => (dispatch, _getState, extra) => {
-    extra.engine = new Engine();
+    extra.engine = new QueueEngine();
     dispatch(startLoop());
   };
 

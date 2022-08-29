@@ -3,7 +3,7 @@
  * defined here are guaranteed to *attempt* to not needlessly duplicate objects.
  */
 import {
-  Engine,
+  QueueEngine,
   LoopFlagId,
   ResourceId,
   ProgressId,
@@ -72,7 +72,7 @@ export type EngineView = {
   timeAcrossAllLoops: number;
 };
 
-export function project(engine: Engine): EngineView {
+export function project(engine: QueueEngine): EngineView {
   const visibles = findVisibles(engine);
   return {
     resources: mapValues(engine.resources, (amount, id) => {
@@ -113,14 +113,14 @@ export function project(engine: Engine): EngineView {
   };
 }
 
-function projectSchedule(engine: Engine): ScheduleView {
-  const schedule = engine.schedule;
+function projectSchedule(engine: QueueEngine): ScheduleView {
+  const schedule = engine;
   return {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       kind: task,
       count,
-      success: engine.schedule.completions[index].success,
-      failure: engine.schedule.completions[index].failure,
+      success: engine.completions[index].success,
+      failure: engine.completions[index].failure,
     })),
     currentTask: schedule.task && {
       index: schedule.index,
@@ -134,7 +134,7 @@ function projectSchedule(engine: Engine): ScheduleView {
  * True if we should even allow the player to add this task to the queue. This
  * should only return false if there is no possible way for this task to succeed.
  */
-function canAddToQueue(engine: Engine, task: Task): boolean {
+function canAddToQueue(engine: QueueEngine, task: Task): boolean {
   // Zero max iterations means it's impossible.
   if (task.maxIterations && task.maxIterations(engine) === 0) {
     return false;
@@ -145,7 +145,7 @@ function canAddToQueue(engine: Engine, task: Task): boolean {
   );
 }
 
-function findVisibles(engine: Engine): {
+function findVisibles(engine: QueueEngine): {
   resources: Set<ResourceId>;
   progresses: Set<ProgressId>;
 } {

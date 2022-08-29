@@ -1,9 +1,9 @@
-import { Engine } from "./engine";
+import { QueueEngine } from "./engine";
 import { project } from "./viewModel";
 import { reuse } from "./reuse";
 
 it("should generate identical objects for a blank engine", () => {
-  const engine = new Engine();
+  const engine = new QueueEngine();
   const old = project(engine);
   const nu = project(engine);
   expect(nu).toEqual(old);

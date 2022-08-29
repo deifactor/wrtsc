@@ -10,9 +10,8 @@ import {
   MilestoneId,
   PROGRESS_IDS,
 } from "./player";
-import { QueueSchedule } from "./schedule";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
-import { Task } from "./task";
+import { Task, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneKind } from "./zone";
 
@@ -39,19 +38,17 @@ export type SimulationResult = SimulationStep[];
 const INITIAL_ENERGY = 5000;
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
-export class Engine {
+export abstract class Engine<ScheduleT = unknown> {
   // Saved player state.
   readonly progress: Record<ProgressId, Progress>;
   readonly skills: Record<SkillId, Skill>;
-  private readonly _milestones: Set<MilestoneId>;
+  protected readonly _milestones: Set<MilestoneId>;
   timeAcrossAllLoops: number;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
   flags: Record<LoopFlagId, boolean>;
   zoneKind: ZoneKind = RUINS.kind;
-
-  schedule: QueueSchedule = new QueueSchedule([]);
 
   timeLeftOnTask: number | undefined = undefined;
 
@@ -86,6 +83,17 @@ export class Engine {
     );
   }
 
+  /** Stores the current task. */
+  abstract get task(): Task | undefined;
+  /**
+   * Called to advance to the next task. The argument indicates whether the task
+   * succeeded or not.
+   */
+  abstract next(success: boolean): void;
+
+  /** Sets the schedule from the given object. Implicitly called via startLoop. */
+  protected abstract setSchedule(schedule: ScheduleT): void;
+
   get energy(): number {
     return this._energy;
   }
@@ -99,11 +107,11 @@ export class Engine {
   }
 
   /** Restart the time loop. */
-  startLoop(queue: TaskQueue) {
+  startLoop(schedule: ScheduleT) {
+    this.setSchedule(schedule);
+    this.timeLeftOnTask = this.task?.cost(this);
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
-    this.schedule = new QueueSchedule(queue);
-    this.timeLeftOnTask = this.schedule.task?.cost(this);
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
@@ -176,11 +184,11 @@ export class Engine {
     // We basically 'spend' time from the duration until we hit 0;
     duration = Math.floor(duration);
     while (duration > 0) {
-      if (!this.schedule.task) {
+      if (!this.task) {
         return { ok: true };
       }
-      if (!this.canPerform(this.schedule.task)) {
-        this.schedule.next(false);
+      if (!this.canPerform(this.task)) {
+        this.next(false);
         return { ok: false, reason: "taskFailed" };
       }
       const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
@@ -189,42 +197,17 @@ export class Engine {
       this.timeAcrossAllLoops += ticked;
       this.timeLeftOnTask! -= ticked;
       if (this.timeLeftOnTask === 0) {
-        this.perform(this.schedule.task);
-        this.schedule.next(true);
-        this.timeLeftOnTask = this.schedule.task?.cost(this);
+        this.perform(this.task);
+        this.next(true);
+        this.timeLeftOnTask = this.task?.cost(this);
       }
       duration = Math.min(this.energy, duration - ticked);
     }
-    if (this.energy <= 0 && this.schedule.task) {
-      this.schedule.next(false);
+    if (this.energy <= 0 && this.task) {
+      this.next(false);
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
-  }
-
-  simulation(tasks: TaskQueue): SimulationResult {
-    // Deep-copy the engine into a new state
-    const sim = new Engine(this.toSave());
-    return sim.simulationImpl(tasks);
-  }
-
-  /** Simulates the entire task queue. This mutates everything, so clone before running it! */
-  private simulationImpl(tasks: TaskQueue): SimulationResult {
-    const result: SimulationResult = [];
-    this.startLoop(tasks);
-    while (this.schedule.task) {
-      // need to get the index *before* we tick, since that can advance the index.
-      const index = this.schedule.index;
-      const { ok } = this.tickTime(Math.max(this.schedule.task.cost(this), 1));
-      result[index] = {
-        ok: ok,
-        energy: this.energy,
-      };
-      if (!ok) {
-        break;
-      }
-    }
-    return result;
   }
 
   addEnergy(amount: number) {
@@ -237,6 +220,81 @@ export class Engine {
 
   removeEnergy(amount: number) {
     this._energy -= amount;
+  }
+}
+
+export class QueueEngine extends Engine<TaskQueue> {
+  queue: TaskQueue = [];
+  /** The index of the task batch we're in. */
+  index = 0;
+  /**
+   * Which iteration within the batch. Zero-indexed, so 0 means we're working on
+   * the first iteration.
+   */
+  iteration = 0;
+  completions: { total: number; success: number; failure: number }[] = [];
+
+  constructor(save?: GameSave) {
+    super(save);
+    this.queue = [];
+  }
+
+  get task(): Task | undefined {
+    const id = this.queue[this.index]?.task;
+    return id && TASKS[id];
+  }
+
+  next(success: boolean): void {
+    if (this.task === undefined) {
+      return;
+    }
+    const completions = this.completions[this.index];
+    if (success) {
+      completions.success++;
+    } else {
+      completions.failure++;
+    }
+    this.iteration += 1;
+    if (this.iteration >= this.queue[this.index].count) {
+      this.index += 1;
+      this.iteration = 0;
+    }
+  }
+
+  setSchedule(queue: TaskQueue) {
+    this.queue = queue;
+    this.index = 0;
+    this.iteration = 0;
+    this.completions = queue.map((entry) => ({
+      total: entry.count,
+      success: 0,
+      failure: 0,
+    }));
+  }
+
+  simulation(tasks: TaskQueue): SimulationResult {
+    // Deep-copy the engine into a new state
+    const sim = new QueueEngine(this.toSave());
+    return sim.simulationImpl(tasks);
+  }
+
+  /** Simulates the entire task queue. This mutates everything, so clone before running it! */
+  private simulationImpl(tasks: TaskQueue): SimulationResult {
+    const result: SimulationResult = [];
+    this.startLoop(tasks);
+    while (this.task) {
+      // need to get the index *before* we tick, since that can advance the index.
+      const index = this.index;
+      const { ok } = this.tickTime(Math.max(this.task.cost(this), 1));
+      result[index] = {
+        ok: ok,
+        energy: this.energy,
+      };
+      if (!ok) {
+        break;
+      }
+    }
+    return result;
   }
 
   toSave(): GameSave {
@@ -262,12 +320,12 @@ export class Engine {
     return Boolean(localStorage.getItem(STORAGE_KEY));
   }
 
-  static loadFromStorage(): Engine {
+  static loadFromStorage(): QueueEngine {
     const stringified = localStorage.getItem(STORAGE_KEY);
     if (stringified) {
-      return new Engine(JSON.parse(stringified) as GameSave);
+      return new QueueEngine(JSON.parse(stringified) as GameSave);
     } else {
-      return new Engine();
+      return new QueueEngine();
     }
   }
 }

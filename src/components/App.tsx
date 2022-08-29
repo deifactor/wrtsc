@@ -10,7 +10,7 @@ import { Credits } from "./Credits";
 import { Intro } from "./Intro";
 import { tick, hardReset } from "../engineStore";
 import { useAppDispatch } from "../store";
-import { Engine } from "../engine";
+import { QueueEngine } from "../engine";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -57,7 +57,7 @@ const Panel = ({ children, className }: PanelProps) => {
  */
 const App = () => {
   const dispatch = useAppDispatch();
-  const [inIntro, setInIntro] = useState(!Engine.hasSave());
+  const [inIntro, setInIntro] = useState(!QueueEngine.hasSave());
 
   useInterval(() => {
     if (inIntro) {
