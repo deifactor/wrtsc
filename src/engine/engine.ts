@@ -108,13 +108,13 @@ export abstract class Engine<ScheduleT = unknown> {
 
   /** Restart the time loop. */
   startLoop(schedule: ScheduleT) {
-    this.setSchedule(schedule);
-    this.timeLeftOnTask = this.task?.cost(this);
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
+    this.setSchedule(schedule);
+    this.timeLeftOnTask = this.task?.cost(this);
   }
 
   perform(task: Task) {
@@ -190,6 +190,9 @@ export abstract class Engine<ScheduleT = unknown> {
       if (!this.canPerform(this.task)) {
         this.next(false);
         return { ok: false, reason: "taskFailed" };
+      }
+      if (!this.timeLeftOnTask) {
+        throw new Error("timeLeftOnTask unset despite task being set");
       }
       const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
       this.removeEnergy(ticked);
