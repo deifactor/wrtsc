@@ -70,7 +70,7 @@ const App = () => {
 
   useInterval(() => {
     dispatch(saveAction());
-  }, 10000);
+  }, 1000);
 
   const introFinished = useCallback(() => setInIntro(false), []);
   if (inIntro) {

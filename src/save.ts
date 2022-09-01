@@ -2,6 +2,8 @@
  * Logic for saving/loading the game. We implement this ourselves instead of
  * using redux-persist because we need to save the engine as well, which isn't
  * stored in the store.
+ *
+ * To use this in a store, use `extraReducers` and listen for `saveLoaded`.
  */
 import { createAction } from "@reduxjs/toolkit";
 import { EngineSave, QueueEngine, TaskQueue } from "./engine";
@@ -14,6 +16,8 @@ export type GameSave = {
   state: {
     world: {
       nextQueue: TaskQueue;
+      lastUpdate: number;
+      unspentTime: number;
     };
     settings: Settings;
   };
@@ -33,6 +37,8 @@ export function saveAction(): AppThunkAction {
       state: {
         world: {
           nextQueue: state.world.nextQueue,
+          lastUpdate: state.world.lastUpdate,
+          unspentTime: state.world.unspentTime,
         },
         settings: state.settings,
       },

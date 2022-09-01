@@ -1,7 +1,7 @@
 import React from "react";
 import { SkillId, SKILL_NAME } from "../engine/skills";
 import { startLoop } from "../worldStore";
-import { useAppDispatch, useEngineSelector } from "../store";
+import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
 
@@ -27,6 +27,7 @@ export const PlayerDisplay = React.memo(() => {
   const energy = useEngineSelector((engine) => engine.energy);
   const combat = useEngineSelector((engine) => engine.combat);
   const totalTime = useEngineSelector((engine) => engine.timeAcrossAllLoops);
+  const bonusTime = useAppSelector((state) => state.world.unspentTime);
   return (
     <div>
       <h1>Stats</h1>
@@ -35,6 +36,9 @@ export const PlayerDisplay = React.memo(() => {
       </div>
       <div>
         <strong>T_total</strong>: {(totalTime / 1000).toFixed(0)}
+      </div>
+      <div>
+        <strong>Bonus</strong>: {bonusTime.toFixed(0)}
       </div>
       <ResourceDisplay kind="linkedSensorDrones" />
       <ResourceDisplay kind="qhLockoutAttempts" />

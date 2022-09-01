@@ -16,7 +16,9 @@ export const worldSlice = createSlice({
       nextQueue: [] as TaskQueue,
       simulation: [] as SimulationResult,
       lastUpdate: new Date().getTime(),
-      paused: false,
+      // Amount of time that has passed in updates but hasn't yet been simulated.
+      unspentTime: 0,
+      paused: true,
     };
   },
   reducers: {
@@ -25,7 +27,17 @@ export const worldSlice = createSlice({
     },
 
     setLastUpdate: (state, action: PayloadAction<number>) => {
-      state.lastUpdate = action.payload;
+      const now = action.payload;
+      state.unspentTime += now - state.lastUpdate;
+      state.lastUpdate = now;
+    },
+
+    ticked: (state, action: PayloadAction<number>) => {
+      state.unspentTime -= action.payload;
+      if (state.unspentTime < 0) {
+        console.error("Somehow got to negative unspent time");
+        state.unspentTime = 0;
+      }
     },
 
     setView: (state, action: PayloadAction<EngineView>) => {
@@ -108,7 +120,10 @@ export const worldSlice = createSlice({
 
   extraReducers(builder) {
     builder.addCase(saveLoaded, (state, action) => {
-      state.nextQueue = action.payload.world.nextQueue;
+      const world = action.payload.world;
+      state.nextQueue = world.nextQueue;
+      state.lastUpdate = world.lastUpdate;
+      state.unspentTime = world.unspentTime;
     });
   },
 });
@@ -148,14 +163,20 @@ export const tick: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
     const now = new Date().getTime();
-    const speedrunMode = getState().settings.speedrunMode;
-    const dt = (speedrunMode ? 1000 : 1) * (now - getState().world.lastUpdate);
+    let dt = now - getState().world.lastUpdate;
     dispatch(worldSlice.actions.setLastUpdate(now));
     if (getState().world.paused) {
       return;
     }
+    const speedrunMode = getState().settings.speedrunMode;
+    if (speedrunMode) {
+      dt *= 1000;
+    } else if (getState().world.unspentTime > 0) {
+      dt = Math.min(3 * dt, getState().world.unspentTime);
+    }
     const { autoRestart, pauseOnFailure } = getState().settings;
     const { ok } = engine.tickTime(dt);
+    dispatch(worldSlice.actions.ticked(dt));
     if (!ok && pauseOnFailure) {
       dispatch(setPaused(true));
     }
@@ -170,8 +191,8 @@ export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
     engine.startLoop(getState().world.nextQueue);
-    dispatch(worldSlice.actions.setLastUpdate(new Date().getTime()));
-    dispatch(setPaused(false));
+    // Pause if the engine is empty so we properly accumulate bonus time.
+    dispatch(setPaused(engine.queue.length === 0));
     dispatch(saveAction());
   };
 
