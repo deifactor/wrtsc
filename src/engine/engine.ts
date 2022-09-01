@@ -113,6 +113,9 @@ export abstract class Engine<ScheduleT = unknown> {
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
+    this.flags = {
+      shipHijacked: false,
+    };
     this.setSchedule(schedule);
     this.timeLeftOnTask = this.task?.cost(this);
   }
