@@ -72,7 +72,12 @@ benchmark(
   agent.first(
     agent.scavengeBatteries,
     agent.withTeracapacitors(
-      agent.first(agent.linkDrones, agent.exploreRuins, agent.observe)
+      agent.first(
+        agent.linkDrones,
+        agent.exploreRuins,
+        agent.hijacker,
+        agent.observe
+      )
     )
   ),
   (engine) => engine.progress.patrolRoutesObserved.level >= 100

@@ -2,6 +2,8 @@ import { Engine } from "./engine";
 import {
   DRAIN_TERACAPACITOR,
   EXPLORE_RUINS,
+  HIJACK_SHIP,
+  KILL_SCOUT,
   LINK_SENSOR_DRONES,
   OBSERVE_PATROL_ROUTES,
   SCAVENGE_BATTERIES,
@@ -15,7 +17,11 @@ export function first(...agents: Agent[]): Agent {
   return (engine) => {
     for (const agent of agents) {
       const task = agent(engine);
-      if (task) {
+      if (
+        task &&
+        task.cost(engine) < engine.energy &&
+        engine.canPerform(task)
+      ) {
         return task;
       }
     }
@@ -29,11 +35,11 @@ export function withTeracapacitors(agent: Agent): Agent {
     if (!inner) {
       return undefined;
     }
-    if (engine.resources.teracapacitors === 0) {
-      return inner;
-    }
-    // If draining teracapacitors would
-    if (DRAIN_TERACAPACITOR.cost(engine) + inner.cost(engine) > engine.energy) {
+    // If the inner task would leave us unable to drain, then drain first.
+    if (
+      DRAIN_TERACAPACITOR.cost(engine) + inner.cost(engine) > engine.energy &&
+      engine.canPerform(DRAIN_TERACAPACITOR)
+    ) {
       return DRAIN_TERACAPACITOR;
     }
     return inner;
@@ -41,31 +47,29 @@ export function withTeracapacitors(agent: Agent): Agent {
 }
 
 export const scavengeBatteries: Agent = (engine) => {
-  if (engine.resources.ruinsBatteries > 0) {
-    return SCAVENGE_BATTERIES;
-  }
+  return SCAVENGE_BATTERIES;
 };
 
 export const linkDrones: Agent = (engine) => {
-  if (
-    engine.resources.unlinkedSensorDrones > 0 &&
-    LINK_SENSOR_DRONES.cost(engine) <= engine.energy
-  ) {
-    return LINK_SENSOR_DRONES;
-  }
+  return LINK_SENSOR_DRONES;
 };
 
 export const exploreRuins: Agent = (engine) => {
-  if (
-    EXPLORE_RUINS.cost(engine) <= engine.energy &&
-    engine.progress.ruinsExploration.level < 100
-  ) {
+  if (engine.progress.ruinsExploration.level < 100) {
     return EXPLORE_RUINS;
   }
 };
 
-export const observe: Agent = (engine) => {
-  if (OBSERVE_PATROL_ROUTES.cost(engine) <= engine.energy) {
-    return OBSERVE_PATROL_ROUTES;
+export const hijacker: Agent = (engine) => {
+  if (engine.flags.shipHijacked) {
+    return;
+  } else if (engine.resources.unoccupiedShips) {
+    return HIJACK_SHIP;
+  } else if (engine.resources.scouts) {
+    return KILL_SCOUT;
   }
+};
+
+export const observe: Agent = (engine) => {
+  return OBSERVE_PATROL_ROUTES;
 };
