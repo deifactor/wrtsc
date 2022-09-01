@@ -39,7 +39,9 @@ export function withTeracapacitors(agent: Agent): Agent {
     // If the inner task would leave us unable to drain, then drain first.
     if (
       DRAIN_TERACAPACITOR.cost(engine) + inner.cost(engine) > engine.energy &&
-      engine.canPerform(DRAIN_TERACAPACITOR)
+      engine.canPerform(DRAIN_TERACAPACITOR) &&
+      DRAIN_TERACAPACITOR.rewards(engine).energy! >
+        DRAIN_TERACAPACITOR.cost(engine)
     ) {
       return DRAIN_TERACAPACITOR;
     }
