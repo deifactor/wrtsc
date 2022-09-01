@@ -108,7 +108,7 @@ export const SCAVENGE_BATTERIES: Task = {
   kind: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
-  cost: () => 500,
+  cost: () => 2000,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
@@ -124,7 +124,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   kind: "dischargeTeracapacitor",
   name: "Discharge Teracapacitor",
   shortName: "DIS_TERA",
-  cost: () => 2000,
+  cost: () => 4000,
   description: `Gives 200 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
@@ -140,7 +140,7 @@ export const LINK_SENSOR_DRONES: Task = {
   kind: "linkSensorDrones",
   name: "Link Sensor Drones",
   shortName: "LINK_DRN",
-  cost: () => 1500,
+  cost: () => 1000,
   description:
     "Multiplies progress for Explore Ruins and Observe Patrol Routes by sqrt(1 + linked drones). Bonus stacks with Ship Hijacked bonuses.",
   flavor:
@@ -160,7 +160,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   kind: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
-  cost: () => 4000,
+  cost: () => 3500,
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
@@ -177,7 +177,7 @@ export const KILL_SCOUT: Task = {
   kind: "eradicateScout",
   name: "Kill Scout",
   shortName: "KILL_SCT",
-  cost: () => 3000,
+  cost: () => 8000,
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:
@@ -205,12 +205,7 @@ export const HIJACK_SHIP: Task = {
   name: "Hijack Ship",
   shortName: "HJCK_SHP",
   cost: (engine) =>
-    Math.max(
-      24000 -
-        engine.combat * 1500 -
-        engine.progress.patrolRoutesObserved.level * 100,
-      6000
-    ),
+    Math.max(60000 - engine.progress.patrolRoutesObserved.level * 200, 24000),
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
   flavor:
@@ -259,7 +254,7 @@ export const STRAFING_RUN: Task = {
   kind: "strafingRun",
   name: "Strafing Run",
   shortName: "STRAF_RN",
-  cost: () => 6000,
+  cost: () => 10000,
   description:
     "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
   flavor:
@@ -289,7 +284,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     progress: { qhLockout: 25 },
     resources: { linkedSensorDrones: 1 },
   },
-  rewards: () => ({ energy: 3000 }),
+  rewards: () => ({ energy: 2000 }),
   trainedSkills: { energyTransfer: 16, datalink: 16 },
 };
 
