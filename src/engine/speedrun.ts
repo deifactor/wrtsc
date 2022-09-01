@@ -82,3 +82,20 @@ benchmark(
   ),
   (engine) => engine.progress.patrolRoutesObserved.level >= 100
 );
+
+benchmark(
+  "with teracapacitors: batteries, linking, exploring, observing, hacking",
+  agent.first(
+    agent.scavengeBatteries,
+    agent.withTeracapacitors(
+      agent.first(
+        agent.linkDrones,
+        agent.exploreRuins,
+        agent.hijacker,
+        agent.observe,
+        agent.lockout
+      )
+    )
+  ),
+  (engine) => engine.progress.qhLockout.level >= 100
+);

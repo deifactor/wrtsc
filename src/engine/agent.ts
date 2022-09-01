@@ -1,5 +1,6 @@
 import { Engine } from "./engine";
 import {
+  DISABLE_LOCKOUTS,
   DRAIN_TERACAPACITOR,
   EXPLORE_RUINS,
   HIJACK_SHIP,
@@ -71,5 +72,9 @@ export const hijacker: Agent = (engine) => {
 };
 
 export const observe: Agent = (engine) => {
-  return OBSERVE_PATROL_ROUTES;
+  if (engine.progress.patrolRoutesObserved.level < 100) {
+    return OBSERVE_PATROL_ROUTES;
+  }
 };
+
+export const lockout: Agent = (engine) => DISABLE_LOCKOUTS;
