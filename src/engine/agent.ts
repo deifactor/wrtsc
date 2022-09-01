@@ -64,9 +64,7 @@ export const exploreRuins: Agent = (engine) => {
 };
 
 export const hijacker: Agent = (engine) => {
-  if (engine.flags.shipHijacked) {
-    return;
-  } else if (engine.resources.unoccupiedShips) {
+  if (engine.resources.unoccupiedShips) {
     return HIJACK_SHIP;
   } else if (engine.resources.scouts) {
     return KILL_SCOUT;
