@@ -3,11 +3,12 @@ import { AppThunkAction } from "./store";
 import { QueueEngine, TaskQueue, TaskKind, SimulationResult } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { startAppListening } from "./listener";
+import { saveAction, saveLoaded } from "./save";
 
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
-    const engine = QueueEngine.loadFromStorage();
+    const engine = new QueueEngine();
     return {
       // This is a function that closes over a constant variable to prevent the
       // type inference from converting it to a WritableDraft<QueueEngine>.
@@ -104,6 +105,12 @@ export const worldSlice = createSlice({
       queue.splice(index, 1);
     },
   },
+
+  extraReducers(builder) {
+    builder.addCase(saveLoaded, (state, action) => {
+      state.nextQueue = action.payload.world.nextQueue;
+    });
+  },
 });
 
 export const {
@@ -113,6 +120,7 @@ export const {
   moveTask,
   removeTask,
   setPaused,
+  setView,
 } = worldSlice.actions;
 
 // Whenever we modify the task queue, update the simulation. In the future we
@@ -123,7 +131,8 @@ startAppListening({
     modifyBatchCount,
     setBatchCountToMax,
     moveTask,
-    removeTask
+    removeTask,
+    saveLoaded
   ),
   effect(_action, api) {
     const state = api.getState().world;
@@ -161,9 +170,9 @@ export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
     engine.startLoop(getState().world.nextQueue);
-    engine.saveToStorage();
     dispatch(worldSlice.actions.setLastUpdate(new Date().getTime()));
     dispatch(setPaused(false));
+    dispatch(saveAction());
   };
 
 export const hardReset: () => AppThunkAction =

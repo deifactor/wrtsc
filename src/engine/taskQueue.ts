@@ -12,7 +12,7 @@ export type TaskQueuePointer = Readonly<
   }
 >;
 
-export type TaskQueue = readonly TaskBatch[];
+export type TaskQueue = TaskBatch[];
 
 /**
  * Iterates over the entries in a task queue.

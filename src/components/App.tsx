@@ -10,7 +10,7 @@ import { Credits } from "./Credits";
 import { Intro } from "./Intro";
 import { tick, hardReset } from "../worldStore";
 import { useAppDispatch } from "../store";
-import { QueueEngine } from "../engine";
+import { hasSave, loadAction, saveAction } from "../save";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -57,7 +57,7 @@ const Panel = ({ children, className }: PanelProps) => {
  */
 const App = () => {
   const dispatch = useAppDispatch();
-  const [inIntro, setInIntro] = useState(!QueueEngine.hasSave());
+  const [inIntro, setInIntro] = useState(!hasSave());
 
   useInterval(() => {
     if (inIntro) {
@@ -65,6 +65,12 @@ const App = () => {
     }
     dispatch(tick());
   }, 1000 / UPDATES_PER_SEC);
+
+  useEffect(() => dispatch(loadAction()), [dispatch]);
+
+  useInterval(() => {
+    dispatch(saveAction());
+  }, 10000);
 
   const introFinished = useCallback(() => setInIntro(false), []);
   if (inIntro) {

@@ -58,7 +58,7 @@ export abstract class Engine<ScheduleT = unknown> {
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
 
-  constructor(save?: GameSave) {
+  constructor(save?: EngineSave) {
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
     this.skills = makeValues(SKILL_IDS, () => new Skill());
     this._milestones = new Set();
@@ -240,7 +240,7 @@ export class QueueEngine extends Engine<TaskQueue> {
   iteration = 0;
   completions: { total: number; success: number; failure: number }[] = [];
 
-  constructor(save?: GameSave) {
+  constructor(save?: EngineSave) {
     super(save);
     this.queue = [];
   }
@@ -303,7 +303,7 @@ export class QueueEngine extends Engine<TaskQueue> {
     return result;
   }
 
-  toSave(): GameSave {
+  toSave(): EngineSave {
     return {
       progress: mapValues(this.progress, (progress) => ({
         xp: progress.xp,
@@ -317,26 +317,9 @@ export class QueueEngine extends Engine<TaskQueue> {
       timeAcrossAllLoops: this.timeAcrossAllLoops,
     };
   }
-
-  saveToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.toSave()));
-  }
-
-  static hasSave(): boolean {
-    return Boolean(localStorage.getItem(STORAGE_KEY));
-  }
-
-  static loadFromStorage(): QueueEngine {
-    const stringified = localStorage.getItem(STORAGE_KEY);
-    if (stringified) {
-      return new QueueEngine(JSON.parse(stringified) as GameSave);
-    } else {
-      return new QueueEngine();
-    }
-  }
 }
 
-export type GameSave = {
+export type EngineSave = {
   progress: Record<ProgressId, { xp: number; level: number }>;
   skills: Record<SkillId, { xp: number; level: number }>;
   milestones: MilestoneId[];
