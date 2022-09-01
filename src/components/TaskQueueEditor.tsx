@@ -14,14 +14,14 @@ import {
   pushTaskToQueue,
   removeTask,
   setBatchCountToMax,
-} from "../engineStore";
+} from "../worldStore";
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 
 const AddTaskButton = React.memo(({ id }: { id: TaskKind }) => {
   const dispatch = useAppDispatch();
   const canAddToQueue = useAppSelector(
-    (store) => store.engine.view.tasks[id].canAddToQueue
+    (store) => store.world.view.tasks[id].canAddToQueue
   );
   return (
     <Button
@@ -39,9 +39,9 @@ const AddTaskButton = React.memo(({ id }: { id: TaskKind }) => {
 
 const TaskQueueItem = React.memo(({ index }: { index: number }) => {
   const dispatch = useAppDispatch();
-  const entry = useAppSelector((store) => store.engine.nextQueue[index], equal);
+  const entry = useAppSelector((store) => store.world.nextQueue[index], equal);
   const step: SimulationStep | undefined = useAppSelector(
-    (store) => store.engine.simulation[index],
+    (store) => store.world.simulation[index],
     equal
   );
   const incrementCount = () => dispatch(modifyBatchCount({ index, amount: 1 }));
@@ -101,7 +101,7 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const { className } = props;
-  const length = useAppSelector((store) => store.engine.nextQueue.length);
+  const length = useAppSelector((store) => store.world.nextQueue.length);
   const indices = Array.from(Array(length).keys());
 
   const addButtons = useEngineSelector((engine) => Object.values(engine.tasks))

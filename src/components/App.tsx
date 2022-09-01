@@ -8,7 +8,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { SettingsEditor } from "./SettingsEditor";
 import { Credits } from "./Credits";
 import { Intro } from "./Intro";
-import { tick, hardReset } from "../engineStore";
+import { tick, hardReset } from "../worldStore";
 import { useAppDispatch } from "../store";
 import { QueueEngine } from "../engine";
 

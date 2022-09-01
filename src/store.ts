@@ -1,7 +1,7 @@
 import { AnyAction, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { engineSlice } from "./engineStore";
+import { worldSlice } from "./worldStore";
 import { extra } from "./extra";
 import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
@@ -9,7 +9,7 @@ import { EngineView } from "./viewModel";
 
 export const store = configureStore({
   reducer: {
-    engine: engineSlice.reducer,
+    world: worldSlice.reducer,
     settings: settingsSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -30,7 +30,7 @@ export type AppThunkAction = ThunkAction<
 >;
 export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
   return useSelector<RootState, T>(
-    (store) => selector(store.engine.view),
+    (store) => selector(store.world.view),
     equal
   );
 }

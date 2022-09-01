@@ -4,8 +4,8 @@ import { QueueEngine, TaskQueue, TaskKind, SimulationResult } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { startAppListening } from "./listener";
 
-export const engineSlice = createSlice({
-  name: "engine",
+export const worldSlice = createSlice({
+  name: "world",
   initialState: () => {
     const engine = QueueEngine.loadFromStorage();
     return {
@@ -113,7 +113,7 @@ export const {
   moveTask,
   removeTask,
   setPaused,
-} = engineSlice.actions;
+} = worldSlice.actions;
 
 // Whenever we modify the task queue, update the simulation. In the future we
 // may want to do some fancy debouncing logic.
@@ -126,9 +126,9 @@ startAppListening({
     removeTask
   ),
   effect(_action, api) {
-    const state = api.getState().engine;
+    const state = api.getState().world;
     api.dispatch(
-      engineSlice.actions.setSimulation(
+      worldSlice.actions.setSimulation(
         api.extra.engine.simulation(state.nextQueue)
       )
     );
@@ -140,9 +140,9 @@ export const tick: () => AppThunkAction =
   (dispatch, getState, { engine }) => {
     const now = new Date().getTime();
     const speedrunMode = getState().settings.speedrunMode;
-    const dt = (speedrunMode ? 1000 : 1) * (now - getState().engine.lastUpdate);
-    dispatch(engineSlice.actions.setLastUpdate(now));
-    if (getState().engine.paused) {
+    const dt = (speedrunMode ? 1000 : 1) * (now - getState().world.lastUpdate);
+    dispatch(worldSlice.actions.setLastUpdate(now));
+    if (getState().world.paused) {
       return;
     }
     const { autoRestart, pauseOnFailure } = getState().settings;
@@ -151,18 +151,18 @@ export const tick: () => AppThunkAction =
       dispatch(setPaused(true));
     }
     if (!speedrunMode && ok && !engine.task && autoRestart) {
-      engine.startLoop(getState().engine.nextQueue);
+      engine.startLoop(getState().world.nextQueue);
       dispatch(startLoop());
     }
-    dispatch(engineSlice.actions.setView(project(engine)));
+    dispatch(worldSlice.actions.setView(project(engine)));
   };
 
 export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
-    engine.startLoop(getState().engine.nextQueue);
+    engine.startLoop(getState().world.nextQueue);
     engine.saveToStorage();
-    dispatch(engineSlice.actions.setLastUpdate(new Date().getTime()));
+    dispatch(worldSlice.actions.setLastUpdate(new Date().getTime()));
     dispatch(setPaused(false));
   };
 

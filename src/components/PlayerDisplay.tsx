@@ -1,6 +1,6 @@
 import React from "react";
 import { SkillId, SKILL_NAME } from "../engine/skills";
-import { startLoop } from "../engineStore";
+import { startLoop } from "../worldStore";
 import { useAppDispatch, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
