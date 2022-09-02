@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { SkillId, SKILL_NAME } from "../engine/skills";
-import { startLoop } from "../worldStore";
+import { setPaused, startLoop } from "../worldStore";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
@@ -28,6 +28,11 @@ export const PlayerDisplay = React.memo(() => {
   const combat = useEngineSelector((engine) => engine.combat);
   const totalTime = useEngineSelector((engine) => engine.timeAcrossAllLoops);
   const bonusTime = useAppSelector((state) => state.world.unspentTime);
+  const isPaused = useAppSelector((state) => state.world.paused);
+  const togglePause = useCallback(
+    () => dispatch(setPaused(!isPaused)),
+    [dispatch, isPaused]
+  );
   return (
     <div>
       <h1>Stats</h1>
@@ -54,6 +59,7 @@ export const PlayerDisplay = React.memo(() => {
       <SkillDisplay skillId="energyTransfer" />
       <SkillDisplay skillId="metacognition" />
       <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
+      <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
     </div>
   );
 });
