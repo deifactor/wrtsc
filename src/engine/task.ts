@@ -98,7 +98,7 @@ export const EXPLORE_RUINS: Task = {
   rewards: (engine) => ({
     progress: { ruinsExploration: exploreMultiplier(engine) * 1024 },
   }),
-  trainedSkills: { ergodicity: 128 },
+  trainedSkills: { ergodicity: 32 },
 };
 
 const BATTERY_AMOUNT = 3000;
@@ -169,7 +169,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
     progress: { patrolRoutesObserved: exploreMultiplier(engine) * 128 },
   }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
-  trainedSkills: { ergodicity: 8 },
+  trainedSkills: { ergodicity: 16 },
 };
 
 export const KILL_SCOUT: Task = {

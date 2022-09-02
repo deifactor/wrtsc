@@ -129,7 +129,9 @@ export abstract class Engine<ScheduleT = unknown> {
       this.resources[res] += value;
     });
     entries(rewards.progress || {}).forEach(([progress, xp]) => {
-      this.progress[progress].addXp(xp);
+      this.progress[progress].addXp(
+        xp * (1 + Math.log2(1 + this.skills.ergodicity.level / 128))
+      );
     });
     entries(rewards.flags || {}).forEach(([flag, value]) => {
       this.flags[flag] = value;
