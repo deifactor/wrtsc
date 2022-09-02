@@ -137,8 +137,9 @@ export abstract class Engine<ScheduleT = unknown> {
       this.flags[flag] = value;
     });
     entries(task.trainedSkills).forEach(([id, xp]) => {
-      this.skills[id].addXp(xp);
-      this.skills.metacognition.addXp(xp);
+      const metaMult = 1 + Math.log2(1 + this.skills.metacognition.level / 256);
+      this.skills[id].addXp(xp * metaMult);
+      this.skills.metacognition.addXp((xp * metaMult) / 4);
     });
     rewards.energy && this.addEnergy(rewards.energy);
     task.extraPerform(this);
