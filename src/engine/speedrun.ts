@@ -2,6 +2,7 @@ import { Agent } from "./agent";
 import * as agent from "./agent";
 import { Engine } from "./engine";
 import { Task, TaskKind } from "./task";
+import { entries } from "../records";
 
 class DynamicEngine extends Engine<Agent> {
   agent: Agent = () => undefined;
@@ -44,6 +45,12 @@ function benchmark(
     (engine.timeAcrossAllLoops / 1000).toFixed(0)
   );
   console.log("Wall-clock time taken (ms): ", duration.toFixed(0));
+  console.log(
+    "Skills",
+    entries(engine.skills)
+      .map(([id, level]) => `${id} ${level.level}`)
+      .join(", ")
+  );
 }
 
 benchmark(
