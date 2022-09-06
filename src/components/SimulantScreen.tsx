@@ -41,8 +41,9 @@ function subroutineLore(id: SubroutineId): {
 
 const SubroutineButton = React.memo(({ id }: { id: SubroutineId }) => {
   const { name, description } = subroutineLore(id);
+  const tooltip = <div className="w-96 p-2 text-sm">{description}</div>;
   return (
-    <Button onClick={() => {}} tooltip={description}>
+    <Button onClick={() => {}} tooltip={tooltip}>
       {name}
     </Button>
   );
