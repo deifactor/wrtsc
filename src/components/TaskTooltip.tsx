@@ -5,81 +5,94 @@ import {
   RESOURCES,
   ResourceId,
   TaskKind,
+  Requirements,
+  Rewards,
 } from "../engine";
-import React from "react";
+import React, { ReactNode } from "react";
 import { useEngineSelector } from "../store";
 import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
+import { Tooltip } from "./common/Tooltip";
 
 interface Props {
   kind: TaskKind;
+}
+
+function taskMetadata({
+  id,
+  cost,
+  requirements,
+  rewards,
+}: {
+  id: TaskKind;
+  cost: number;
+  requirements: Requirements | undefined;
+  rewards: Rewards | undefined;
+}): Record<string, ReactNode> {
+  const task = TASKS[id];
+  const metadata: Record<string, ReactNode> = {};
+
+  metadata["Cost"] = cost;
+  metadata["Trains"] = entries(task.trainedSkills)
+    .map(([id, xp]) => `${xp} ${SKILL_NAME[id]} XP`)
+    .join(", ");
+
+  if (requirements) {
+    const requiresFrags = [
+      ...Object.entries(requirements.progress || {}).map(
+        ([progress, min]) => `${min}% ${PROGRESS_NAME[progress as ProgressId]}`
+      ),
+      ...Object.entries(requirements.resources || {}).map(
+        ([resource, amount]) =>
+          `${amount}x ${RESOURCES[resource as ResourceId].name}`
+      ),
+    ];
+    metadata["Requires"] = requiresFrags.length !== 0 && (
+      <ul>
+        {requiresFrags.map((frag, index) => (
+          <li key={index}>{frag}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (rewards) {
+    const rewardsFrags = [
+      ...entries(rewards.progress || {}).map(
+        ([progress]) => `${PROGRESS_NAME[progress]} progress`
+      ),
+      ...entries(rewards.resources || {}).map(
+        ([resource, amount]) => `${amount}x ${RESOURCES[resource].name}`
+      ),
+    ];
+    metadata["Rewards"] = rewardsFrags.length !== 0 && (
+      <ul>
+        {rewardsFrags.map((frag, index) => (
+          <li key={index}>{frag}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  return metadata;
 }
 
 export const TaskTooltip = React.memo(({ kind }: Props) => {
   const task = TASKS[kind];
   const cost = useEngineSelector((engine) => engine.tasks[kind].cost);
   const rewards = useEngineSelector((engine) => engine.tasks[kind].rewards);
-  const trainingSection = Object.keys(task.trainedSkills).length !== 0 && (
-    <p>
-      <strong>Trains:</strong>{" "}
-      {entries(task.trainedSkills)
-        .map(([id, xp]) => `${xp} ${SKILL_NAME[id]} XP`)
-        .join(", ")}
-    </p>
-  );
 
-  const requiresFrags = [
-    ...Object.entries(task.required.progress || {}).map(
-      ([progress, min]) => `${min}% ${PROGRESS_NAME[progress as ProgressId]}`
-    ),
-    ...Object.entries(task.required.resources || {}).map(
-      ([resource, amount]) =>
-        `${amount}x ${RESOURCES[resource as ResourceId].name}`
-    ),
-  ];
-  const requiresSection = requiresFrags.length !== 0 && (
-    <div>
-      <strong>Requires</strong>:
-      <ul>
-        {requiresFrags.map((frag, index) => (
-          <li key={index}>{frag}</li>
-        ))}
-      </ul>
-    </div>
-  );
-
-  const rewardsFrags = [
-    ...entries(rewards.progress || {}).map(
-      ([progress]) => `${PROGRESS_NAME[progress]} progress`
-    ),
-    ...entries(rewards.resources || {}).map(
-      ([resource, amount]) => `${amount}x ${RESOURCES[resource].name}`
-    ),
-  ];
-  const rewardsSection = rewardsFrags.length !== 0 && (
-    <div>
-      <strong>Rewards</strong>:
-      <ul>
-        {rewardsFrags.map((frag, index) => (
-          <li key={index}>{frag}</li>
-        ))}
-      </ul>
-    </div>
-  );
+  const metadata = taskMetadata({
+    id: kind,
+    cost,
+    requirements: task.required,
+    rewards,
+  });
 
   return (
-    <div className="w-96 p-2 text-sm">
-      <p className="font-bold">{task.name}</p>
-      <p className="my-2">{task.description}</p>
-      <p>
-        <strong>Cost:</strong> {cost} AEU
-      </p>
-      {requiresSection}
-      {rewardsSection}
-      {trainingSection}
-      <hr className="border-gray-700 my-3" />
-      <p className="text-xs mb-2 text-gray-400">{task.flavor}</p>
-    </div>
+    <Tooltip title={task.name} metadata={metadata} lore={task.flavor}>
+      {task.description}
+    </Tooltip>
   );
 });
 TaskTooltip.displayName = "TaskTooltip";
