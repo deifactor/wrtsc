@@ -10,6 +10,7 @@ import {
   MilestoneId,
   PROGRESS_IDS,
 } from "./player";
+import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { Task, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
@@ -44,6 +45,7 @@ export abstract class Engine<ScheduleT = unknown> {
   readonly skills: Record<SkillId, Skill>;
   protected readonly _milestones: Set<MilestoneId>;
   timeAcrossAllLoops: number;
+  simulant: Simulant;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
@@ -62,6 +64,7 @@ export abstract class Engine<ScheduleT = unknown> {
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
     this.skills = makeValues(SKILL_IDS, () => new Skill());
     this._milestones = new Set();
+    this.simulant = new Simulant(save?.simulant);
     this.timeAcrossAllLoops = 0;
     if (save) {
       entries(save.progress).forEach(([id, { xp, level }]) => {
@@ -142,6 +145,7 @@ export abstract class Engine<ScheduleT = unknown> {
       this.skills.metacognition.addXp((xp * metaMult) / 4);
     });
     rewards.energy && this.addEnergy(rewards.energy);
+    rewards.simulant && this.simulant.unlockedSimulants.add(rewards.simulant);
     task.extraPerform(this);
   }
 
@@ -187,7 +191,13 @@ export abstract class Engine<ScheduleT = unknown> {
    * give it a 100ms tick then it'll do a 50ms and then another 50ms.
    */
   tickTime(duration: number): TickResult {
-    // We basically 'spend' time from the duration until we hit 0;
+    // We basically 'spend' time from the duration until we hit 0. The
+    // multiplier here is a multiplier on how much energy we're spending per
+    // second.
+    const mult = this.simulant.unlocked.has("burstClock")
+      ? Math.max(1, 2 - this.timeInLoop / 16384)
+      : 1;
+    duration *= mult;
     duration = Math.floor(duration);
     while (duration > 0) {
       if (!this.task) {
@@ -202,9 +212,13 @@ export abstract class Engine<ScheduleT = unknown> {
       }
       const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
       this.removeEnergy(ticked);
-      this._timeInLoop += ticked;
-      this.timeAcrossAllLoops += ticked;
+      this._timeInLoop += ticked / mult;
+      this.timeAcrossAllLoops += ticked / mult;
       this.timeLeftOnTask! -= ticked;
+      // Only add simulant XP if there's actually an unlocked simulant.
+      if (this.simulant.unlockedSimulants.size !== 0) {
+        this.simulant.addXp(ticked / 1000);
+      }
       if (this.timeLeftOnTask === 0) {
         this.perform(this.task);
         this.next(true);
@@ -318,6 +332,7 @@ export class QueueEngine extends Engine<TaskQueue> {
       })),
       milestones: Array.from(this._milestones),
       timeAcrossAllLoops: this.timeAcrossAllLoops,
+      simulant: this.simulant.toSave(),
     };
   }
 }
@@ -326,5 +341,6 @@ export type EngineSave = {
   progress: Record<ProgressId, { xp: number; level: number }>;
   skills: Record<SkillId, { xp: number; level: number }>;
   milestones: MilestoneId[];
+  simulant: SimulantSave;
   timeAcrossAllLoops: number;
 };

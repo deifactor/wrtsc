@@ -12,6 +12,7 @@ import {
   Task,
   Rewards,
 } from "./engine";
+import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
 import { SkillId } from "./engine/skills";
 import { ZoneKind } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
@@ -43,6 +44,12 @@ export type ScheduleView = {
     progress: number;
   };
 };
+export type SimulantView = {
+  unlockedSimulants: SimulantId[];
+  unlockedSubroutines: SubroutineId[];
+  availableSubroutines: SubroutineId[];
+  freeXp: number;
+};
 
 /**
  * Fields here generally correspond to the fields on `Task` that are functions
@@ -70,6 +77,7 @@ export type EngineView = {
   schedule: ScheduleView;
   tasks: Record<TaskKind, TaskView>;
   timeAcrossAllLoops: number;
+  simulant: SimulantView;
 };
 
 export function project(engine: QueueEngine): EngineView {
@@ -110,6 +118,7 @@ export function project(engine: QueueEngine): EngineView {
       maxIterations: task.maxIterations && task.maxIterations(engine),
     })),
     timeAcrossAllLoops: engine.timeAcrossAllLoops,
+    simulant: simulantView(engine),
   };
 }
 
@@ -165,4 +174,15 @@ function findVisibles(engine: QueueEngine): {
       keys(rewards.progress || {}).forEach(progresses.add.bind(progresses));
     });
   return { resources, progresses };
+}
+
+function simulantView(engine: QueueEngine): SimulantView {
+  return {
+    unlockedSimulants: Array.from(engine.simulant.unlockedSimulants),
+    unlockedSubroutines: Array.from(engine.simulant.unlocked),
+    availableSubroutines: SUBROUTINE_IDS.filter((sub) =>
+      engine.simulant.subroutineAvailable(sub)
+    ),
+    freeXp: engine.simulant.freeXp,
+  };
 }

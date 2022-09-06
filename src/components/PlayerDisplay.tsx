@@ -29,6 +29,7 @@ export const PlayerDisplay = React.memo(() => {
   const totalTime = useEngineSelector((engine) => engine.timeAcrossAllLoops);
   const bonusTime = useAppSelector((state) => state.world.unspentTime);
   const isPaused = useAppSelector((state) => state.world.paused);
+  const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const togglePause = useCallback(
     () => dispatch(setPaused(!isPaused)),
     [dispatch, isPaused]
@@ -50,6 +51,9 @@ export const PlayerDisplay = React.memo(() => {
       <ResourceDisplay kind="weaponSalvage" />
       <p>
         <strong>Combat:</strong> {combat}
+      </p>
+      <p>
+        <strong>Simulant XP:</strong> {simulantXp.toFixed(0)}
       </p>
       <hr className="mx-3 my-4 border-gray-800" />
       <SkillDisplay skillId="ergodicity" />

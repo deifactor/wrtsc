@@ -4,6 +4,7 @@ import { QueueEngine, TaskQueue, TaskKind, SimulationResult } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { startAppListening } from "./listener";
 import { saveAction, saveLoaded } from "./save";
+import { SubroutineId } from "./engine/simulant";
 
 export const worldSlice = createSlice({
   name: "world",
@@ -201,6 +202,14 @@ export const hardReset: () => AppThunkAction =
     extra.engine = new QueueEngine();
     dispatch(startLoop());
   };
+
+/** Unlocks the given simulant subroutine. */
+export function unlockSubroutine(id: SubroutineId): AppThunkAction {
+  return (dispatch, _getState, { engine }) => {
+    engine.simulant.unlock(id);
+    dispatch(saveAction());
+  };
+}
 
 function checkBounds(queue: TaskQueue, index: number) {
   if (index < 0 || index >= queue.length) {
