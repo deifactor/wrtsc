@@ -214,6 +214,10 @@ export abstract class Engine<ScheduleT = unknown> {
       this._timeInLoop += ticked / mult;
       this.timeAcrossAllLoops += ticked / mult;
       this.timeLeftOnTask! -= ticked;
+      // Only add simulant XP if there's actually an unlocked simulant.
+      if (this.simulant.unlockedSimulants.size !== 0) {
+        this.simulant.addXp(ticked / 1000);
+      }
       if (this.timeLeftOnTask === 0) {
         this.perform(this.task);
         this.next(true);
