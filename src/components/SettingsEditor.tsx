@@ -20,27 +20,38 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
   const speedrunMode = useAppSelector((store) => store.settings.speedrunMode);
   return (
     <div>
-      <Button kind="danger" onClick={onHardReset}>
-        Hard Reset
-      </Button>
-      <Switch
-        checked={autoRestart}
-        onChange={(checked) => dispatch(setAutoRestart(checked))}
-      >
-        Auto-restart
-      </Switch>
-      <Switch
-        checked={autoRestartOnFailure}
-        onChange={(checked) => dispatch(setPauseOnFailure(checked))}
-      >
-        Auto-restart on failure
-      </Switch>
-      <Switch
-        checked={speedrunMode}
-        onChange={(checked) => dispatch(setSpeedrunMode(checked))}
-      >
-        Speedrun Mode
-      </Switch>
+      <div>
+        <Switch
+          checked={autoRestart}
+          onChange={(checked) => dispatch(setAutoRestart(checked))}
+        >
+          Auto-restart
+        </Switch>
+        <Switch
+          checked={autoRestartOnFailure}
+          onChange={(checked) => dispatch(setPauseOnFailure(checked))}
+        >
+          Auto-restart on failure
+        </Switch>
+      </div>
+      <div></div>
+      <div>
+        <Switch
+          checked={speedrunMode}
+          onChange={(checked) => dispatch(setSpeedrunMode(checked))}
+        >
+          Speedrun Mode
+        </Switch>
+      </div>
+      <div className="mt-12">
+        Warning: This will <em>delete your entire save</em>. This is not a
+        prestige. There is no backup!
+        <div>
+          <Button kind="danger" onClick={onHardReset}>
+            Hard Reset
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
