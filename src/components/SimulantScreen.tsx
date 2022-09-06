@@ -4,6 +4,8 @@ import {
   SIMULANT_TO_SUBROUTINE,
   SubroutineId,
 } from "../engine/simulant";
+import { useAppDispatch, useAppSelector } from "../store";
+import { unlockSubroutine } from "../worldStore";
 import { Button } from "./common/Button";
 
 function simulantLore(id: SimulantId): {
@@ -41,9 +43,21 @@ function subroutineLore(id: SubroutineId): {
 
 const SubroutineButton = React.memo(({ id }: { id: SubroutineId }) => {
   const { name, description } = subroutineLore(id);
+  const dispatch = useAppDispatch();
+  const available = useAppSelector((store) =>
+    store.world.view.simulant.availableSubroutines.includes(id)
+  );
+  const unlocked = useAppSelector((store) =>
+    store.world.view.simulant.unlockedSubroutines.includes(id)
+  );
+  debugger;
   const tooltip = <div className="w-96 p-2 text-sm">{description}</div>;
   return (
-    <Button onClick={() => {}} tooltip={tooltip}>
+    <Button
+      state={unlocked ? "unlocked" : available ? "active" : "locked"}
+      onClick={() => dispatch(unlockSubroutine(id))}
+      tooltip={tooltip}
+    >
       {name}
     </Button>
   );

@@ -47,6 +47,13 @@ export class Simulant {
     );
   }
 
+  unlock(id: SubroutineId) {
+    if (!this.subroutineAvailable(id)) {
+      throw new Error(`Tried to unlock ${id} but it wasn't available`);
+    }
+    this.unlocked.add(id);
+  }
+
   /** Whether the given subroutine is unlocked. */
   subroutineAvailable(id: SubroutineId) {
     const subToSim: Record<SubroutineId, SimulantId> = {

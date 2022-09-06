@@ -8,7 +8,9 @@ import React from "react";
 interface Props {
   onClick: () => void;
   icon?: IconType;
-  state?: "active" | "locked";
+  // "Unlocked" is for things like simulant subroutines that are effectively
+  // permanently active. XXX: This really needs to be better.
+  state?: "active" | "locked" | "unlocked";
   kind?: "normal" | "danger";
   size?: "xs" | "sm" | "md";
   children: ReactNode;
@@ -43,6 +45,7 @@ export const Button = React.memo(
     const stateClass = {
       locked: "text-red-600",
       active: "text-white",
+      unlocked: "text-green-300",
     };
     const kindClass = {
       normal: "bg-gray-900 hover:bg-gray-500",
