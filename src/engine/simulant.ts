@@ -26,6 +26,7 @@ export class Simulant {
   unlocked: Set<SubroutineId> = new Set();
 
   constructor(save?: SimulantSave) {
+    this.freeXp = save?.freeXp || 0;
     this.unlockedSimulants = new Set(save?.unlockedSimulants || []);
     this.unlocked = new Set(save?.unlocked || []);
   }
@@ -36,6 +37,7 @@ export class Simulant {
 
   toSave(): SimulantSave {
     return {
+      freeXp: this.freeXp,
       unlockedSimulants: Array.from(this.unlockedSimulants),
       unlocked: Array.from(this.unlocked),
     };
@@ -52,6 +54,7 @@ export class Simulant {
       throw new Error(`Tried to unlock ${id} but it wasn't available`);
     }
     this.unlocked.add(id);
+    this.freeXp -= this.cost(id);
   }
 
   /** Whether the given subroutine is unlocked. */
@@ -59,7 +62,9 @@ export class Simulant {
     const subToSim: Record<SubroutineId, SimulantId> = {
       burstClock: "tekhne",
     };
-    return this.unlockedSimulants.has(subToSim[id]);
+    return (
+      this.unlockedSimulants.has(subToSim[id]) && this.freeXp >= this.cost(id)
+    );
   }
 
   /** Adds free XP, to be spent on unlocked levels. XP is added at 1 per *second*. */
@@ -69,6 +74,7 @@ export class Simulant {
 }
 
 export type SimulantSave = {
+  freeXp: number;
   unlockedSimulants: SimulantId[];
   unlocked: SubroutineId[];
 };
