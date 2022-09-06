@@ -48,6 +48,7 @@ export type SimulantView = {
   unlockedSimulants: SimulantId[];
   unlockedSubroutines: SubroutineId[];
   availableSubroutines: SubroutineId[];
+  freeXp: number;
 };
 
 /**
@@ -182,5 +183,6 @@ function simulantView(engine: QueueEngine): SimulantView {
     availableSubroutines: SUBROUTINE_IDS.filter((sub) =>
       engine.simulant.subroutineAvailable(sub)
     ),
+    freeXp: engine.simulant.freeXp,
   };
 }
