@@ -145,6 +145,7 @@ export abstract class Engine<ScheduleT = unknown> {
       this.skills.metacognition.addXp((xp * metaMult) / 4);
     });
     rewards.energy && this.addEnergy(rewards.energy);
+    rewards.simulant && this.simulant.unlockedSimulants.add(rewards.simulant);
     task.extraPerform(this);
   }
 

@@ -1,5 +1,6 @@
 import { Engine } from "./engine";
 import { LoopFlagId, ResourceId, ProgressId, RESOURCES } from "./player";
+import { SimulantId } from "./simulant";
 import { SkillId } from "./skills";
 
 export type TaskKind =
@@ -44,6 +45,8 @@ export type Rewards = {
   flags?: Partial<Record<LoopFlagId, boolean>>;
   /** Energy to add. */
   energy?: number;
+  /** This task unlocks the given simulant. */
+  simulant?: SimulantId;
 };
 /** A task, something that goes in the task queue. */
 export type Task = {
@@ -221,6 +224,7 @@ export const HIJACK_SHIP: Task = {
       resources: {
         qhLockoutAttempts: Math.floor(LOCKOUTS_PER_SHIP * (1 + datalinkBonus)),
       },
+      simulant: "tekhne",
     };
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
