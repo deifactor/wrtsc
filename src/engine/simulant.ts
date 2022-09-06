@@ -1,9 +1,18 @@
-export const SIMULANT_IDS = ["tekhne"] as const;
+export const SIMULANT_IDS = ["tekhne", "ergon"] as const;
 export type SimulantId = typeof SIMULANT_IDS[number];
 
 export const SUBROUTINE_IDS = ["burstClock"] as const;
 /** Corresponds to a 'talent' in a more fantasy-ish game. */
 export type SubroutineId = typeof SUBROUTINE_IDS[number];
+
+export const SIMULANT_TO_SUBROUTINE: Record<SimulantId, SubroutineId[]> = {
+  tekhne: ["burstClock"],
+  ergon: [],
+};
+
+const REQUIREMENTS: Record<SubroutineId, SubroutineId[]> = {
+  burstClock: [],
+};
 
 const COSTS: Record<SubroutineId, number> = {
   // This one costs a very small amount because we expect it to be the first the
@@ -30,6 +39,12 @@ export class Simulant {
       unlockedSimulants: Array.from(this.unlockedSimulants),
       unlocked: Array.from(this.unlocked),
     };
+  }
+
+  visibleSubroutines(id: SimulantId): SubroutineId[] {
+    return SIMULANT_TO_SUBROUTINE[id].filter((sub) =>
+      REQUIREMENTS[sub].every((req) => this.unlocked.has(req))
+    );
   }
 
   /** Whether the given subroutine is unlocked. */

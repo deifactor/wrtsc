@@ -11,6 +11,7 @@ import { Intro } from "./Intro";
 import { tick, hardReset } from "../worldStore";
 import { useAppDispatch } from "../store";
 import { hasSave, loadAction, saveAction } from "../save";
+import { SimulantScreen } from "./SimulantScreen";
 
 /**
  * Set up a callback to be called at intervals of `delay`. Setting it to `null`
@@ -95,6 +96,7 @@ const App = () => {
         >
           <TabList className="flex flex-row text-xl justify-evenly text-gray-400">
             <Tab>Queue</Tab>
+            <Tab>Simulant</Tab>
             <Tab>Settings</Tab>
             <Tab>Credits</Tab>
           </TabList>
@@ -105,6 +107,9 @@ const App = () => {
               <div className="w-px bg-gray-800" />
               <ScheduleDisplay className="h-full w-2/5" />
             </div>
+          </TabPanel>
+          <TabPanel>
+            <SimulantScreen />
           </TabPanel>
           <TabPanel>
             <SettingsEditor onHardReset={() => dispatch(hardReset())} />
