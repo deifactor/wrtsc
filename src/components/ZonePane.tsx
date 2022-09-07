@@ -7,7 +7,7 @@ type Props = {
   className?: string;
 };
 
-export const ZoneDisplay = (props: Props) => {
+export const ZonePane = (props: Props) => {
   const zone = ZONES[useEngineSelector((engine) => engine.zoneKind)];
   const { className } = props;
 
@@ -38,4 +38,4 @@ export const ZoneDisplay = (props: Props) => {
     </div>
   );
 };
-ZoneDisplay.displayName = "ZoneDisplay";
+ZonePane.displayName = "ZonePane";

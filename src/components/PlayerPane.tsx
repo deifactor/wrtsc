@@ -22,7 +22,7 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   );
 });
 
-export const PlayerDisplay = React.memo(() => {
+export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
   const combat = useEngineSelector((engine) => engine.combat);
@@ -67,4 +67,4 @@ export const PlayerDisplay = React.memo(() => {
     </div>
   );
 });
-PlayerDisplay.displayName = "PlayerDisplay";
+PlayerPane.displayName = "PlayerPane";

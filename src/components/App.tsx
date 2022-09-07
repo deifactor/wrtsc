@@ -1,8 +1,8 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import TaskQueueEditor from "./TaskQueueEditor";
 import { ScheduleDisplay } from "./ScheduleDisplay";
-import { ZoneDisplay } from "./ZoneDisplay";
-import { PlayerDisplay } from "./PlayerDisplay";
+import { ZonePane } from "./ZonePane";
+import { PlayerPane } from "./PlayerPane";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { SettingsPanel } from "./SettingsPanel";
@@ -44,7 +44,7 @@ type PanelProps = {
   className: string;
 };
 
-const Panel = ({ children, className }: PanelProps) => {
+const Pane = ({ children, className }: PanelProps) => {
   const panelClass =
     "p-4 bg-black/70 border-gray-500 border backdrop-blur-[6px]";
 
@@ -85,11 +85,11 @@ const App = () => {
 
   return (
     <div className="app flex space-x-10 p-4 items-start h-full">
-      <Panel className="w-3/12">
-        <PlayerDisplay />
-      </Panel>
+      <Pane className="w-3/12">
+        <PlayerPane />
+      </Pane>
 
-      <Panel className="w-8/12 h-full">
+      <Pane className="w-8/12 h-full">
         <Tabs
           className="flex flex-col h-full"
           selectedTabPanelClassName="flex-auto overflow-auto"
@@ -123,12 +123,11 @@ const App = () => {
             <AboutPanel />
           </TabPanel>
         </Tabs>
-      </Panel>
+      </Pane>
 
-      <Panel className="w-3/12">
-        <h1>Location</h1>
-        <ZoneDisplay className="mb-12" />
-      </Panel>
+      <Pane className="w-3/12">
+        <ZonePane className="mb-12" />
+      </Pane>
     </div>
   );
 };
