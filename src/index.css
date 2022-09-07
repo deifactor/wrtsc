@@ -11,7 +11,7 @@ html {
 
 @layer base {
   h1 {
-    @apply text-2xl pb-4;
+    @apply text-2xl py-4;
   }
 
   h2 {
