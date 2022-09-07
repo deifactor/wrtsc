@@ -1,11 +1,27 @@
-import React, { useCallback } from "react";
-import { SkillId, SKILL_NAME } from "../engine/skills";
+import React, { useCallback, useState } from "react";
+import { SkillId } from "../engine/skills";
 import { setPaused, startLoop } from "../worldStore";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
+import { ProgressBar } from "./common/ProgressBar";
+import { SkillIcon } from "./common/SkillIcon";
+import classNames from "classnames";
+
+// We have to explicitly write out the class names, otherwise PostCSS will
+// "optimize" them out.
+const SKILL_CLASS: Record<SkillId, string> = {
+  ergodicity: "text-ergodicity",
+  datalink: "text-datalink",
+  spatial: "text-spatial",
+  energyTransfer: "text-energy",
+  metacognition: "text-metacognition",
+  lethality: "text-lethality",
+};
 
 export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
+  // Randomly offset the background image so it doesn't look weird.
+  const [offsetX] = useState(Math.random() * 100);
   const { skillId } = props;
   const { xp, level, totalToNextLevel, visible } = useEngineSelector(
     (engine) => engine.skills[skillId]
@@ -13,11 +29,16 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   if (!visible) {
     return null;
   }
-  const skillPercent = ((100 * xp) / totalToNextLevel).toFixed(1);
   return (
-    <div>
-      <strong>{SKILL_NAME[skillId]}</strong>: {level} ({skillPercent}
-      %)
+    <div className={classNames("flex font-mono h-8", SKILL_CLASS[skillId])}>
+      <SkillIcon id={skillId} className="flex-0 mr-3" size="2em" />
+      <ProgressBar
+        current={xp}
+        max={totalToNextLevel}
+        level={level.toString()}
+        className="flex-grow h-full"
+        backgroundPosition={`${100 * offsetX}%`}
+      />
     </div>
   );
 });
