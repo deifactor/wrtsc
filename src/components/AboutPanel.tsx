@@ -4,9 +4,29 @@ type Props = {
   className?: string;
 };
 
-export const Credits = (props: Props) => {
+export const AboutPanel = (props: Props) => {
   return (
     <div className={classNames(props.className, "space-y-2 indent-8")}>
+      <h1>About</h1>
+      <p>
+        <a href="https://github.com/deifactor/wrtsc">
+          The canonical git repo for this game
+        </a>{" "}
+        is where all the development happens. If you run into any issues, please
+        file an issue there;{" "}
+        <strong>this game is still in beta and under active development</strong>
+        , so don't expect a smooth, polished experience (yet).
+      </p>
+      <p>
+        If you want to talk about wrtsc, or if you want to file a bug report but
+        don't have a github account, I mostly hang out in{" "}
+        <a href="https://discord.gg/dnKA6Xd">
+          the Idle Loops/Stop_Sign Gaming discord
+        </a>{" "}
+        under the username <code>Sera</code>. If this gets popular enough, I'll
+        probably make my own server.
+      </p>
+      <h1>Thanks</h1>
       <p>
         This game wouldn't exist without{" "}
         <a href="https://twitter.com/VyrCossont">Vyr</a>, who helped motivate me
@@ -32,4 +52,4 @@ export const Credits = (props: Props) => {
     </div>
   );
 };
-Credits.displayName = "Credits";
+AboutPanel.displayName = "AboutPanel";

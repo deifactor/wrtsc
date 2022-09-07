@@ -6,7 +6,7 @@ import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { SettingsEditor } from "./SettingsEditor";
-import { Credits } from "./Credits";
+import { AboutPanel } from "./AboutPanel";
 import { Intro } from "./Intro";
 import { tick, hardReset } from "../worldStore";
 import { useAppDispatch } from "../store";
@@ -100,7 +100,7 @@ const App = () => {
             <Tab>Simulant</Tab>
             <Tab>Settings</Tab>
             <Tab>Help</Tab>
-            <Tab>Credits</Tab>
+            <Tab>About</Tab>
           </TabList>
           <hr className="border-gray-400 my-4" />
           <TabPanel>
@@ -120,7 +120,7 @@ const App = () => {
             <HelpPanel />
           </TabPanel>
           <TabPanel>
-            <Credits />
+            <AboutPanel />
           </TabPanel>
         </Tabs>
       </Panel>
