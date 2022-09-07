@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { ReactComponent as Squares } from "./squares.svg";
+import Squares from "jsx:./squares.svg";
 import circuits from "./progress_circuit.svg";
 
 /**

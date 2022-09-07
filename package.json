@@ -17,10 +17,8 @@
     "tailwindcss": "^3.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "parcel src/index.html",
+    "test": "jest"
   },
   "eslintConfig": {
     "extends": [
@@ -41,27 +39,37 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.19.0",
+    "@babel/preset-env": "^7.19.0",
+    "@babel/preset-react": "^7.18.6",
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
+    "@parcel/transformer-svg-react": "^2.7.0",
     "@testing-library/dom": "^8.17.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^14.4.3",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^28.0.0",
     "@types/node": "^12.0.0",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/react-redux": "^7.1.24",
     "@types/react-tabs": "^2.3.4",
     "autoprefixer": "^10.4.0",
+    "babel-jest": "^28.0.2",
+    "eslint": "^8.23.0",
+    "eslint-config-react-app": "^7.0.1",
     "husky": "^7.0.4",
+    "jest": "^28.0.0",
     "lint-staged": "^12.1.7",
+    "parcel": "^2.7.0",
     "postcss": "^8.4.4",
     "prettier": "^2.5.1",
     "prettier-plugin-jsdoc": "^0.3.30",
-    "react-scripts": "^5.0.0",
+    "process": "^0.11.10",
+    "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
-    "typescript": "^4.1.2"
+    "typescript": "^4.8.2"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": "eslint --fix --max-warnings 0"
