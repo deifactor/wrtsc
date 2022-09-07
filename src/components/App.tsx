@@ -5,13 +5,13 @@ import { ZoneDisplay } from "./ZoneDisplay";
 import { PlayerDisplay } from "./PlayerDisplay";
 import classNames from "classnames";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { SettingsEditor } from "./SettingsEditor";
+import { SettingsPanel } from "./SettingsPanel";
 import { AboutPanel } from "./AboutPanel";
 import { Intro } from "./Intro";
 import { tick, hardReset } from "../worldStore";
 import { useAppDispatch } from "../store";
 import { hasSave, loadAction, saveAction } from "../save";
-import { SimulantScreen } from "./SimulantScreen";
+import { SimulantPanel } from "./SimulantPanel";
 import { HelpPanel } from "./HelpPanel";
 
 /**
@@ -111,10 +111,10 @@ const App = () => {
             </div>
           </TabPanel>
           <TabPanel>
-            <SimulantScreen />
+            <SimulantPanel />
           </TabPanel>
           <TabPanel>
-            <SettingsEditor onHardReset={() => dispatch(hardReset())} />
+            <SettingsPanel onHardReset={() => dispatch(hardReset())} />
           </TabPanel>
           <TabPanel>
             <HelpPanel />

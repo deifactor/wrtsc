@@ -82,7 +82,7 @@ const SimulantSection = React.memo(({ id }: { id: SimulantId }) => {
 SimulantSection.displayName = "SimulantSection";
 
 /** The user interface for viewing what simulants/subroutines are unlocked. */
-export const SimulantScreen = React.memo(() => {
+export const SimulantPanel = React.memo(() => {
   return (
     <div>
       <SimulantSection id="tekhne" />
@@ -90,4 +90,4 @@ export const SimulantScreen = React.memo(() => {
     </div>
   );
 });
-SimulantScreen.displayName = "SimulantScreen";
+SimulantPanel.displayName = "SimulantPanel";

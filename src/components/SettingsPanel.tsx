@@ -13,7 +13,7 @@ type Props = {
   onHardReset: () => void;
 };
 
-export const SettingsEditor = ({ onHardReset }: Props) => {
+export const SettingsPanel = ({ onHardReset }: Props) => {
   const dispatch = useAppDispatch();
   const autoRestart = useAppSelector((store) => store.settings.autoRestart);
   const autoRestartOnFailure = useAppSelector(
@@ -81,4 +81,4 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
     </div>
   );
 };
-SettingsEditor.displayName = "SettingsEditor";
+SettingsPanel.displayName = "SettingsPanel";
