@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { exportSave } from "../save";
 import {
   setAutoRestart,
   setPauseOnFailure,
@@ -18,6 +20,13 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
     (store) => store.settings.pauseOnFailure
   );
   const speedrunMode = useAppSelector((store) => store.settings.speedrunMode);
+  const saveRef = useRef<HTMLTextAreaElement>(null);
+
+  const onExport = () => {
+    const exported = dispatch(exportSave());
+    saveRef.current!.value = exported;
+  };
+  const importSave = () => {};
   return (
     <div>
       <div>
@@ -42,6 +51,23 @@ export const SettingsEditor = ({ onHardReset }: Props) => {
         >
           Speedrun Mode
         </Switch>
+      </div>
+      <div>
+        Export/import save
+        <div>
+          <textarea
+            className="font-mono"
+            ref={saveRef}
+            cols={80}
+            rows={5}
+          ></textarea>
+        </div>
+        <div>
+          <Button onClick={onExport}>Export Save</Button>
+          <Button kind="danger" onClick={importSave}>
+            Import Save
+          </Button>
+        </div>
       </div>
       <div className="mt-12">
         Warning: This will <em>delete your entire save</em>. This is not a

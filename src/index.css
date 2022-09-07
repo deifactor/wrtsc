@@ -21,6 +21,10 @@ html {
   a {
    @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
   }
+
+  textarea {
+    @apply bg-gray-900 border-gray-400 border;
+  }
 }
 
 /* We use div. here in order to get extra specificity. */

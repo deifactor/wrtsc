@@ -8,7 +8,7 @@
 import { createAction } from "@reduxjs/toolkit";
 import { EngineSave, QueueEngine, TaskQueue } from "./engine";
 import { Settings } from "./settingsStore";
-import { AppThunkAction } from "./store";
+import { AppThunkAction, RootState } from "./store";
 import { project } from "./viewModel";
 import { setView } from "./worldStore";
 
@@ -30,21 +30,26 @@ export function hasSave(): boolean {
   return localStorage.getItem(STORAGE_KEY) !== undefined;
 }
 
-export function saveAction(): AppThunkAction {
-  return (_dispatch, getState, extra) => {
-    const state = getState();
-    const save: GameSave = {
-      state: {
-        world: {
-          nextQueue: state.world.nextQueue,
-          lastUpdate: state.world.lastUpdate,
-          unspentTime: state.world.unspentTime,
-        },
-        settings: state.settings,
+function toSave(state: RootState, engine: QueueEngine): GameSave {
+  return {
+    state: {
+      world: {
+        nextQueue: state.world.nextQueue,
+        lastUpdate: state.world.lastUpdate,
+        unspentTime: state.world.unspentTime,
       },
-      engine: extra.engine.toSave(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(save));
+      settings: state.settings,
+    },
+    engine: engine.toSave(),
+  };
+}
+
+export function saveAction(): AppThunkAction {
+  return (_dispatch, getState, { engine }) => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(toSave(getState(), engine))
+    );
   };
 }
 
@@ -58,6 +63,23 @@ export function loadAction(): AppThunkAction {
     extra.engine = new QueueEngine(save.engine);
     dispatch(setView(project(extra.engine)));
     dispatch(saveLoaded(save.state));
+  };
+}
+
+/** Returns the current save as a string, suitable for export/import. */
+export function exportSave(): AppThunkAction<string> {
+  return (_dispatch, getState, { engine }) => {
+    const save = toSave(getState(), engine);
+    return JSON.stringify(save);
+  };
+}
+
+export function importSave(saveString: string): AppThunkAction {
+  return (dispatch) => {
+    // Make sure the save is valid before we even try to set it.
+    JSON.parse(saveString);
+    localStorage.setItem(STORAGE_KEY, saveString);
+    dispatch(loadAction());
   };
 }
 
