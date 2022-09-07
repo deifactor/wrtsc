@@ -104,9 +104,14 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const length = useAppSelector((store) => store.world.nextQueue.length);
   const indices = Array.from(Array(length).keys());
 
-  const addButtons = useEngineSelector((engine) => Object.values(engine.tasks))
-    .filter((task) => task.visible)
-    .map((task) => <AddTaskButton key={task.kind} id={task.kind} />);
+  const visibleTasks = useEngineSelector((engine) =>
+    Object.values(engine.tasks)
+      .filter((task) => task.visible)
+      .map((task) => task.kind)
+  );
+  const addButtons = visibleTasks.map((id) => (
+    <AddTaskButton key={id} id={id} />
+  ));
   // For reasons I don't understand, without the flex having an icon messes with
   // vertical alignment.
   return (
