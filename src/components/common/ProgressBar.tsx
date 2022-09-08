@@ -57,7 +57,6 @@ export const ProgressBar = (props: {
           className="h-full w-full absolute opacity-30"
           style={{
             backgroundImage: `url(${circuits})`,
-            backgroundSize: "250px",
             backgroundPosition: backgroundPosition,
           }}
         ></div>
