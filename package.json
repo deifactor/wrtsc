@@ -69,9 +69,11 @@
     "process": "^0.11.10",
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
+    "tsc-files": "^1.1.3",
     "typescript": "^4.8.2"
   },
   "lint-staged": {
+    "*.{ts,tsx}": "tsc-files --noEmit src/react-app-env.d.ts",
     "*.{ts,tsx,js}": "eslint --fix --max-warnings 0"
   }
 }
