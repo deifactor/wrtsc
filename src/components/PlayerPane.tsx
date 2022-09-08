@@ -7,6 +7,7 @@ import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressBar } from "./common/ProgressBar";
 import { SkillIcon } from "./common/SkillIcon";
 import classNames from "classnames";
+import prettyMilliseconds from "pretty-ms";
 
 // We have to explicitly write out the class names, otherwise PostCSS will
 // "optimize" them out.
@@ -19,6 +20,11 @@ const SKILL_CLASS: Record<SkillId, string> = {
   lethality: "text-lethality",
 };
 
+const scientific = Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   // Randomly offset the background image so it doesn't look weird.
   const [offsetX] = useState(Math.random() * 100);
@@ -29,13 +35,17 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   if (!visible) {
     return null;
   }
+
+  const text = `${level} (${scientific.format(xp)}/${scientific.format(
+    totalToNextLevel
+  )})`;
   return (
     <div className={classNames("flex font-mono h-8", SKILL_CLASS[skillId])}>
       <SkillIcon id={skillId} className="flex-0 mr-3" size="2em" />
       <ProgressBar
         current={xp}
         max={totalToNextLevel}
-        level={level.toString()}
+        text={text}
         className="flex-grow h-full"
         backgroundPosition={`${100 * offsetX}%`}
       />
@@ -43,12 +53,32 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   );
 });
 
+/** We move this into its own component because it's potentially updating quite a bit. */
+const TimeStats = React.memo(() => {
+  const options = { secondsDecimalDigits: 0 };
+  const totalTime = useEngineSelector((engine) =>
+    prettyMilliseconds(engine.timeAcrossAllLoops, options)
+  );
+  const bonusTime = useAppSelector((state) =>
+    prettyMilliseconds(state.world.unspentTime, options)
+  );
+
+  return (
+    <>
+      <div>
+        <strong>Total time</strong>: {totalTime}
+      </div>
+      <div>
+        <strong>Bonus time</strong>: {bonusTime}
+      </div>
+    </>
+  );
+});
+
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
   const combat = useEngineSelector((engine) => engine.combat);
-  const totalTime = useEngineSelector((engine) => engine.timeAcrossAllLoops);
-  const bonusTime = useAppSelector((state) => state.world.unspentTime);
   const isPaused = useAppSelector((state) => state.world.paused);
   const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const togglePause = useCallback(
@@ -60,12 +90,6 @@ export const PlayerPane = React.memo(() => {
       <h1>Stats</h1>
       <div>
         <strong>AEU</strong>: {energy.toFixed(0)}
-      </div>
-      <div>
-        <strong>T_total</strong>: {(totalTime / 1000).toFixed(0)}
-      </div>
-      <div>
-        <strong>Bonus</strong>: {bonusTime.toFixed(0)}
       </div>
       <ResourceDisplay id="linkedSensorDrones" />
       <ResourceDisplay id="qhLockoutAttempts" />
@@ -85,6 +109,8 @@ export const PlayerPane = React.memo(() => {
       <SkillDisplay skillId="metacognition" />
       <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
       <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
+      <hr className="mx-3 my-4 border-gray-800" />
+      <TimeStats />
     </div>
   );
 });
