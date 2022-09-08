@@ -1,17 +1,9 @@
-import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { QueueEngine, SimulationResult } from "./engine";
+import { QueueEngine } from "./engine";
 import { EngineView, project } from "./viewModel";
-import { startAppListening } from "./listener";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
-import {
-  modifyBatchCount,
-  moveTask,
-  pushTaskToQueue,
-  removeTask,
-  setBatchCount,
-} from "./nextQueueStore";
 
 export const worldSlice = createSlice({
   name: "world",
@@ -19,7 +11,6 @@ export const worldSlice = createSlice({
     const engine = new QueueEngine();
     return {
       view: project(engine),
-      simulation: [] as SimulationResult,
       lastUpdate: new Date().getTime(),
       // Amount of time that has passed in updates but hasn't yet been simulated.
       unspentTime: 0,
@@ -27,10 +18,6 @@ export const worldSlice = createSlice({
     };
   },
   reducers: {
-    setSimulation: (state, action: PayloadAction<SimulationResult>) => {
-      state.simulation = action.payload;
-    },
-
     setLastUpdate: (state, action: PayloadAction<number>) => {
       const now = action.payload;
       state.unspentTime += now - state.lastUpdate;
@@ -65,25 +52,6 @@ export const worldSlice = createSlice({
 
 export const { setPaused, setView } = worldSlice.actions;
 
-// Whenever we modify the task queue, update the simulation. In the future we
-// may want to do some fancy debouncing logic.
-startAppListening({
-  matcher: isAnyOf(
-    pushTaskToQueue,
-    modifyBatchCount,
-    setBatchCount,
-    moveTask,
-    removeTask,
-    saveLoaded
-  ),
-  effect(_action, api) {
-    const state = api.getState().nextQueue;
-    api.dispatch(
-      worldSlice.actions.setSimulation(api.extra.engine.simulation(state))
-    );
-  },
-});
-
 export const tick: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
@@ -106,7 +74,7 @@ export const tick: () => AppThunkAction =
       dispatch(setPaused(true));
     }
     if (!speedrunMode && ok && !engine.task && autoRestart) {
-      engine.startLoop(getState().nextQueue);
+      engine.startLoop(getState().nextQueue.queue);
       dispatch(startLoop());
     }
     dispatch(worldSlice.actions.setView(project(engine)));
@@ -115,7 +83,7 @@ export const tick: () => AppThunkAction =
 export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
-    engine.startLoop(getState().nextQueue);
+    engine.startLoop(getState().nextQueue.queue);
     // Pause if the engine is empty so we properly accumulate bonus time.
     dispatch(setPaused(engine.queue.length === 0));
     dispatch(saveAction());

@@ -67,12 +67,12 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
     dropRef(instance);
   };
 
-  const entry = useAppSelector((store) => store.nextQueue[index], equal);
+  const entry = useAppSelector((store) => store.nextQueue.queue[index], equal);
   const maxIterations = useEngineSelector(
     (view) => view.tasks[entry.task].maxIterations
   );
   const step: SimulationStep | undefined = useAppSelector(
-    (store) => store.world.simulation[index],
+    (store) => store.nextQueue.simulation[index],
     equal
   );
   const incrementCount = () => dispatch(modifyBatchCount({ index, amount: 1 }));
@@ -142,7 +142,7 @@ TaskQueueItem.displayName = "TaskQueueItem";
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const { className } = props;
-  const length = useAppSelector((store) => store.nextQueue.length);
+  const length = useAppSelector((store) => store.nextQueue.queue.length);
   const indices = Array.from(Array(length).keys());
 
   const visibleTasks = useEngineSelector((engine) =>

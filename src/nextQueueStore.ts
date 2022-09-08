@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { TaskQueue, TaskId } from "./engine";
+import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
+import { TaskQueue, TaskId, SimulationResult } from "./engine";
+import { startAppListening } from "./listener";
 import { saveLoaded } from "./save";
 
 /**
@@ -8,19 +9,34 @@ import { saveLoaded } from "./save";
  */
 export const nextQueueSlice = createSlice({
   name: "nextQueue",
-  initialState: [] as TaskQueue,
+  initialState: {
+    queue: [] as TaskQueue,
+    simulation: [] as SimulationResult,
+  },
   reducers: {
+    setSimulation: (state, action: PayloadAction<SimulationResult>) => {
+      state.simulation = action.payload;
+    },
+
+    /**
+     * Directly sets the queue. Only call this from save/load mechanisms;
+     * mutating the queue using the UI should use the other actions.
+     */
+    setNextQueue: (state, action: PayloadAction<TaskQueue>) => {
+      state.queue = action.payload;
+    },
+
     /**
      * Push a task to the end of the queue. If the last task in the queue is the
      * given kind, increments its count by 1 instead.
      */
-    pushTaskToQueue: (state, action: PayloadAction<TaskId>) => {
+    pushTaskToQueue: ({ queue }, action: PayloadAction<TaskId>) => {
       const id = action.payload;
-      const len = state.length;
-      if (len !== 0 && state[len - 1].task === action.payload) {
-        state[state.length - 1].count++;
+      const len = queue.length;
+      if (len !== 0 && queue[len - 1].task === action.payload) {
+        queue[queue.length - 1].count++;
       } else {
-        state.push({ task: id, count: 1 });
+        queue.push({ task: id, count: 1 });
       }
     },
 
@@ -29,29 +45,29 @@ export const nextQueueSlice = createSlice({
      * in the count being negative, we remove the entry.
      */
     modifyBatchCount: (
-      state,
+      { queue },
       action: PayloadAction<{ index: number; amount: number }>
     ) => {
       const { index, amount } = action.payload;
-      checkBounds(state, index);
-      const entry = state[index];
+      checkBounds(queue, index);
+      const entry = queue[index];
       entry.count += amount;
       if (entry.count <= 0) {
-        state.splice(index, 1);
+        queue.splice(index, 1);
       }
     },
 
     /** Set the batch count to a fixed number. */
     setBatchCount: (
-      state,
+      { queue },
       action: PayloadAction<{ index: number; amount: number }>
     ) => {
       const { index, amount } = action.payload;
-      checkBounds(state, index);
-      const entry = state[index];
+      checkBounds(queue, index);
+      const entry = queue[index];
       entry.count = amount;
       if (entry.count <= 0) {
-        state.splice(index, 1);
+        queue.splice(index, 1);
       }
     },
 
@@ -59,29 +75,26 @@ export const nextQueueSlice = createSlice({
      * Move the task at `from` to the position `to`. Throws if either of those
      * is out of bounds.
      */
-    moveTask: (state, action: PayloadAction<{ from: number; to: number }>) => {
+    moveTask: (
+      { queue },
+      action: PayloadAction<{ from: number; to: number }>
+    ) => {
       const { from, to } = action.payload;
-      checkBounds(state, from);
-      checkBounds(state, to);
+      checkBounds(queue, from);
+      checkBounds(queue, to);
       // Yes, this works no matter what `from` and `to` are. Unit test it anyway
       // though.
-      const entry = state[from];
-      state.splice(from, 1);
-      state.splice(to, 0, entry);
+      const entry = queue[from];
+      queue.splice(from, 1);
+      queue.splice(to, 0, entry);
     },
 
     /** Removes a task entirely from the state. */
-    removeTask: (state, action: PayloadAction<number>) => {
+    removeTask: ({ queue }, action: PayloadAction<number>) => {
       const index = action.payload;
-      checkBounds(state, index);
-      state.splice(index, 1);
+      checkBounds(queue, index);
+      queue.splice(index, 1);
     },
-  },
-
-  extraReducers(builder) {
-    builder.addCase(saveLoaded, (_state, action) => {
-      return action.payload.world.nextQueue;
-    });
   },
 });
 
@@ -91,6 +104,7 @@ export const {
   setBatchCount,
   moveTask,
   removeTask,
+  setNextQueue,
 } = nextQueueSlice.actions;
 
 function checkBounds(queue: TaskQueue, index: number) {
@@ -98,3 +112,33 @@ function checkBounds(queue: TaskQueue, index: number) {
     throw new Error(`Invalid index ${index} for queue ${queue}`);
   }
 }
+
+// Whenever we modify the task queue, update the simulation. In the future we
+// may want to do some fancy debouncing logic.
+startAppListening({
+  matcher: isAnyOf(
+    pushTaskToQueue,
+    modifyBatchCount,
+    setBatchCount,
+    moveTask,
+    removeTask,
+    setNextQueue
+  ),
+  effect(_action, api) {
+    const { queue } = api.getState().nextQueue;
+    api.dispatch(
+      nextQueueSlice.actions.setSimulation(api.extra.engine.simulation(queue))
+    );
+  },
+});
+
+// Whenever we modify the task queue, update the simulation. In the future we
+// may want to do some fancy debouncing logic.
+startAppListening({
+  actionCreator: saveLoaded,
+  effect(action, api) {
+    api.dispatch(
+      nextQueueSlice.actions.setNextQueue(action.payload.world.nextQueue)
+    );
+  },
+});
