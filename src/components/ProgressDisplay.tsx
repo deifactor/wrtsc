@@ -2,13 +2,13 @@ import { ProgressId, PROGRESS_NAME } from "../engine";
 import { useEngineSelector } from "../store";
 
 type Props = {
-  kind: ProgressId;
+  id: ProgressId;
 };
 
 export const ProgressDisplay = (props: Props) => {
-  const { kind } = props;
+  const { id } = props;
   const { level, xp, totalToNextLevel, visible } = useEngineSelector(
-    (engine) => engine.progress[kind]
+    (engine) => engine.progress[id]
   );
   if (!visible) {
     return null;
@@ -17,7 +17,7 @@ export const ProgressDisplay = (props: Props) => {
   const progressPercent = Math.floor((100 * xp) / totalToNextLevel);
   return (
     <div>
-      <strong>{PROGRESS_NAME[kind]}</strong>: {levelDisplay} ({progressPercent}
+      <strong>{PROGRESS_NAME[id]}</strong>: {levelDisplay} ({progressPercent}
       %)
     </div>
   );

@@ -38,7 +38,7 @@ export const ScheduleDisplay = (props: Props) => {
     return (
       <div className="flex items-center font-mono h-10" key={idx}>
         <span className="inline-block">
-          <TaskIcon className="inline" task={entry.kind} />{" "}
+          <TaskIcon className="inline" task={entry.id} />{" "}
           {entry.success + entry.failure}/{entry.count}{" "}
         </span>
         <span className="inline-block ml-auto whitespace-pre font-bold">

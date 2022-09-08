@@ -3,19 +3,19 @@ import { ResourceId, RESOURCES } from "../engine";
 import { useEngineSelector } from "../store";
 
 type Props = {
-  kind: ResourceId;
+  id: ResourceId;
 };
 
 export const ResourceDisplay = React.memo((props: Props) => {
-  const { kind } = props;
-  const visible = useEngineSelector((engine) => engine.resources[kind].visible);
-  const amount = useEngineSelector((engine) => engine.resources[kind].amount);
+  const { id } = props;
+  const visible = useEngineSelector((engine) => engine.resources[id].visible);
+  const amount = useEngineSelector((engine) => engine.resources[id].amount);
   if (!visible) {
     return null;
   }
   return (
     <div>
-      <strong>{RESOURCES[kind].name}</strong>: {amount}
+      <strong>{RESOURCES[id].name}</strong>: {amount}
     </div>
   );
 });

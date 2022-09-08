@@ -4,7 +4,7 @@ import {
   PROGRESS_NAME,
   RESOURCES,
   ResourceId,
-  TaskKind,
+  TaskId,
   Requirements,
   Rewards,
 } from "../engine";
@@ -15,7 +15,7 @@ import { SKILL_NAME } from "../engine/skills";
 import { Tooltip } from "./common/Tooltip";
 
 interface Props {
-  kind: TaskKind;
+  id: TaskId;
 }
 
 function taskMetadata({
@@ -24,7 +24,7 @@ function taskMetadata({
   requirements,
   rewards,
 }: {
-  id: TaskKind;
+  id: TaskId;
   cost: number;
   requirements: Requirements | undefined;
   rewards: Rewards | undefined;
@@ -77,13 +77,13 @@ function taskMetadata({
   return metadata;
 }
 
-export const TaskTooltip = React.memo(({ kind }: Props) => {
-  const task = TASKS[kind];
-  const cost = useEngineSelector((engine) => engine.tasks[kind].cost);
-  const rewards = useEngineSelector((engine) => engine.tasks[kind].rewards);
+export const TaskTooltip = React.memo(({ id }: Props) => {
+  const task = TASKS[id];
+  const cost = useEngineSelector((engine) => engine.tasks[id].cost);
+  const rewards = useEngineSelector((engine) => engine.tasks[id].rewards);
 
   const metadata = taskMetadata({
-    id: kind,
+    id,
     cost,
     requirements: task.required,
     rewards,

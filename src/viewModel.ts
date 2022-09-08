@@ -7,14 +7,14 @@ import {
   LoopFlagId,
   ResourceId,
   ProgressId,
-  TaskKind,
+  TaskId,
   TASKS,
   Task,
   Rewards,
 } from "./engine";
 import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
 import { SkillId } from "./engine/skills";
-import { ZoneKind } from "./engine/zone";
+import { ZoneId } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
 
 export type ResourcesView = Record<
@@ -33,7 +33,7 @@ export type ProgressView = Record<
 export type ScheduleView = {
   /** `completed` is the number of iterations of that task that has been completed. */
   tasks: {
-    kind: TaskKind;
+    id: TaskId;
     count: number;
     success: number;
     failure: number;
@@ -56,7 +56,7 @@ export type SimulantView = {
  * of the engine state.
  */
 export type TaskView = {
-  kind: TaskKind;
+  id: TaskId;
   cost: number;
   visible: boolean;
   canAddToQueue: boolean;
@@ -70,12 +70,12 @@ export type EngineView = {
   flags: FlagsView;
   progress: ProgressView;
   skills: SkillView;
-  zoneKind: ZoneKind;
+  zoneId: ZoneId;
   energy: number;
   totalEnergy: number;
   combat: number;
   schedule: ScheduleView;
-  tasks: Record<TaskKind, TaskView>;
+  tasks: Record<TaskId, TaskView>;
   timeAcrossAllLoops: number;
   simulant: SimulantView;
 };
@@ -104,12 +104,12 @@ export function project(engine: QueueEngine): EngineView {
       visible: true,
     })),
     combat: engine.combat,
-    zoneKind: engine.zoneKind,
+    zoneId: engine.zoneId,
     energy: engine.energy,
     totalEnergy: engine.totalEnergy,
     schedule: projectSchedule(engine),
     tasks: mapValues(TASKS, (task) => ({
-      kind: task.kind,
+      id: task.id,
       cost: task.cost(engine),
       visible: task.visible(engine),
       canAddToQueue: canAddToQueue(engine, task),
@@ -126,7 +126,7 @@ function projectSchedule(engine: QueueEngine): ScheduleView {
   const schedule = engine;
   return {
     tasks: schedule.queue.map(({ task, count }, index) => ({
-      kind: task,
+      id: task,
       count,
       success: engine.completions[index].success,
       failure: engine.completions[index].failure,

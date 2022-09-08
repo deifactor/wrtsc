@@ -3,7 +3,7 @@ import { LoopFlagId, ResourceId, ProgressId, RESOURCES } from "./player";
 import { SimulantId } from "./simulant";
 import { SkillId } from "./skills";
 
-export type TaskKind =
+export type TaskId =
   | "exploreRuins"
   | "scavengeBatteries"
   | "dischargeTeracapacitor"
@@ -50,7 +50,7 @@ export type Rewards = {
 };
 /** A task, something that goes in the task queue. */
 export type Task = {
-  readonly kind: TaskKind;
+  readonly id: TaskId;
   name: string;
   shortName: string;
   /** Cost in AEUs. */
@@ -89,7 +89,7 @@ export type Task = {
 
 export const EXPLORE_RUINS: Task = {
   ...defaults,
-  kind: "exploreRuins",
+  id: "exploreRuins",
   name: "Explore Ruins",
   shortName: "XPL_RUIN",
   cost: () => 4000,
@@ -108,7 +108,7 @@ const BATTERY_AMOUNT = 3000;
 
 export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
-  kind: "scavengeBatteries",
+  id: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
   cost: () => 2000,
@@ -124,7 +124,7 @@ export const SCAVENGE_BATTERIES: Task = {
 
 export const DRAIN_TERACAPACITOR: Task = {
   ...defaults,
-  kind: "dischargeTeracapacitor",
+  id: "dischargeTeracapacitor",
   name: "Discharge Teracapacitor",
   shortName: "DIS_TERA",
   cost: () => 4000,
@@ -140,7 +140,7 @@ export const DRAIN_TERACAPACITOR: Task = {
 
 export const LINK_SENSOR_DRONES: Task = {
   ...defaults,
-  kind: "linkSensorDrones",
+  id: "linkSensorDrones",
   name: "Link Sensor Drones",
   shortName: "LINK_DRN",
   cost: () => 1000,
@@ -160,7 +160,7 @@ export const LINK_SENSOR_DRONES: Task = {
 
 export const OBSERVE_PATROL_ROUTES: Task = {
   ...defaults,
-  kind: "observePatrolRoutes",
+  id: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
   cost: () => 3500,
@@ -177,7 +177,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
 
 export const KILL_SCOUT: Task = {
   ...defaults,
-  kind: "eradicateScout",
+  id: "eradicateScout",
   name: "Kill Scout",
   shortName: "KILL_SCT",
   cost: () => 8000,
@@ -204,7 +204,7 @@ const LOCKOUTS_PER_SHIP = 8;
 
 export const HIJACK_SHIP: Task = {
   ...defaults,
-  kind: "hijackShip",
+  id: "hijackShip",
   name: "Hijack Ship",
   shortName: "HJCK_SHP",
   cost: (engine) =>
@@ -237,7 +237,7 @@ export const HIJACK_SHIP: Task = {
 
 export const DISABLE_LOCKOUTS: Task = {
   ...defaults,
-  kind: "disableLockouts",
+  id: "disableLockouts",
   name: "Override Lockouts",
   shortName: "OVR_LOCK",
   cost: () => 800,
@@ -255,7 +255,7 @@ export const DISABLE_LOCKOUTS: Task = {
 
 export const STRAFING_RUN: Task = {
   ...defaults,
-  kind: "strafingRun",
+  id: "strafingRun",
   name: "Strafing Run",
   shortName: "STRAF_RN",
   cost: () => 10000,
@@ -274,7 +274,7 @@ export const STRAFING_RUN: Task = {
 
 export const DISMANTLE_SENSOR_DRONES: Task = {
   ...defaults,
-  kind: "dismantleSensorDrones",
+  id: "dismantleSensorDrones",
   name: "Dismantle Sensor Drones",
   shortName: "DSMN_DRN",
   cost: () => 500,
@@ -294,7 +294,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
 
 export const LEAVE_RUINS: Task = {
   ...defaults,
-  kind: "leaveRuins",
+  id: "leaveRuins",
   name: "Leave Ruins",
   shortName: "LEAVE",
   cost: () => 20000,
@@ -307,7 +307,7 @@ export const LEAVE_RUINS: Task = {
   },
   rewards: () => ({}),
   extraPerform: (engine) => {
-    engine.zoneKind = "phobosDeimos";
+    engine.zoneId = "phobosDeimos";
   },
   visible: (engine) => engine.hasMilestone("shipHijacked"),
   trainedSkills: { spatial: 128 },
@@ -315,7 +315,7 @@ export const LEAVE_RUINS: Task = {
 
 export const COMPLETE_RUINS: Task = {
   ...defaults,
-  kind: "completeRuins",
+  id: "completeRuins",
   name: "Debug Complete Ruins",
   shortName: "CMP_RUIN",
   cost: () => 1,
@@ -324,12 +324,12 @@ export const COMPLETE_RUINS: Task = {
   required: {},
   rewards: () => ({}),
   extraPerform: (engine) => {
-    for (const kind of [
+    for (const id of [
       "ruinsExploration",
       "patrolRoutesObserved",
       "qhLockout",
     ] as const) {
-      const progress = engine.progress[kind];
+      const progress = engine.progress[id];
       progress.level = 100;
       progress.xp = 0;
     }
@@ -338,7 +338,7 @@ export const COMPLETE_RUINS: Task = {
   trainedSkills: {},
 };
 
-export const TASKS: Record<TaskKind, Task> = {
+export const TASKS: Record<TaskId, Task> = {
   exploreRuins: EXPLORE_RUINS,
   scavengeBatteries: SCAVENGE_BATTERIES,
   dischargeTeracapacitor: DRAIN_TERACAPACITOR,

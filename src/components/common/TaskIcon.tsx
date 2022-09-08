@@ -1,4 +1,4 @@
-import { TaskKind } from "../../engine";
+import { TaskId } from "../../engine";
 import { IconType } from "react-icons";
 import {
   GiBatteryPack,
@@ -17,7 +17,7 @@ import React from "react";
 // because it's funny to me
 const DEBUG_ICON = FaVenusDouble;
 
-export const ICONS: Partial<Record<TaskKind, IconType>> = {
+export const ICONS: Partial<Record<TaskId, IconType>> = {
   exploreRuins: GiTargeting,
   scavengeBatteries: GiBatteryPack,
   dischargeTeracapacitor: SiCapacitor,
@@ -33,7 +33,7 @@ export const ICONS: Partial<Record<TaskKind, IconType>> = {
 };
 
 type Props = {
-  task: TaskKind;
+  task: TaskId;
   size?: string;
   className?: string;
 };

@@ -1,19 +1,19 @@
 import { Agent } from "./agent";
 import * as agent from "./agent";
 import { Engine } from "./engine";
-import { Task, TaskKind } from "./task";
+import { Task, TaskId } from "./task";
 import { entries } from "../records";
 
 class DynamicEngine extends Engine<Agent> {
   agent: Agent = () => undefined;
   task: Task | undefined;
-  taskHistory: TaskKind[] = [];
+  taskHistory: TaskId[] = [];
 
   next(success: boolean): void {
     if (!success) {
-      throw new Error(`Task ${this.task?.kind} mysteriously failed!`);
+      throw new Error(`Task ${this.task?.id} mysteriously failed!`);
     }
-    this.task && this.taskHistory.push(this.task?.kind);
+    this.task && this.taskHistory.push(this.task?.id);
     this.task = this.agent(this);
   }
 

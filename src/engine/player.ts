@@ -1,5 +1,5 @@
 import { Engine } from "./engine";
-import { ZoneKind } from "./zone";
+import { ZoneId } from "./zone";
 
 export class Progress {
   public xp: number = 0;
@@ -51,7 +51,7 @@ export type Resource = {
   id: ResourceId;
   name: string;
   /** The zone the resource is associated with. If null, associated with the player. */
-  zone: ZoneKind | null;
+  zone: ZoneId | null;
   initial: (engine: Engine) => number;
 };
 

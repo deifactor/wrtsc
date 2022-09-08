@@ -8,22 +8,22 @@ type Props = {
 };
 
 export const ZonePane = (props: Props) => {
-  const zone = ZONES[useEngineSelector((engine) => engine.zoneKind)];
+  const zone = ZONES[useEngineSelector((engine) => engine.zoneId)];
   const { className } = props;
 
   const body = (() => {
-    switch (zone.kind) {
+    switch (zone.id) {
       case "ruins":
         return (
           <div>
-            <ProgressDisplay kind="ruinsExploration" />
-            <ProgressDisplay kind="patrolRoutesObserved" />
-            <ProgressDisplay kind="qhLockout" />
-            <ResourceDisplay kind="ruinsBatteries" />
-            <ResourceDisplay kind="teracapacitors" />
-            <ResourceDisplay kind="unlinkedSensorDrones" />
-            <ResourceDisplay kind="scouts" />
-            <ResourceDisplay kind="unoccupiedShips" />
+            <ProgressDisplay id="ruinsExploration" />
+            <ProgressDisplay id="patrolRoutesObserved" />
+            <ProgressDisplay id="qhLockout" />
+            <ResourceDisplay id="ruinsBatteries" />
+            <ResourceDisplay id="teracapacitors" />
+            <ResourceDisplay id="unlinkedSensorDrones" />
+            <ResourceDisplay id="scouts" />
+            <ResourceDisplay id="unoccupiedShips" />
           </div>
         );
     }

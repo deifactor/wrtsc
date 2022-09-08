@@ -14,7 +14,7 @@ import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { Task, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
-import { RUINS, ZoneKind } from "./zone";
+import { RUINS, ZoneId } from "./zone";
 
 export const STORAGE_KEY = "save";
 
@@ -50,7 +50,7 @@ export abstract class Engine<ScheduleT = unknown> {
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
   flags: Record<LoopFlagId, boolean>;
-  zoneKind: ZoneKind = RUINS.kind;
+  zoneId: ZoneId = RUINS.id;
 
   timeLeftOnTask: number | undefined = undefined;
 

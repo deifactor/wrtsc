@@ -1,8 +1,8 @@
-import { Task, TaskKind, TASKS } from "./task";
+import { Task, TaskId, TASKS } from "./task";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskBatch {
-  readonly task: TaskKind;
+  readonly task: TaskId;
   readonly count: number;
 }
 

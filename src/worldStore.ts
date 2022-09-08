@@ -1,6 +1,6 @@
 import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { QueueEngine, TaskQueue, TaskKind, SimulationResult } from "./engine";
+import { QueueEngine, TaskQueue, TaskId, SimulationResult } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { startAppListening } from "./listener";
 import { saveAction, saveLoaded } from "./save";
@@ -53,14 +53,14 @@ export const worldSlice = createSlice({
      * Push a task to the end of the queue. If the last task in the queue is the
      * given kind, increments its count by 1 instead.
      */
-    pushTaskToQueue: (state, action: PayloadAction<TaskKind>) => {
+    pushTaskToQueue: (state, action: PayloadAction<TaskId>) => {
       const queue = state.nextQueue;
-      const kind = action.payload;
+      const id = action.payload;
       const len = queue.length;
       if (len !== 0 && queue[len - 1].task === action.payload) {
         queue[queue.length - 1].count++;
       } else {
-        queue.push({ task: kind, count: 1 });
+        queue.push({ task: id, count: 1 });
       }
     },
 

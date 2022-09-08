@@ -67,9 +67,9 @@ export const PlayerPane = React.memo(() => {
       <div>
         <strong>Bonus</strong>: {bonusTime.toFixed(0)}
       </div>
-      <ResourceDisplay kind="linkedSensorDrones" />
-      <ResourceDisplay kind="qhLockoutAttempts" />
-      <ResourceDisplay kind="weaponSalvage" />
+      <ResourceDisplay id="linkedSensorDrones" />
+      <ResourceDisplay id="qhLockoutAttempts" />
+      <ResourceDisplay id="weaponSalvage" />
       <p>
         <strong>Combat:</strong> {combat}
       </p>

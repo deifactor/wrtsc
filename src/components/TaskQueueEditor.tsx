@@ -1,6 +1,6 @@
 import { Button } from "./common/Button";
 import { SimulationStep, TASKS } from "../engine";
-import { TaskKind } from "../engine";
+import { TaskId } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
 import { FaArrowDown, FaArrowUp, FaMinus, FaPlus } from "react-icons/fa";
@@ -18,7 +18,7 @@ import {
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 
-const AddTaskButton = React.memo(({ id }: { id: TaskKind }) => {
+const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   const dispatch = useAppDispatch();
   const canAddToQueue = useAppSelector(
     (store) => store.world.view.tasks[id].canAddToQueue
@@ -29,7 +29,7 @@ const AddTaskButton = React.memo(({ id }: { id: TaskKind }) => {
       key={id}
       icon={ICONS[id]}
       onClick={() => dispatch(pushTaskToQueue(id))}
-      tooltip={<TaskTooltip kind={id} />}
+      tooltip={<TaskTooltip id={id} />}
       state={canAddToQueue ? "active" : "locked"}
     >
       {TASKS[id].shortName.padEnd(8)}
@@ -107,7 +107,7 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const visibleTasks = useEngineSelector((engine) =>
     Object.values(engine.tasks)
       .filter((task) => task.visible)
-      .map((task) => task.kind)
+      .map((task) => task.id)
   );
   const addButtons = visibleTasks.map((id) => (
     <AddTaskButton key={id} id={id} />
