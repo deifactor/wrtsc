@@ -2697,6 +2697,18 @@
     "@parcel/utils" "2.7.0"
     nullthrows "^1.1.1"
 
+"@parcel/bundler-experimental@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@parcel/bundler-experimental/-/bundler-experimental-2.7.0.tgz#b1bdb830732ac77e5997ed7ed4a31448dd6a5866"
+  integrity sha512-FrQVMiyy/yQHKiXwpgnphnaThRdPe5qmBh/6MZTzHRIUszONOvA1oGvVskDJhVG4zE/l5lCkdvlJH/aaR//s7A==
+  dependencies:
+    "@parcel/diagnostic" "2.7.0"
+    "@parcel/graph" "2.7.0"
+    "@parcel/hash" "2.7.0"
+    "@parcel/plugin" "2.7.0"
+    "@parcel/utils" "2.7.0"
+    nullthrows "^1.1.1"
+
 "@parcel/cache@2.7.0":
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/@parcel/cache/-/cache-2.7.0.tgz#cc4b99685c7ff0fc20fbc321f4b6850d6e0c6811"
