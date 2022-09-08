@@ -2,6 +2,7 @@ import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
 import { TaskQueue, TaskId, SimulationResult } from "./engine";
 import { startAppListening } from "./listener";
 import { saveLoaded } from "./save";
+import { AppThunkAction } from "./store";
 
 /**
  * This slice manages the task queue/schedule that the user is currently editing
@@ -113,6 +114,13 @@ function checkBounds(queue: TaskQueue, index: number) {
   }
 }
 
+export function setSimulationFromEngine(): AppThunkAction {
+  return (dispatch, getState, { engine }) => {
+    const { queue } = getState().nextQueue;
+    dispatch(nextQueueSlice.actions.setSimulation(engine.simulation(queue)));
+  };
+}
+
 // Whenever we modify the task queue, update the simulation. In the future we
 // may want to do some fancy debouncing logic.
 startAppListening({
@@ -125,15 +133,12 @@ startAppListening({
     setNextQueue
   ),
   effect(_action, api) {
-    const { queue } = api.getState().nextQueue;
-    api.dispatch(
-      nextQueueSlice.actions.setSimulation(api.extra.engine.simulation(queue))
-    );
+    api.dispatch(setSimulationFromEngine());
   },
 });
 
-// Whenever we modify the task queue, update the simulation. In the future we
-// may want to do some fancy debouncing logic.
+// We dispatch instead of using an extraBuilder because this will trigger things
+// that listen on setNextQueue.
 startAppListening({
   actionCreator: saveLoaded,
   effect(action, api) {
