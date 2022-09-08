@@ -34,7 +34,7 @@ function toSave(state: RootState, engine: QueueEngine): GameSave {
   return {
     state: {
       world: {
-        nextQueue: state.world.nextQueue,
+        nextQueue: state.nextQueue,
         lastUpdate: state.world.lastUpdate,
         unspentTime: state.world.unspentTime,
       },

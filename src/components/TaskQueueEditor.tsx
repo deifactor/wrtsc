@@ -13,8 +13,8 @@ import {
   moveTask,
   pushTaskToQueue,
   removeTask,
-  setBatchCountToMax,
-} from "../worldStore";
+  setBatchCount,
+} from "../nextQueueStore";
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
@@ -67,7 +67,10 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
     dropRef(instance);
   };
 
-  const entry = useAppSelector((store) => store.world.nextQueue[index], equal);
+  const entry = useAppSelector((store) => store.nextQueue[index], equal);
+  const maxIterations = useEngineSelector(
+    (view) => view.tasks[entry.task].maxIterations
+  );
   const step: SimulationStep | undefined = useAppSelector(
     (store) => store.world.simulation[index],
     equal
@@ -86,7 +89,10 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
     <Button
       className={maxClass}
       size="xs"
-      onClick={() => dispatch(setBatchCountToMax(index))}
+      onClick={() =>
+        maxIterations !== undefined &&
+        dispatch(setBatchCount({ index, amount: maxIterations }))
+      }
     >
       <FiMaximize />
     </Button>
@@ -136,7 +142,7 @@ TaskQueueItem.displayName = "TaskQueueItem";
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const { className } = props;
-  const length = useAppSelector((store) => store.world.nextQueue.length);
+  const length = useAppSelector((store) => store.nextQueue.length);
   const indices = Array.from(Array(length).keys());
 
   const visibleTasks = useEngineSelector((engine) =>

@@ -6,11 +6,13 @@ import { extra } from "./extra";
 import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
 import { EngineView } from "./viewModel";
+import { nextQueueSlice } from "./nextQueueStore";
 
 export const store = configureStore({
   reducer: {
     world: worldSlice.reducer,
     settings: settingsSlice.reducer,
+    nextQueue: nextQueueSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
