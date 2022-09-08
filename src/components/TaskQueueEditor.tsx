@@ -17,6 +17,9 @@ import {
 } from "../worldStore";
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
+import { ConnectableElement, useDrag, useDrop } from "react-dnd";
+
+const DRAG_TYPE = "TASK_BATCH";
 
 const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   const dispatch = useAppDispatch();
@@ -39,6 +42,31 @@ const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
 
 const TaskQueueItem = React.memo(({ index }: { index: number }) => {
   const dispatch = useAppDispatch();
+
+  const [{ isDragging }, dragRef] = useDrag(() => ({
+    type: DRAG_TYPE,
+    item: { from: index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+  const [{ isOver }, dropRef] = useDrop(() => ({
+    accept: DRAG_TYPE,
+    drop: (item: { from: number }) => {
+      if (item.from !== index) {
+        dispatch(moveTask({ from: item.from, to: index }));
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  }));
+
+  const mergedRef = (instance: ConnectableElement) => {
+    dragRef(instance);
+    dropRef(instance);
+  };
+
   const entry = useAppSelector((store) => store.world.nextQueue[index], equal);
   const step: SimulationStep | undefined = useAppSelector(
     (store) => store.world.simulation[index],
@@ -66,10 +94,16 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
   return (
     // eslint-disable-next-line react/no-array-index-key
     <div
+      ref={mergedRef}
       key={index}
-      className={classNames("flex items-center h-10", {
-        "text-red-300": !step?.ok,
-      })}
+      className={classNames(
+        "flex items-center h-10",
+        {
+          "text-red-300": !step?.ok,
+        },
+        { "opacity-50": isDragging },
+        { "bg-gray-500": isOver }
+      )}
     >
       <div className="flex-grow font-mono text-lg">
         <TaskIcon className="inline" task={entry.task} /> x{entry.count}
@@ -98,6 +132,7 @@ const TaskQueueItem = React.memo(({ index }: { index: number }) => {
     </div>
   );
 });
+TaskQueueItem.displayName = "TaskQueueItem";
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const { className } = props;
