@@ -1,33 +1,45 @@
-import { AnyAction, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import {
+  AnyAction,
+  combineReducers,
+  configureStore,
+  ThunkAction,
+} from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { worldSlice } from "./worldStore";
-import { extra } from "./extra";
 import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
 import { EngineView } from "./viewModel";
 import { nextQueueSlice } from "./nextQueueStore";
+import { QueueEngine } from "./engine";
 
-export const store = configureStore({
-  reducer: {
-    world: worldSlice.reducer,
-    settings: settingsSlice.reducer,
-    nextQueue: nextQueueSlice.reducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: {
-        extraArgument: extra,
-      },
-    }).prepend(listener.middleware),
+const rootReducer = combineReducers({
+  world: worldSlice.reducer,
+  settings: settingsSlice.reducer,
+  nextQueue: nextQueueSlice.reducer,
 });
 
-export type RootState = ReturnType<typeof store.getState>;
+export function createStore() {
+  const extra = { engine: new QueueEngine() };
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        thunk: {
+          extraArgument: extra,
+        },
+      }).prepend(listener.middleware),
+  });
+}
+
+export const store = createStore();
+
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 export type AppThunkAction<T = void> = ThunkAction<
   T,
   RootState,
-  typeof extra,
+  { engine: QueueEngine },
   AnyAction
 >;
 export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
