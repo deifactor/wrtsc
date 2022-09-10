@@ -120,7 +120,12 @@ export abstract class Engine<ScheduleT = unknown> {
       shipHijacked: false,
     };
     this.setSchedule(schedule);
-    this.timeLeftOnTask = this.task?.cost(this);
+    this.timeLeftOnTask = this.task && this.cost(this.task);
+  }
+
+  /** Energy cost of the task after applying any global cost modifiers. */
+  cost(task: Task) {
+    return task.baseCost(this);
   }
 
   perform(task: Task) {
@@ -222,7 +227,7 @@ export abstract class Engine<ScheduleT = unknown> {
       if (this.timeLeftOnTask === 0) {
         this.perform(this.task);
         this.next(true);
-        this.timeLeftOnTask = this.task?.cost(this);
+        this.timeLeftOnTask = this.task && this.cost(this.task);
       }
       duration = Math.min(this.energy, duration - ticked);
     }
@@ -308,7 +313,7 @@ export class QueueEngine extends Engine<TaskQueue> {
     while (this.task) {
       // need to get the index *before* we tick, since that can advance the index.
       const index = this.index;
-      const { ok } = this.tickTime(Math.max(this.task.cost(this), 1));
+      const { ok } = this.tickTime(Math.max(this.cost(this.task), 1));
       result[index] = {
         ok: ok,
         energy: this.energy,

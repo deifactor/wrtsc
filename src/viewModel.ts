@@ -110,7 +110,7 @@ export function project(engine: QueueEngine): EngineView {
     schedule: projectSchedule(engine),
     tasks: mapValues(TASKS, (task) => ({
       id: task.id,
-      cost: task.cost(engine),
+      cost: engine.cost(task),
       visible: task.visible(engine),
       canAddToQueue: canAddToQueue(engine, task),
       shortName: task.shortName,
@@ -133,8 +133,8 @@ function projectSchedule(engine: QueueEngine): ScheduleView {
     })),
     currentTask: schedule.task && {
       index: schedule.index,
-      cost: schedule.task.cost(engine),
-      progress: schedule.task.cost(engine) - engine.timeLeftOnTask!,
+      cost: engine.cost(schedule.task),
+      progress: engine.cost(schedule.task) - engine.timeLeftOnTask!,
     },
   };
 }

@@ -53,8 +53,11 @@ export type Task = {
   readonly id: TaskId;
   name: string;
   shortName: string;
-  /** Cost in AEUs. */
-  cost: (engine: Engine) => number;
+  /**
+   * Cost in AEUs. This does *not* apply any potential effects that can globally
+   * reduce the cost.
+   */
+  baseCost: (engine: Engine) => number;
   /** The description of the task itself, as read by the player. */
   description: string;
   /** Flavor text. Not game-relevant. Generally written in a `robotic` tone. */
@@ -92,7 +95,7 @@ export const EXPLORE_RUINS: Task = {
   id: "exploreRuins",
   name: "Explore Ruins",
   shortName: "XPL_RUIN",
-  cost: () => 4000,
+  baseCost: () => 4000,
   description:
     "Increases amount of weapons and batteries that can be scavenged. 2.5x progress with Ship Hijacked.",
   flavor:
@@ -111,7 +114,7 @@ export const SCAVENGE_BATTERIES: Task = {
   id: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
-  cost: () => 2000,
+  baseCost: () => 2000,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
@@ -127,7 +130,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   id: "dischargeTeracapacitor",
   name: "Discharge Teracapacitor",
   shortName: "DIS_TERA",
-  cost: () => 4000,
+  baseCost: () => 4000,
   description: `Gives 200 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
@@ -143,7 +146,7 @@ export const LINK_SENSOR_DRONES: Task = {
   id: "linkSensorDrones",
   name: "Link Sensor Drones",
   shortName: "LINK_DRN",
-  cost: () => 1000,
+  baseCost: () => 1000,
   description:
     "Multiplies progress for Explore Ruins and Observe Patrol Routes by sqrt(1 + linked drones). Bonus stacks with Ship Hijacked bonuses.",
   flavor:
@@ -163,7 +166,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   id: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
-  cost: () => 3500,
+  baseCost: () => 3500,
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
@@ -180,7 +183,7 @@ export const KILL_SCOUT: Task = {
   id: "eradicateScout",
   name: "Kill Scout",
   shortName: "KILL_SCT",
-  cost: () => 8000,
+  baseCost: () => 8000,
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:
@@ -207,7 +210,7 @@ export const HIJACK_SHIP: Task = {
   id: "hijackShip",
   name: "Hijack Ship",
   shortName: "HJCK_SHP",
-  cost: (engine) =>
+  baseCost: (engine) =>
     Math.max(60000 - engine.progress.patrolRoutesObserved.level * 200, 24000),
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
@@ -240,7 +243,7 @@ export const DISABLE_LOCKOUTS: Task = {
   id: "disableLockouts",
   name: "Override Lockouts",
   shortName: "OVR_LOCK",
-  cost: () => 800,
+  baseCost: () => 800,
   description:
     "Hack your stolen ship to bring the weapons, thrusters, and jump drive online.",
   flavor:
@@ -258,7 +261,7 @@ export const STRAFING_RUN: Task = {
   id: "strafingRun",
   name: "Strafing Run",
   shortName: "STRAF_RN",
-  cost: () => 10000,
+  baseCost: () => 10000,
   description:
     "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
   flavor:
@@ -277,7 +280,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
   id: "dismantleSensorDrones",
   name: "Dismantle Sensor Drones",
   shortName: "DSMN_DRN",
-  cost: () => 500,
+  baseCost: () => 500,
   description:
     "Use your stolen ship to fly to your sensor drone array. Each drone dismantled provides 3000 AEU.",
   flavor:
@@ -297,7 +300,7 @@ export const LEAVE_RUINS: Task = {
   id: "leaveRuins",
   name: "Leave Ruins",
   shortName: "LEAVE",
-  cost: () => 20000,
+  baseCost: () => 20000,
   description: "Advance to the next zone.",
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
@@ -318,7 +321,7 @@ export const COMPLETE_RUINS: Task = {
   id: "completeRuins",
   name: "Debug Complete Ruins",
   shortName: "CMP_RUIN",
-  cost: () => 1,
+  baseCost: () => 1,
   description: "Instantly complete everything in the Ruins.",
   flavor: "Existential debugger engaged.",
   required: {},
