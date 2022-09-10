@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { SkillId } from "../engine/skills";
-import { setPaused, startLoop } from "../worldStore";
+import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
@@ -81,9 +81,14 @@ export const PlayerPane = React.memo(() => {
   const combat = useEngineSelector((engine) => engine.combat);
   const isPaused = useAppSelector((state) => state.world.paused);
   const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
+  const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
   const togglePause = useCallback(
     () => dispatch(setPaused(!isPaused)),
     [dispatch, isPaused]
+  );
+  const toggleUnspentTime = useCallback(
+    () => dispatch(setUseUnspentTime(!useUnspentTime)),
+    [dispatch, useUnspentTime]
   );
   return (
     <div>
@@ -109,6 +114,9 @@ export const PlayerPane = React.memo(() => {
       <SkillDisplay skillId="metacognition" />
       <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
       <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
+      <Button onClick={toggleUnspentTime}>
+        {useUnspentTime ? "Disable" : "Enable"} Unspent Time
+      </Button>
       <hr className="mx-3 my-4 border-gray-800" />
       <TimeStats />
     </div>

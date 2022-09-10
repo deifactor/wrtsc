@@ -12,8 +12,8 @@ export const worldSlice = createSlice({
     return {
       view: project(engine),
       lastUpdate: new Date().getTime(),
-      // Amount of time that has passed in updates but hasn't yet been simulated.
       unspentTime: 0,
+      useUnspentTime: false,
       paused: true,
     };
   },
@@ -39,6 +39,10 @@ export const worldSlice = createSlice({
     setPaused: (state, action: PayloadAction<boolean>) => {
       state.paused = action.payload;
     },
+
+    setUseUnspentTime: (state, action: PayloadAction<boolean>) => {
+      state.useUnspentTime = action.payload;
+    },
   },
 
   extraReducers(builder) {
@@ -50,7 +54,7 @@ export const worldSlice = createSlice({
   },
 });
 
-export const { setPaused, setView } = worldSlice.actions;
+export const { setPaused, setView, setUseUnspentTime } = worldSlice.actions;
 
 export function tick(now: number = new Date().getTime()): AppThunkAction {
   return (dispatch, getState, { engine }) => {
@@ -62,7 +66,10 @@ export function tick(now: number = new Date().getTime()): AppThunkAction {
     const speedrunMode = getState().settings.speedrunMode;
     if (speedrunMode) {
       dt *= 1000;
-    } else if (getState().world.unspentTime > 0) {
+    } else if (
+      getState().world.unspentTime > 0 &&
+      getState().world.useUnspentTime
+    ) {
       dt = Math.min(3 * dt, getState().world.unspentTime);
     }
     const { autoRestart, pauseOnFailure } = getState().settings;

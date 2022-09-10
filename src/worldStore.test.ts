@@ -1,6 +1,11 @@
 import { pushTaskToQueue } from "./nextQueueStore";
 import { createStore } from "./store";
-import { setPaused, startLoop, tickDelta } from "./worldStore";
+import {
+  setPaused,
+  setUseUnspentTime,
+  startLoop,
+  tickDelta,
+} from "./worldStore";
 
 // Create a test store with a single "explore ruins" action.
 function createTestStore() {
@@ -44,5 +49,16 @@ describe("bonus time", () => {
     store.dispatch(tickDelta(100));
     expect(store.getState().world.unspentTime).toEqual(0);
     expect(engine.timeInLoop).toEqual(100);
+  });
+
+  it("should not be spent if we disable unspent time", () => {
+    const { store, engine } = createTestStore();
+    store.dispatch(setPaused(true));
+    store.dispatch(tickDelta(100));
+    store.dispatch(setUseUnspentTime(false));
+    store.dispatch(setPaused(false));
+    store.dispatch(tickDelta(50));
+    expect(store.getState().world.unspentTime).toEqual(100);
+    expect(engine.timeInLoop).toEqual(50);
   });
 });
