@@ -42,6 +42,7 @@ export class QueueSchedule {
     this.iteration++;
     if (this.iteration >= this.queue[this.index].count) {
       this.index++;
+      this.iteration = 0;
     }
     return this.queue[this.index]?.task;
   }
