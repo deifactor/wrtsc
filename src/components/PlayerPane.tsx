@@ -78,7 +78,9 @@ const TimeStats = React.memo(() => {
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
-  const combat = useEngineSelector((engine) => engine.combat);
+  const combat = useEngineSelector((engine) => engine.combat.toFixed(0));
+  const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
+  const maxHp = useEngineSelector((engine) => engine.maxHp);
   const isPaused = useAppSelector((state) => state.world.paused);
   const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
@@ -101,6 +103,9 @@ export const PlayerPane = React.memo(() => {
       <ResourceDisplay id="weaponSalvage" />
       <p>
         <strong>Combat:</strong> {combat}
+      </p>
+      <p>
+        <strong>HP:</strong> {currentHp}/{maxHp}
       </p>
       <p>
         <strong>Simulant XP:</strong> {simulantXp.toFixed(0)}

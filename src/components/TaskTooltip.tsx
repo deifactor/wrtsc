@@ -37,6 +37,10 @@ function taskMetadata({
     .map(([id, xp]) => `${xp} ${SKILL_NAME[id]} XP`)
     .join(", ");
 
+  if (task.kind === "combat") {
+    metadata["Combat"] = `${task.stats.offense} offense, ${task.stats.hp} HP`;
+  }
+
   if (requirements) {
     const requiresFrags = [
       ...Object.entries(requirements.progress || {}).map(

@@ -1,5 +1,5 @@
 import { entries, makeValues, mapValues } from "../records";
-import { dpsDealt } from "./combat";
+import { damagePerEnergy } from "./combat";
 
 import {
   Progress,
@@ -20,7 +20,7 @@ import { RUINS, ZoneId } from "./zone";
 
 export const STORAGE_KEY = "save";
 
-export type TaskFailureReason = "outOfEnergy" | "taskFailed";
+export type TaskFailureReason = "outOfEnergy" | "taskFailed" | "outOfHp";
 
 export type TickResult =
   | {
@@ -148,7 +148,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       case "normal":
         return task.baseCost(this);
       case "combat":
-        return task.stats.hp / dpsDealt(this, task.stats);
+        return task.stats.hp / damagePerEnergy(this, task.stats).dealt;
     }
   }
 
@@ -201,11 +201,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   }
 
   get combat(): number {
-    return (
-      (1 + this.skills.lethality.level / 10) *
-        (1 + this.resources.weaponSalvage) -
-      1
-    );
+    return 100 * (1 + Math.log2(1 + this.skills.lethality.level / 16));
   }
 
   get defense(): number {
@@ -241,6 +237,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     // Amount of energy we're allowed to spend in this tick.
     const energyPerMs = this.energyPerMs();
     let unspentEnergy = Math.floor(duration * energyPerMs);
+    console.log(duration);
     while (unspentEnergy > 0 && this.energy > 0) {
       if (!this.task) {
         return { ok: true };
@@ -255,6 +252,11 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       // Spend energy until we run out or something happens.
       const spent = Math.min(this.energyToNextEvent(), unspentEnergy);
       this.spendEnergy(spent);
+
+      if (this.currentHp <= 0) {
+        this.schedule.recordResult(false);
+        return { ok: false, reason: "outOfHp" };
+      }
 
       if (this.taskFinished()) {
         this.perform(this.task);
@@ -272,15 +274,19 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
 
   /** Advances the schedule and records the success of the most recent task. */
   private next(success: boolean | undefined) {
+    console.log("next");
     if (success !== undefined) {
       this.schedule.recordResult(success);
     }
+    console.log(this.schedule);
     const next = this.schedule.next(this);
     if (!next) {
       this.taskState = undefined;
+      console.log("finished");
       return;
     }
     const task = TASKS[next];
+    console.log("moving to", task.id);
     switch (task.kind) {
       case "normal":
         this.taskState = {
@@ -297,6 +303,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
           hpLeft: task.stats.hp,
           hpTotal: task.stats.hp,
         };
+        console.log("resetting to", this.taskState);
     }
   }
 
@@ -338,7 +345,14 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         taskState.energyLeft -= amount;
         break;
       case "combat":
-        taskState.hpLeft -= time * dpsDealt(this, taskState.task.stats);
+        const { dealt, received } = damagePerEnergy(this, taskState.task.stats);
+        taskState.hpLeft -= time * dealt;
+        this.currentHp -= time * received;
+        // floating-point math strikes again; this prevents the player from
+        // surviving something that should have reduced them to exactly 0 HP.
+        if (Math.abs(this.currentHp) < 0.001) {
+          this.currentHp = 0;
+        }
         break;
     }
   }
@@ -357,7 +371,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         break;
       case "combat":
         toTaskCompletion =
-          taskState.hpLeft / dpsDealt(this, taskState.task.stats);
+          taskState.hpLeft / damagePerEnergy(this, taskState.task.stats).dealt;
         break;
     }
     return Math.min(this.energy, toTaskCompletion);

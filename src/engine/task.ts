@@ -197,10 +197,14 @@ export const OBSERVE_PATROL_ROUTES: Task = {
 
 export const KILL_SCOUT: Task = {
   ...defaults,
+  kind: "combat",
   id: "eradicateScout",
   name: "Kill Scout",
   shortName: "KILL_SCT",
-  baseCost: () => 8000,
+  stats: {
+    offense: 100,
+    hp: 50,
+  },
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
   flavor:

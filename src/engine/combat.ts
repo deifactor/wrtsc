@@ -1,34 +1,22 @@
+/**
+ * This is a very minimal file, but it gives us the approach to complicate
+ * things later, add more stats, and so on.
+ */
 import { Engine } from "./engine";
 
 export type CombatStats = {
+  /** Damage dealt per 1 kAEU (1 second, before tickspeed/etc). */
   offense: number;
-  defense: number;
   hp: number;
 };
 
-/**
- * Damage dealt has the form `offense * scaler(offense / defense)`, where
- * `scaler` is some increasing function with the property that `scaler(0) = 0`,
- * `scaler(1) = 1`, and `scaler(infinity) = infinity`. This means that if your
- * offense is equal to their defense, you deal dps equal to your offense, which
- * is nice. This also means that increasing your offense increases DPS
- * *superlinearly*, which is a bit weird, but oh well.
- *
- * The baseline for offense/defense stats is 100.
- */
-
-function advantageScaler(advantage: number): number {
-  return Math.pow(advantage, 0.3);
-}
-
-/** How much damage per second the player deals to the task. */
-export function dpsDealt(engine: Engine, taskStats: CombatStats): number {
-  return engine.combat * advantageScaler(engine.combat / taskStats.defense);
-}
-
-/** How much damage per second the player takes to the task. */
-export function dpsReceived(engine: Engine, taskStats: CombatStats): number {
-  return (
-    taskStats.offense * advantageScaler(taskStats.offense / engine.defense)
-  );
+/** Damage dealt/received by the player per 1 AEU spent. */
+export function damagePerEnergy(
+  engine: Engine,
+  taskStats: CombatStats
+): { dealt: number; received: number } {
+  return {
+    dealt: engine.combat / 1000,
+    received: taskStats.offense / 1000,
+  };
 }
