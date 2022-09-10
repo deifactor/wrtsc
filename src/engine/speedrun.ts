@@ -1,33 +1,25 @@
 import { Agent } from "./agent";
 import * as agent from "./agent";
 import { Engine } from "./engine";
-import { Task, TaskId } from "./task";
 import { entries } from "../records";
-
-class DynamicEngine extends Engine {
-  agent: Agent = () => undefined;
-  task: Task | undefined;
-  taskHistory: TaskId[] = [];
-
-  constructor(agent: Agent) {
-    super({
-      next: () => agent(this)?.id,
-      recordResult(success: boolean) {
-        if (!success) {
-          throw new Error(`Task mysteriously failed!`);
-        }
-      },
-      restart() {},
-    });
-  }
-}
 
 function benchmark(
   name: string,
   agent: Agent,
   stopCondition: (engine: Engine) => boolean
 ) {
-  const engine = new DynamicEngine(agent);
+  const schedule = {
+    next(engine: Engine) {
+      return agent(engine)?.id;
+    },
+    recordResult(success: boolean) {
+      if (!success) {
+        throw new Error(`Task mysteriously failed!`);
+      }
+    },
+    restart() {},
+  };
+  const engine = new Engine(schedule);
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {

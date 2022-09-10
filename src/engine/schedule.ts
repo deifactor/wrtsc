@@ -1,8 +1,9 @@
+import { Engine } from "./engine";
 import { TaskId } from "./task";
 import { TaskQueue } from "./taskQueue";
 
 export interface Schedule {
-  next(): TaskId | undefined;
+  next(engine: Engine): TaskId | undefined;
   recordResult(success: boolean): void;
   restart(): void;
 }

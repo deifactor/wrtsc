@@ -250,7 +250,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     if (success !== undefined) {
       this.schedule.recordResult(success);
     }
-    const next = this.schedule.next();
+    const next = this.schedule.next(this);
     this.task = next && TASKS[next];
   }
 
