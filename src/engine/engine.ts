@@ -52,10 +52,11 @@ export abstract class Engine<ScheduleT = unknown> {
   flags: Record<LoopFlagId, boolean>;
   zoneId: ZoneId = RUINS.id;
 
-  timeLeftOnTask: number | undefined = undefined;
+  energyLeftOnTask: number | undefined = undefined;
 
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
+
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
@@ -120,7 +121,7 @@ export abstract class Engine<ScheduleT = unknown> {
       shipHijacked: false,
     };
     this.setSchedule(schedule);
-    this.timeLeftOnTask = this.task && this.cost(this.task);
+    this.energyLeftOnTask = this.task && this.cost(this.task);
   }
 
   /** Energy cost of the task after applying any global cost modifiers. */
@@ -185,6 +186,14 @@ export abstract class Engine<ScheduleT = unknown> {
   }
 
   /**
+   * 1 millisecond will spend this many AEUs. This is effectively an increase in
+   * tickspeed; you can't do more things, but you can do them faster.
+   */
+  energyPerMs(): number {
+    return true ? Math.max(1, 2 - this.timeInLoop / 16384) : 1;
+  }
+
+  /**
    * Advance the simulation by this many milliseconds. Returns an indication of
    * whether there was an error in the simulation.
    *
@@ -196,15 +205,10 @@ export abstract class Engine<ScheduleT = unknown> {
    * give it a 100ms tick then it'll do a 50ms and then another 50ms.
    */
   tickTime(duration: number): TickResult {
-    // We basically 'spend' time from the duration until we hit 0. The
-    // multiplier here is a multiplier on how much energy we're spending per
-    // second.
-    const mult = this.simulant.unlocked.has("burstClock")
-      ? Math.max(1, 2 - this.timeInLoop / 16384)
-      : 1;
-    duration *= mult;
-    duration = Math.floor(duration);
-    while (duration > 0) {
+    // Amount of energy we're allowed to spend in this tick.
+    const energyPerMs = this.energyPerMs();
+    let unspentEnergy = Math.floor(duration * energyPerMs);
+    while (unspentEnergy > 0 && this.energy > 0) {
       if (!this.task) {
         return { ok: true };
       }
@@ -212,25 +216,28 @@ export abstract class Engine<ScheduleT = unknown> {
         this.next(false);
         return { ok: false, reason: "taskFailed" };
       }
-      if (!this.timeLeftOnTask) {
+      if (!this.energyLeftOnTask) {
         throw new Error("timeLeftOnTask unset despite task being set");
       }
-      const ticked = Math.min(this.timeLeftOnTask!, this.energy, duration);
-      this.removeEnergy(ticked);
-      this._timeInLoop += ticked / mult;
-      this.timeAcrossAllLoops += ticked / mult;
-      this.timeLeftOnTask! -= ticked;
-      // Only add simulant XP if there's actually an unlocked simulant.
-      if (this.simulant.unlockedSimulants.size !== 0) {
-        this.simulant.addXp(ticked / 1000);
-      }
-      if (this.timeLeftOnTask === 0) {
+      // Spend energy until...
+      const spent = Math.min(
+        // we finish the current task
+        this.energyLeftOnTask!,
+        // we run out of energy, period
+        this.energy,
+        // the current tick has run out of energy
+        unspentEnergy
+      );
+      this.spendEnergy(spent);
+
+      if (this.energyLeftOnTask === 0) {
         this.perform(this.task);
         this.next(true);
-        this.timeLeftOnTask = this.task && this.cost(this.task);
+        this.energyLeftOnTask = this.task && this.cost(this.task);
       }
-      duration = Math.min(this.energy, duration - ticked);
+      unspentEnergy -= spent;
     }
+
     if (this.energy <= 0 && this.task) {
       this.next(false);
       return { ok: false, reason: "outOfEnergy" };
@@ -246,8 +253,20 @@ export abstract class Engine<ScheduleT = unknown> {
     this._totalEnergy += amount;
   }
 
-  removeEnergy(amount: number) {
+  /**
+   * Does everything associated with spending energy: increases the time
+   * counters and simulant XP.
+   */
+  spendEnergy(amount: number) {
+    const energyPerMs = this.energyPerMs();
     this._energy -= amount;
+    this._timeInLoop += amount / energyPerMs;
+    this.timeAcrossAllLoops += amount / energyPerMs;
+    this.energyLeftOnTask! -= amount;
+    // Only add simulant XP if there's actually an unlocked simulant.
+    if (this.simulant.unlockedSimulants.size !== 0) {
+      this.simulant.addXp(amount / 1000);
+    }
   }
 }
 

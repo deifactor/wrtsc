@@ -35,7 +35,7 @@ function benchmark(
   while (!stopCondition(engine)) {
     engine.startLoop(agent);
     while (engine.task && !stopCondition(engine)) {
-      engine.tickTime(engine.timeLeftOnTask!);
+      engine.tickTime(engine.energyLeftOnTask!);
     }
   }
   const duration = new Date().getTime() - now;
