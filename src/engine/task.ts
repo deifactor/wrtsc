@@ -1,3 +1,4 @@
+import { CombatStats } from "./combat";
 import { Engine } from "./engine";
 import { LoopFlagId, ResourceId, ProgressId, RESOURCES } from "./player";
 import { SimulantId } from "./simulant";
@@ -20,6 +21,7 @@ export type TaskId =
 const always = () => true;
 
 const defaults = {
+  kind: "normal" as const,
   visible: always,
   extraPerform: () => {},
   requiredProgress: {},
@@ -49,15 +51,10 @@ export type Rewards = {
   simulant?: SimulantId;
 };
 /** A task, something that goes in the task queue. */
-export type Task = {
+export type BaseTask = {
   readonly id: TaskId;
   name: string;
   shortName: string;
-  /**
-   * Cost in AEUs. This does *not* apply any potential effects that can globally
-   * reduce the cost.
-   */
-  baseCost: (engine: Engine) => number;
   /** The description of the task itself, as read by the player. */
   description: string;
   /** Flavor text. Not game-relevant. Generally written in a `robotic` tone. */
@@ -80,6 +77,26 @@ export type Task = {
    */
   maxIterations?: (engine: Engine) => number;
 };
+
+export type NormalTask = BaseTask & {
+  kind: "normal";
+  /**
+   * Cost in AEUs. This does *not* apply any potential effects that can globally
+   * reduce the cost.
+   */
+  baseCost: (engine: Engine) => number;
+};
+
+/**
+ * A combat task resolves differently from a normal task. Instead, the player
+ * and the task deal damage to each other, and the task completes when the
+ * player has dealt damage to the task equal to its HP.
+ */
+export type CombatTask = BaseTask & {
+  kind: "combat";
+  stats: CombatStats;
+};
+export type Task = NormalTask | CombatTask;
 
 /**
  * Some timescale stuff. for a one-second task:

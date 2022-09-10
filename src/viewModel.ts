@@ -124,6 +124,23 @@ export function project(engine: QueueEngine): EngineView {
 
 function projectSchedule(engine: QueueEngine): ScheduleView {
   const schedule = engine.schedule;
+  const taskState = engine.taskState;
+  const stats =
+    taskState &&
+    (function () {
+      switch (taskState.kind) {
+        case "normal":
+          return {
+            progress: taskState.energyTotal - taskState.energyLeft,
+            cost: taskState.energyTotal,
+          };
+        case "combat":
+          return {
+            progress: taskState.hpTotal - taskState.hpLeft,
+            cost: taskState.hpTotal,
+          };
+      }
+    })();
   return {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       id: task,
@@ -133,8 +150,7 @@ function projectSchedule(engine: QueueEngine): ScheduleView {
     })),
     currentTask: engine.task && {
       index: schedule.index!,
-      cost: engine.cost(engine.task),
-      progress: engine.cost(engine.task) - engine.taskState!.energyLeft,
+      ...stats!,
     },
   };
 }

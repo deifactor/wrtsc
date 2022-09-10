@@ -1,4 +1,5 @@
 import { entries, makeValues, mapValues } from "../records";
+import { dpsDealt } from "./combat";
 
 import {
   Progress,
@@ -13,7 +14,7 @@ import {
 import { QueueSchedule, Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
-import { Task, TaskId, TASKS } from "./task";
+import { CombatTask, NormalTask, Task, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneId } from "./zone";
 
@@ -40,12 +41,19 @@ export type SimulationResult = SimulationStep[];
 const INITIAL_ENERGY = 5000;
 
 /** The current task and how far in it we are. */
-export type TaskState = {
-  kind: "normal";
-  energyTotal: number;
-  energyLeft: number;
-  task: TaskId;
-};
+export type TaskState =
+  | {
+      kind: "normal";
+      energyTotal: number;
+      energyLeft: number;
+      task: NormalTask;
+    }
+  | {
+      kind: "combat";
+      hpTotal: number;
+      hpLeft: number;
+      task: CombatTask;
+    };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine<ScheduleT extends Schedule = Schedule> {
@@ -70,6 +78,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   private _energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
+
+  currentHp!: number;
 
   constructor(schedule: ScheduleT, save?: EngineSave) {
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
@@ -112,7 +122,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   }
 
   get task(): Task | undefined {
-    return this.taskState?.task && TASKS[this.taskState!.task];
+    return this.taskState?.task;
   }
 
   /** Restart the time loop. */
@@ -128,12 +138,18 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     if (schedule) {
       this.schedule = schedule;
     }
+    this.currentHp = this.maxHp;
     this.next(undefined);
   }
 
   /** Energy cost of the task after applying any global cost modifiers. */
   cost(task: Task) {
-    return task.baseCost(this);
+    switch (task.kind) {
+      case "normal":
+        return task.baseCost(this);
+      case "combat":
+        return task.stats.hp / dpsDealt(this, task.stats);
+    }
   }
 
   private perform(task: Task) {
@@ -192,6 +208,14 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     );
   }
 
+  get defense(): number {
+    return 100;
+  }
+
+  get maxHp(): number {
+    return 256;
+  }
+
   /**
    * 1 millisecond will spend this many AEUs. This is effectively an increase in
    * tickspeed; you can't do more things, but you can do them faster.
@@ -232,7 +256,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       const spent = Math.min(this.energyToNextEvent(), unspentEnergy);
       this.spendEnergy(spent);
 
-      if (this.taskState.energyLeft === 0) {
+      if (this.taskFinished()) {
         this.perform(this.task);
         this.next(true);
       }
@@ -252,12 +276,38 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       this.schedule.recordResult(success);
     }
     const next = this.schedule.next(this);
-    this.taskState = next && {
-      kind: "normal",
-      task: next,
-      energyTotal: this.cost(TASKS[next]),
-      energyLeft: this.cost(TASKS[next]),
-    };
+    if (!next) {
+      this.taskState = undefined;
+      return;
+    }
+    const task = TASKS[next];
+    switch (task.kind) {
+      case "normal":
+        this.taskState = {
+          kind: "normal",
+          task,
+          energyLeft: this.cost(task),
+          energyTotal: this.cost(task),
+        };
+        return;
+      case "combat":
+        this.taskState = {
+          kind: "combat",
+          task,
+          hpLeft: task.stats.hp,
+          hpTotal: task.stats.hp,
+        };
+    }
+  }
+
+  taskFinished(): boolean {
+    const state = this.taskState!;
+    switch (state.kind) {
+      case "normal":
+        return state.energyLeft <= 0;
+      case "combat":
+        return state.hpLeft <= 0;
+    }
   }
 
   private addEnergy(amount: number) {
@@ -274,13 +324,22 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
    */
   private spendEnergy(amount: number) {
     const energyPerMs = this.energyPerMs();
+    const time = amount / energyPerMs;
     this._energy -= amount;
     this._timeInLoop += amount / energyPerMs;
     this.timeAcrossAllLoops += amount / energyPerMs;
-    this.taskState!.energyLeft -= amount;
     // Only add simulant XP if there's actually an unlocked simulant.
     if (this.simulant.unlockedSimulants.size !== 0) {
       this.simulant.addXp(amount / 1000);
+    }
+    const taskState = this.taskState!;
+    switch (taskState.kind) {
+      case "normal":
+        taskState.energyLeft -= amount;
+        break;
+      case "combat":
+        taskState.hpLeft -= time * dpsDealt(this, taskState.task.stats);
+        break;
     }
   }
 
@@ -289,8 +348,19 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
    * happens that changes the simulation: we run out of energy or the current
    * task finishes.
    */
-  private energyToNextEvent(): number {
-    return Math.min(this.energy, this.taskState!.energyLeft);
+  energyToNextEvent(): number {
+    const taskState = this.taskState!;
+    let toTaskCompletion;
+    switch (taskState.kind) {
+      case "normal":
+        toTaskCompletion = taskState.energyLeft;
+        break;
+      case "combat":
+        toTaskCompletion =
+          taskState.hpLeft / dpsDealt(this, taskState.task.stats);
+        break;
+    }
+    return Math.min(this.energy, toTaskCompletion);
   }
 
   simulation(tasks: TaskQueue): SimulationResult {
