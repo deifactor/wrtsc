@@ -34,6 +34,7 @@ export type TickResult =
 export type SimulationStep = {
   ok: boolean;
   energy: number;
+  hp: number;
 };
 
 export type SimulationResult = SimulationStep[];
@@ -388,6 +389,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       result[index] = {
         ok: ok,
         energy: sim.energy,
+        hp: sim.currentHp,
       };
       if (!ok) {
         break;

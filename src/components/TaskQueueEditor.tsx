@@ -40,104 +40,118 @@ const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   );
 });
 
-const TaskQueueItem = React.memo(({ index }: { index: number }) => {
-  const dispatch = useAppDispatch();
+const TaskQueueItem = React.memo(
+  ({ index, showHp }: { index: number; showHp: boolean }) => {
+    const dispatch = useAppDispatch();
 
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: DRAG_TYPE,
-    item: { from: index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
-  const [{ isOver }, dropRef] = useDrop(() => ({
-    accept: DRAG_TYPE,
-    drop: (item: { from: number }) => {
-      if (item.from !== index) {
-        dispatch(moveTask({ from: item.from, to: index }));
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
+    const [{ isDragging }, dragRef] = useDrag(() => ({
+      type: DRAG_TYPE,
+      item: { from: index },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }));
+    const [{ isOver }, dropRef] = useDrop(() => ({
+      accept: DRAG_TYPE,
+      drop: (item: { from: number }) => {
+        if (item.from !== index) {
+          dispatch(moveTask({ from: item.from, to: index }));
+        }
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+      }),
+    }));
 
-  const mergedRef = (instance: ConnectableElement) => {
-    dragRef(instance);
-    dropRef(instance);
-  };
+    const mergedRef = (instance: ConnectableElement) => {
+      dragRef(instance);
+      dropRef(instance);
+    };
 
-  const entry = useAppSelector((store) => store.nextQueue.queue[index], equal);
-  const maxIterations = useEngineSelector(
-    (view) => view.tasks[entry.task].maxIterations
-  );
-  const step: SimulationStep | undefined = useAppSelector(
-    (store) => store.nextQueue.simulation[index],
-    equal
-  );
-  const incrementCount = () => dispatch(modifyBatchCount({ index, amount: 1 }));
-  const decrementCount = () =>
-    dispatch(modifyBatchCount({ index, amount: -1 }));
-  const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
-  const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
-  const remove = () => dispatch(removeTask(index));
-  const maxClass = classNames({
-    invisible: !TASKS[entry.task].maxIterations,
-  });
-  // We always show the button for consistent sizing.
-  const setToMaxButton = (
-    <Button
-      className={maxClass}
-      size="xs"
-      onClick={() =>
-        maxIterations !== undefined &&
-        dispatch(setBatchCount({ index, amount: maxIterations }))
-      }
-    >
-      <FiMaximize />
-    </Button>
-  );
-  return (
-    // eslint-disable-next-line react/no-array-index-key
-    <div
-      ref={mergedRef}
-      key={index}
-      className={classNames(
-        "flex items-center h-10",
-        {
-          "text-red-300": !step?.ok,
-        },
-        { "opacity-50": isDragging },
-        { "bg-gray-500": isOver }
-      )}
-    >
-      <div className="flex-grow font-mono text-lg">
-        <TaskIcon className="inline" task={entry.task} /> x{entry.count}
+    const entry = useAppSelector(
+      (store) => store.nextQueue.queue[index],
+      equal
+    );
+    const maxIterations = useEngineSelector(
+      (view) => view.tasks[entry.task].maxIterations
+    );
+    const step: SimulationStep | undefined = useAppSelector(
+      (store) => store.nextQueue.simulation[index],
+      equal
+    );
+    const incrementCount = () =>
+      dispatch(modifyBatchCount({ index, amount: 1 }));
+    const decrementCount = () =>
+      dispatch(modifyBatchCount({ index, amount: -1 }));
+    const moveUp = () => dispatch(moveTask({ from: index, to: index - 1 }));
+    const moveDown = () => dispatch(moveTask({ from: index, to: index + 1 }));
+    const remove = () => dispatch(removeTask(index));
+    const maxClass = classNames({
+      invisible: !TASKS[entry.task].maxIterations,
+    });
+    // We always show the button for consistent sizing.
+    const setToMaxButton = (
+      <Button
+        className={maxClass}
+        size="xs"
+        onClick={() =>
+          maxIterations !== undefined &&
+          dispatch(setBatchCount({ index, amount: maxIterations }))
+        }
+      >
+        <FiMaximize />
+      </Button>
+    );
+    return (
+      // eslint-disable-next-line react/no-array-index-key
+      <div
+        ref={mergedRef}
+        key={index}
+        className={classNames(
+          "flex items-center h-10",
+          {
+            "text-red-300": !step?.ok,
+          },
+          { "opacity-50": isDragging },
+          { "bg-gray-500": isOver }
+        )}
+      >
+        <div className="flex-grow font-mono text-lg">
+          <TaskIcon className="inline" task={entry.task} /> x{entry.count}
+        </div>
+        <div
+          className={classNames(
+            "px-2 text-green-300 font-mono font-bold text-lg w-16 text-right",
+            { invisible: !showHp }
+          )}
+        >
+          {step?.hp.toFixed(0)}
+        </div>
+        <div className="px-2 text-yellow-300 font-mono font-bold text-lg w-16 text-right">
+          {step?.energy.toFixed(0)}
+        </div>
+        <div className="text-sm">
+          {setToMaxButton}
+          <Button size="xs" onClick={incrementCount}>
+            <FaPlus size="1em" />
+          </Button>
+          <Button size="xs" onClick={decrementCount}>
+            <FaMinus />
+          </Button>
+          <Button size="xs" onClick={moveUp}>
+            <FaArrowUp />
+          </Button>
+          <Button size="xs" onClick={moveDown}>
+            <FaArrowDown />
+          </Button>
+          <Button size="xs" onClick={remove}>
+            <RiDeleteBackFill />
+          </Button>
+        </div>
       </div>
-      <div className="px-4 text-yellow-300 font-mono font-bold text-lg">
-        {step?.energy}
-      </div>
-      <div className="text-sm">
-        {setToMaxButton}
-        <Button size="xs" onClick={incrementCount}>
-          <FaPlus size="1em" />
-        </Button>
-        <Button size="xs" onClick={decrementCount}>
-          <FaMinus />
-        </Button>
-        <Button size="xs" onClick={moveUp}>
-          <FaArrowUp />
-        </Button>
-        <Button size="xs" onClick={moveDown}>
-          <FaArrowDown />
-        </Button>
-        <Button size="xs" onClick={remove}>
-          <RiDeleteBackFill />
-        </Button>
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 TaskQueueItem.displayName = "TaskQueueItem";
 
 const TaskQueueEditor = React.memo((props: { className?: string }) => {
@@ -153,13 +167,17 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const addButtons = visibleTasks.map((id) => (
     <AddTaskButton key={id} id={id} />
   ));
+  // Don't bother showing HP values if there's no combat involved.
+  const showHp = useAppSelector((store) =>
+    store.nextQueue.queue.some((batch) => TASKS[batch.task].kind === "combat")
+  );
   // For reasons I don't understand, without the flex having an icon messes with
   // vertical alignment.
   return (
     <div className={classNames("flex flex-col", className)}>
       <div className="flex-auto overflow-y-scroll">
         {indices.map((index) => (
-          <TaskQueueItem key={index} index={index} />
+          <TaskQueueItem key={index} index={index} showHp={showHp} />
         ))}
       </div>
       <div>{addButtons}</div>
