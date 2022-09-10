@@ -10,6 +10,7 @@ import {
   MilestoneId,
   PROGRESS_IDS,
 } from "./player";
+import { QueueSchedule, Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { Task, TASKS } from "./task";
@@ -39,13 +40,16 @@ export type SimulationResult = SimulationStep[];
 const INITIAL_ENERGY = 5000;
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
-export abstract class Engine<ScheduleT = unknown> {
+export class Engine<ScheduleT extends Schedule = Schedule> {
   // Saved player state.
   readonly progress: Record<ProgressId, Progress>;
   readonly skills: Record<SkillId, Skill>;
   protected readonly _milestones: Set<MilestoneId>;
   timeAcrossAllLoops: number;
   simulant: Simulant;
+
+  task: Task | undefined = undefined;
+  schedule: ScheduleT;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
@@ -61,7 +65,7 @@ export abstract class Engine<ScheduleT = unknown> {
   /** The total amount of energy acquired in this loop. */
   private _totalEnergy: number = INITIAL_ENERGY;
 
-  constructor(save?: EngineSave) {
+  constructor(schedule: ScheduleT, save?: EngineSave) {
     this.progress = makeValues(PROGRESS_IDS, () => new Progress());
     this.skills = makeValues(SKILL_IDS, () => new Skill());
     this._milestones = new Set();
@@ -85,18 +89,9 @@ export abstract class Engine<ScheduleT = unknown> {
     this.resources = makeValues(RESOURCE_IDS, (res) =>
       RESOURCES[res].initial(this)
     );
+    this.schedule = schedule;
+    this.startLoop(schedule);
   }
-
-  /** Stores the current task. */
-  abstract get task(): Task | undefined;
-  /**
-   * Called to advance to the next task. The argument indicates whether the task
-   * succeeded or not.
-   */
-  abstract next(success: boolean): void;
-
-  /** Sets the schedule from the given object. Implicitly called via startLoop. */
-  protected abstract setSchedule(schedule: ScheduleT): void;
 
   get energy(): number {
     return this._energy;
@@ -111,7 +106,7 @@ export abstract class Engine<ScheduleT = unknown> {
   }
 
   /** Restart the time loop. */
-  startLoop(schedule: ScheduleT) {
+  startLoop(schedule?: ScheduleT) {
     this._timeInLoop = 0;
     this._energy = this._totalEnergy = INITIAL_ENERGY;
     for (const resource of RESOURCE_IDS) {
@@ -120,7 +115,10 @@ export abstract class Engine<ScheduleT = unknown> {
     this.flags = {
       shipHijacked: false,
     };
-    this.setSchedule(schedule);
+    if (schedule) {
+      this.schedule = schedule;
+    }
+    this.next(undefined);
     this.energyLeftOnTask = this.task && this.cost(this.task);
   }
 
@@ -190,7 +188,9 @@ export abstract class Engine<ScheduleT = unknown> {
    * tickspeed; you can't do more things, but you can do them faster.
    */
   energyPerMs(): number {
-    return true ? Math.max(1, 2 - this.timeInLoop / 16384) : 1;
+    return this.simulant.unlocked.has("burstClock")
+      ? Math.max(1, 2 - this.timeInLoop / 16384)
+      : 1;
   }
 
   /**
@@ -239,10 +239,18 @@ export abstract class Engine<ScheduleT = unknown> {
     }
 
     if (this.energy <= 0 && this.task) {
-      this.next(false);
+      this.schedule.recordResult(false);
       return { ok: false, reason: "outOfEnergy" };
     }
     return { ok: true };
+  }
+
+  next(success: boolean | undefined) {
+    if (success !== undefined) {
+      this.schedule.recordResult(success);
+    }
+    const next = this.schedule.next();
+    this.task = next && TASKS[next];
   }
 
   addEnergy(amount: number) {
@@ -268,74 +276,18 @@ export abstract class Engine<ScheduleT = unknown> {
       this.simulant.addXp(amount / 1000);
     }
   }
-}
-
-export class QueueEngine extends Engine<TaskQueue> {
-  queue: TaskQueue = [];
-  /** The index of the task batch we're in. */
-  index = 0;
-  /**
-   * Which iteration within the batch. Zero-indexed, so 0 means we're working on
-   * the first iteration.
-   */
-  iteration = 0;
-  completions: { total: number; success: number; failure: number }[] = [];
-
-  constructor(save?: EngineSave) {
-    super(save);
-    this.queue = [];
-  }
-
-  get task(): Task | undefined {
-    const id = this.queue[this.index]?.task;
-    return id && TASKS[id];
-  }
-
-  next(success: boolean): void {
-    if (this.task === undefined) {
-      return;
-    }
-    const completions = this.completions[this.index];
-    if (success) {
-      completions.success++;
-    } else {
-      completions.failure++;
-    }
-    this.iteration += 1;
-    if (this.iteration >= this.queue[this.index].count) {
-      this.index += 1;
-      this.iteration = 0;
-    }
-  }
-
-  setSchedule(queue: TaskQueue) {
-    this.queue = queue;
-    this.index = 0;
-    this.iteration = 0;
-    this.completions = queue.map((entry) => ({
-      total: entry.count,
-      success: 0,
-      failure: 0,
-    }));
-  }
 
   simulation(tasks: TaskQueue): SimulationResult {
     // Deep-copy the engine into a new state
-    const sim = new QueueEngine(this.toSave());
-    return sim.simulationImpl(tasks);
-  }
-
-  /** Simulates the entire task queue. This mutates everything, so clone before running it! */
-  private simulationImpl(tasks: TaskQueue): SimulationResult {
+    const sim = new Engine(new QueueSchedule(tasks), this.toSave());
     const result: SimulationResult = [];
-    this.startLoop(tasks);
-    while (this.task) {
+    while (sim.task) {
       // need to get the index *before* we tick, since that can advance the index.
-      const index = this.index;
-      const { ok } = this.tickTime(Math.max(this.cost(this.task), 1));
+      const index = sim.schedule.index!;
+      const { ok } = sim.tickTime(Math.max(sim.cost(sim.task), 1));
       result[index] = {
         ok: ok,
-        energy: this.energy,
+        energy: sim.energy,
       };
       if (!ok) {
         break;
@@ -360,6 +312,8 @@ export class QueueEngine extends Engine<TaskQueue> {
     };
   }
 }
+
+export type QueueEngine = Engine<QueueSchedule>;
 
 export type EngineSave = {
   progress: Record<ProgressId, { xp: number; level: number }>;

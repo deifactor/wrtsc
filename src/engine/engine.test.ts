@@ -1,10 +1,10 @@
-import { QueueEngine } from "./engine";
-import { EXPLORE_RUINS, SCAVENGE_BATTERIES } from "./task";
+import { Engine } from "./engine";
+import { QueueSchedule } from "./schedule";
+import { SCAVENGE_BATTERIES } from "./task";
 
 describe("QueueEngine#tickTime", () => {
   it("should succeed when the task queue is empty", () => {
-    const engine = new QueueEngine();
-    engine.startLoop([]);
+    const engine = new Engine(new QueueSchedule([]));
     expect(engine.tickTime(200)).toEqual({
       ok: true,
     });
@@ -12,18 +12,22 @@ describe("QueueEngine#tickTime", () => {
 
   describe("failure modes", () => {
     it("should fail when running out of energy", () => {
-      const engine = new QueueEngine();
-      engine.startLoop([{ task: EXPLORE_RUINS.id, count: 1 }]);
-      engine.removeEnergy(engine.energy - 100);
-      expect(engine.tickTime(200)).toEqual({
+      const engine = new Engine(
+        new QueueSchedule([{ task: "exploreRuins", count: 2 }])
+      );
+      expect(engine.tickTime(4500)).toEqual({
+        ok: true,
+      });
+      expect(engine.tickTime(600)).toEqual({
         ok: false,
         reason: "outOfEnergy",
       });
     });
 
     it("should fail when the task cannot be performed", () => {
-      const engine = new QueueEngine();
-      engine.startLoop([{ task: SCAVENGE_BATTERIES.id, count: 1 }]);
+      const engine = new Engine(
+        new QueueSchedule([{ task: SCAVENGE_BATTERIES.id, count: 1 }])
+      );
       expect(engine.tickTime(200)).toEqual({
         ok: false,
         reason: "taskFailed",

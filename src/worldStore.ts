@@ -1,14 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { QueueEngine } from "./engine";
+import { Engine } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
+import { QueueSchedule } from "./engine/schedule";
 
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
-    const engine = new QueueEngine();
+    const engine = new Engine(new QueueSchedule([]));
     return {
       view: project(engine),
       lastUpdate: new Date().getTime(),
@@ -79,7 +80,7 @@ export function tick(now: number = new Date().getTime()): AppThunkAction {
       dispatch(setPaused(true));
     }
     if (!speedrunMode && ok && !engine.task && autoRestart) {
-      engine.startLoop(getState().nextQueue.queue);
+      engine.startLoop(new QueueSchedule(getState().nextQueue.queue));
       dispatch(startLoop());
     }
     dispatch(worldSlice.actions.setView(project(engine)));
@@ -100,15 +101,15 @@ export function tickDelta(delta: number): AppThunkAction {
 export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
-    engine.startLoop(getState().nextQueue.queue);
+    engine.startLoop(new QueueSchedule(getState().nextQueue.queue));
     // Pause if the engine is empty so we properly accumulate bonus time.
-    dispatch(setPaused(engine.queue.length === 0));
+    dispatch(setPaused(engine.schedule.queue.length === 0));
     dispatch(saveAction());
   };
 
 export const hardReset: () => AppThunkAction =
   () => (dispatch, _getState, extra) => {
-    extra.engine = new QueueEngine();
+    extra.engine = new Engine(new QueueSchedule([]));
     dispatch(startLoop());
   };
 

@@ -11,7 +11,8 @@ import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
 import { EngineView } from "./viewModel";
 import { nextQueueSlice } from "./nextQueueStore";
-import { QueueEngine } from "./engine";
+import { Engine, QueueEngine } from "./engine";
+import { QueueSchedule } from "./engine/schedule";
 
 const rootReducer = combineReducers({
   world: worldSlice.reducer,
@@ -23,7 +24,9 @@ const rootReducer = combineReducers({
  * Create a store as initialized from scratch. This returns the engine for
  * convenience in tests.
  */
-export function createStore(engine: QueueEngine = new QueueEngine()) {
+export function createStore(
+  engine: QueueEngine = new Engine(new QueueSchedule([]))
+) {
   return {
     store: configureStore({
       reducer: rootReducer,

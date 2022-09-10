@@ -123,18 +123,18 @@ export function project(engine: QueueEngine): EngineView {
 }
 
 function projectSchedule(engine: QueueEngine): ScheduleView {
-  const schedule = engine;
+  const schedule = engine.schedule;
   return {
     tasks: schedule.queue.map(({ task, count }, index) => ({
       id: task,
       count,
-      success: engine.completions[index].success,
-      failure: engine.completions[index].failure,
+      success: schedule.completions[index].success,
+      failure: schedule.completions[index].failure,
     })),
-    currentTask: schedule.task && {
-      index: schedule.index,
-      cost: engine.cost(schedule.task),
-      progress: engine.cost(schedule.task) - engine.energyLeftOnTask!,
+    currentTask: engine.task && {
+      index: schedule.index!,
+      cost: engine.cost(engine.task),
+      progress: engine.cost(engine.task) - engine.energyLeftOnTask!,
     },
   };
 }

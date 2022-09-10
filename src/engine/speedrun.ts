@@ -4,10 +4,22 @@ import { Engine } from "./engine";
 import { Task, TaskId } from "./task";
 import { entries } from "../records";
 
-class DynamicEngine extends Engine<Agent> {
+class DynamicEngine extends Engine {
   agent: Agent = () => undefined;
   task: Task | undefined;
   taskHistory: TaskId[] = [];
+
+  constructor(agent: Agent) {
+    super({
+      next: () => agent(this)?.id,
+      recordResult(success: boolean) {
+        if (!success) {
+          throw new Error(`Task mysteriously failed!`);
+        }
+      },
+      restart() {},
+    });
+  }
 
   next(success: boolean): void {
     if (!success) {
@@ -29,11 +41,11 @@ function benchmark(
   agent: Agent,
   stopCondition: (engine: Engine) => boolean
 ) {
-  const engine = new DynamicEngine();
+  const engine = new DynamicEngine(agent);
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
-    engine.startLoop(agent);
+    engine.startLoop();
     while (engine.task && !stopCondition(engine)) {
       engine.tickTime(engine.energyLeftOnTask!);
     }
