@@ -127,7 +127,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     return task.baseCost(this);
   }
 
-  perform(task: Task) {
+  private perform(task: Task) {
     const rewards = task.rewards(this);
     entries(task.required.resources || {}).forEach(([res, value]) => {
       this.resources[res] -= value;
@@ -245,7 +245,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     return { ok: true };
   }
 
-  next(success: boolean | undefined) {
+  /** Advances the schedule and records the success of the most recent task. */
+  private next(success: boolean | undefined) {
     if (success !== undefined) {
       this.schedule.recordResult(success);
     }
@@ -253,7 +254,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.task = next && TASKS[next];
   }
 
-  addEnergy(amount: number) {
+  private addEnergy(amount: number) {
     amount *=
       1 + Math.log(1 + this.skills.energyTransfer.level / 128) / Math.log(2);
     amount = Math.floor(amount);
@@ -265,7 +266,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
    * Does everything associated with spending energy: increases the time
    * counters and simulant XP.
    */
-  spendEnergy(amount: number) {
+  private spendEnergy(amount: number) {
     const energyPerMs = this.energyPerMs();
     this._energy -= amount;
     this._timeInLoop += amount / energyPerMs;

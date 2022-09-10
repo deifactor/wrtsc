@@ -20,20 +20,6 @@ class DynamicEngine extends Engine {
       restart() {},
     });
   }
-
-  next(success: boolean): void {
-    if (!success) {
-      throw new Error(`Task ${this.task?.id} mysteriously failed!`);
-    }
-    this.task && this.taskHistory.push(this.task?.id);
-    this.task = this.agent(this);
-  }
-
-  protected setSchedule(agent: Agent): void {
-    this.agent = agent;
-    this.taskHistory = [];
-    this.task = this.agent(this);
-  }
 }
 
 function benchmark(
