@@ -52,10 +52,8 @@ export const worldSlice = createSlice({
 
 export const { setPaused, setView } = worldSlice.actions;
 
-export const tick: () => AppThunkAction =
-  () =>
-  (dispatch, getState, { engine }) => {
-    const now = new Date().getTime();
+export function tick(now: number = new Date().getTime()): AppThunkAction {
+  return (dispatch, getState, { engine }) => {
     let dt = now - getState().world.lastUpdate;
     dispatch(worldSlice.actions.setLastUpdate(now));
     if (getState().world.paused) {
@@ -79,6 +77,18 @@ export const tick: () => AppThunkAction =
     }
     dispatch(worldSlice.actions.setView(project(engine)));
   };
+}
+
+/**
+ * As `tick`, but takes the size of the timestamp instead. This is mostly useful
+ * for tests so we don't have to keep doing `lastUpdate + 100` or whatever everywhere.
+ */
+export function tickDelta(delta: number): AppThunkAction {
+  return (dispatch, getState, { engine }) => {
+    const lastUpdate = getState().world.lastUpdate;
+    dispatch(tick(lastUpdate + delta));
+  };
+}
 
 export const startLoop: () => AppThunkAction =
   () =>
