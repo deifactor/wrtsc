@@ -25,7 +25,7 @@ function benchmark(
   while (!stopCondition(engine)) {
     engine.startLoop();
     while (engine.task && !stopCondition(engine)) {
-      engine.tickTime(engine.energyLeftOnTask!);
+      engine.tickTime(engine.taskState!.energyLeft);
     }
   }
   const duration = new Date().getTime() - now;

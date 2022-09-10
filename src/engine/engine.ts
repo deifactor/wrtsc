@@ -13,7 +13,7 @@ import {
 import { QueueSchedule, Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
-import { Task, TASKS } from "./task";
+import { Task, TaskId, TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneId } from "./zone";
 
@@ -39,6 +39,14 @@ export type SimulationResult = SimulationStep[];
 
 const INITIAL_ENERGY = 5000;
 
+/** The current task and how far in it we are. */
+export type TaskState = {
+  kind: "normal";
+  energyTotal: number;
+  energyLeft: number;
+  task: TaskId;
+};
+
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export class Engine<ScheduleT extends Schedule = Schedule> {
   // Saved player state.
@@ -48,15 +56,13 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   timeAcrossAllLoops: number;
   simulant: Simulant;
 
-  task: Task | undefined = undefined;
   schedule: ScheduleT;
+  taskState: TaskState | undefined = undefined;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
   flags: Record<LoopFlagId, boolean>;
   zoneId: ZoneId = RUINS.id;
-
-  energyLeftOnTask: number | undefined = undefined;
 
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
@@ -105,6 +111,10 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     return this._timeInLoop;
   }
 
+  get task(): Task | undefined {
+    return this.taskState?.task && TASKS[this.taskState!.task];
+  }
+
   /** Restart the time loop. */
   startLoop(schedule?: ScheduleT) {
     this._timeInLoop = 0;
@@ -119,7 +129,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       this.schedule = schedule;
     }
     this.next(undefined);
-    this.energyLeftOnTask = this.task && this.cost(this.task);
   }
 
   /** Energy cost of the task after applying any global cost modifiers. */
@@ -216,24 +225,16 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         this.next(false);
         return { ok: false, reason: "taskFailed" };
       }
-      if (!this.energyLeftOnTask) {
+      if (!this.taskState) {
         throw new Error("timeLeftOnTask unset despite task being set");
       }
-      // Spend energy until...
-      const spent = Math.min(
-        // we finish the current task
-        this.energyLeftOnTask!,
-        // we run out of energy, period
-        this.energy,
-        // the current tick has run out of energy
-        unspentEnergy
-      );
+      // Spend energy until we run out or something happens.
+      const spent = Math.min(this.energyToNextEvent(), unspentEnergy);
       this.spendEnergy(spent);
 
-      if (this.energyLeftOnTask === 0) {
+      if (this.taskState.energyLeft === 0) {
         this.perform(this.task);
         this.next(true);
-        this.energyLeftOnTask = this.task && this.cost(this.task);
       }
       unspentEnergy -= spent;
     }
@@ -251,7 +252,12 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       this.schedule.recordResult(success);
     }
     const next = this.schedule.next(this);
-    this.task = next && TASKS[next];
+    this.taskState = next && {
+      kind: "normal",
+      task: next,
+      energyTotal: this.cost(TASKS[next]),
+      energyLeft: this.cost(TASKS[next]),
+    };
   }
 
   private addEnergy(amount: number) {
@@ -271,11 +277,20 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this._energy -= amount;
     this._timeInLoop += amount / energyPerMs;
     this.timeAcrossAllLoops += amount / energyPerMs;
-    this.energyLeftOnTask! -= amount;
+    this.taskState!.energyLeft -= amount;
     // Only add simulant XP if there's actually an unlocked simulant.
     if (this.simulant.unlockedSimulants.size !== 0) {
       this.simulant.addXp(amount / 1000);
     }
+  }
+
+  /**
+   * Amount of energy that's necessary to spend until something interesting
+   * happens that changes the simulation: we run out of energy or the current
+   * task finishes.
+   */
+  private energyToNextEvent(): number {
+    return Math.min(this.energy, this.taskState!.energyLeft);
   }
 
   simulation(tasks: TaskQueue): SimulationResult {

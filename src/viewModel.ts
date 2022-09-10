@@ -134,7 +134,7 @@ function projectSchedule(engine: QueueEngine): ScheduleView {
     currentTask: engine.task && {
       index: schedule.index!,
       cost: engine.cost(engine.task),
-      progress: engine.cost(engine.task) - engine.energyLeftOnTask!,
+      progress: engine.cost(engine.task) - engine.taskState!.energyLeft,
     },
   };
 }
