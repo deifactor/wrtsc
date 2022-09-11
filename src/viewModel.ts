@@ -13,6 +13,7 @@ import {
   Rewards,
   totalToNextProgressLevel,
 } from "./engine";
+import { getCombat, getDefense, getMaxHp } from "./engine/combat";
 import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
 import { SkillId, totalToNextSkillLevel } from "./engine/skills";
 import { ZoneId } from "./engine/zone";
@@ -107,10 +108,10 @@ export function project(engine: QueueEngine): EngineView {
       totalToNextLevel: totalToNextSkillLevel(skill),
       visible: true,
     })),
-    combat: engine.combat,
-    defense: engine.defense,
+    combat: getCombat(engine),
+    defense: getDefense(engine),
     currentHp: engine.currentHp,
-    maxHp: engine.maxHp,
+    maxHp: getMaxHp(engine),
     zoneId: engine.zoneId,
     energy: engine.energy,
     totalEnergy: engine.totalEnergy,

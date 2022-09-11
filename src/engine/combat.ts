@@ -16,9 +16,21 @@ export function damagePerEnergy(
   taskStats: CombatStats
 ): { dealt: number; received: number } {
   const armorMultiplier =
-    taskStats.offense / (taskStats.offense + engine.defense);
+    taskStats.offense / (taskStats.offense + getDefense(engine));
   return {
-    dealt: engine.combat / 1000,
+    dealt: getCombat(engine) / 1000,
     received: (taskStats.offense * armorMultiplier) / 1000,
   };
+}
+
+export function getCombat(engine: Engine): number {
+  return 100 * (1 + Math.log2(1 + engine.skills.lethality.level / 16));
+}
+
+export function getDefense(engine: Engine): number {
+  return 100 * Math.log2(1 + engine.skills.lethality.level / 32);
+}
+
+export function getMaxHp(_engine: Engine): number {
+  return 256;
 }

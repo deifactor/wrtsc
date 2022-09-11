@@ -1,5 +1,5 @@
 import { entries, keys, makeValues, mapValues } from "../records";
-import { damagePerEnergy } from "./combat";
+import { damagePerEnergy, getMaxHp } from "./combat";
 
 import {
   Progress,
@@ -134,7 +134,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     if (schedule) {
       this.schedule = schedule;
     }
-    this.currentHp = this.maxHp;
+    this.currentHp = getMaxHp(this);
     this.next(undefined);
   }
 
@@ -187,18 +187,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         ([id, value]) => this.flags[id] === value
       )
     );
-  }
-
-  get combat(): number {
-    return 100 * (1 + Math.log2(1 + this.skills.lethality.level / 16));
-  }
-
-  get defense(): number {
-    return 100 * Math.log2(1 + this.skills.lethality.level / 32);
-  }
-
-  get maxHp(): number {
-    return 256;
   }
 
   /**
