@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { Engine } from "./engine";
+import { Engine, tickTime } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
@@ -74,7 +74,7 @@ export function tick(now: number = new Date().getTime()): AppThunkAction {
       dt = Math.min(3 * dt, getState().world.unspentTime);
     }
     const { autoRestart, pauseOnFailure } = getState().settings;
-    const { ok } = engine.tickTime(dt);
+    const { ok } = tickTime(engine, dt);
     dispatch(worldSlice.actions.ticked(dt));
     if (!ok && pauseOnFailure) {
       dispatch(setPaused(true));

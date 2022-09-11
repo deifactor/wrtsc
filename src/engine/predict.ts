@@ -3,7 +3,7 @@
  * after each task batch.
  */
 
-import { Engine, getCost, toEngineSave } from "./engine";
+import { Engine, getCost, tickTime, toEngineSave } from "./engine";
 import { QueueSchedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
 
@@ -24,7 +24,7 @@ export function simulate(
   while (engine.task) {
     // need to get the index *before* we tick, since that can advance the index.
     const index = engine.schedule.index!;
-    const { ok } = engine.tickTime(Math.max(getCost(engine, engine.task), 1));
+    const { ok } = tickTime(engine, Math.max(getCost(engine, engine.task), 1));
     result[index] = {
       ok: ok,
       energy: engine.energy,

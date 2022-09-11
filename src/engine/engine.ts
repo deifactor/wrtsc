@@ -22,15 +22,6 @@ export const STORAGE_KEY = "save";
 
 export type TaskFailureReason = "outOfEnergy" | "taskFailed" | "outOfHp";
 
-export type TickResult =
-  | {
-      ok: true;
-    }
-  | {
-      ok: false;
-      reason: TaskFailureReason;
-    };
-
 const INITIAL_ENERGY = 5000;
 
 /** The current task and how far in it we are. */
@@ -67,7 +58,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   zoneId: ZoneId = RUINS.id;
 
   /** Time, in milliseconds, since the start of the loop. */
-  private _timeInLoop: number = 0;
+  timeInLoop: number = 0;
 
   /**
    * Current amount of energy the player has. If adding energy, make sure to use
@@ -109,17 +100,13 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.startLoop(schedule);
   }
 
-  get timeInLoop(): number {
-    return this._timeInLoop;
-  }
-
   get task(): Task | undefined {
     return this.taskState?.task;
   }
 
   /** Restart the time loop. */
   startLoop(schedule?: ScheduleT) {
-    this._timeInLoop = 0;
+    this.timeInLoop = 0;
     this.energy = this.totalEnergy = INITIAL_ENERGY;
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
@@ -131,34 +118,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       this.schedule = schedule;
     }
     this.currentHp = getMaxHp(this);
-    this.next(undefined);
-  }
-
-  private perform(task: Task) {
-    const rewards = task.rewards(this);
-    entries(task.required.resources || {}).forEach(([res, value]) => {
-      this.resources[res] -= value;
-    });
-    entries(rewards.resources || {}).forEach(([res, value]) => {
-      this.resources[res] += value;
-    });
-    entries(rewards.progress || {}).forEach(([progress, xp]) => {
-      addProgressXp(
-        this.progress[progress],
-        xp * (1 + Math.log2(1 + this.skills.ergodicity.level / 128))
-      );
-    });
-    entries(rewards.flags || {}).forEach(([flag, value]) => {
-      this.flags[flag] = value;
-    });
-    entries(task.trainedSkills).forEach(([id, xp]) => {
-      const metaMult = 1 + Math.log2(1 + this.skills.metacognition.level / 256);
-      addProgressXp(this.skills[id], xp * metaMult);
-      addProgressXp(this.skills.metacognition, (xp * metaMult) / 4);
-    });
-    rewards.energy && addEnergy(this, rewards.energy);
-    rewards.simulant && this.simulant.unlockedSimulants.add(rewards.simulant);
-    task.extraPerform(this);
+    advanceTask(this, undefined);
   }
 
   canPerform(task: Task): boolean {
@@ -186,127 +146,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   }
 
   /**
-   * Advance the simulation by this many milliseconds. Returns an indication of
-   * whether there was an error in the simulation.
-   *
-   * - `taskFailed` indicates that the task failed to be performed.
-   * - `outOfEnergy` indicates that the player ran out in the middle of a task.
-   *
-   * Note that this will automatically 'slice' the tick into smaller ticks if it
-   * would cross a boundary. E.g., if there are 50 ms left on a task and you
-   * give it a 100ms tick then it'll do a 50ms and then another 50ms.
-   */
-  tickTime(duration: number): TickResult {
-    // Amount of energy we're allowed to spend in this tick.
-    const energyPerMs = this.energyPerMs();
-    let unspentEnergy = Math.floor(duration * energyPerMs);
-    while (unspentEnergy > 0 && this.energy > 0) {
-      if (!this.task) {
-        return { ok: true };
-      }
-      if (!this.canPerform(this.task)) {
-        this.next(false);
-        return { ok: false, reason: "taskFailed" };
-      }
-      if (!this.taskState) {
-        throw new Error("timeLeftOnTask unset despite task being set");
-      }
-      // Spend energy until we run out or something happens.
-      const spent = Math.min(this.energyToNextEvent(), unspentEnergy);
-      this.spendEnergy(spent);
-
-      if (this.currentHp <= 0) {
-        this.schedule.recordResult(false);
-        return { ok: false, reason: "outOfHp" };
-      }
-
-      if (this.taskFinished()) {
-        this.perform(this.task);
-        this.next(true);
-      }
-      unspentEnergy -= spent;
-    }
-
-    if (this.energy <= 0 && this.task) {
-      this.schedule.recordResult(false);
-      return { ok: false, reason: "outOfEnergy" };
-    }
-    return { ok: true };
-  }
-
-  /** Advances the schedule and records the success of the most recent task. */
-  private next(success: boolean | undefined) {
-    if (success !== undefined) {
-      this.schedule.recordResult(success);
-    }
-    const next = this.schedule.next(this);
-    if (!next) {
-      this.taskState = undefined;
-      return;
-    }
-    const task = TASKS[next];
-    switch (task.kind) {
-      case "normal":
-        this.taskState = {
-          kind: "normal",
-          task,
-          energyLeft: getCost(this, task),
-          energyTotal: getCost(this, task),
-        };
-        return;
-      case "combat":
-        this.taskState = {
-          kind: "combat",
-          task,
-          hpLeft: task.stats.hp,
-          hpTotal: task.stats.hp,
-        };
-    }
-  }
-
-  taskFinished(): boolean {
-    const state = this.taskState!;
-    switch (state.kind) {
-      case "normal":
-        return state.energyLeft <= 0;
-      case "combat":
-        return state.hpLeft <= 0;
-    }
-  }
-
-  /**
-   * Does everything associated with spending energy: increases the time
-   * counters and simulant XP.
-   */
-  private spendEnergy(amount: number) {
-    const energyPerMs = this.energyPerMs();
-    const time = amount / energyPerMs;
-    this.energy -= amount;
-    this._timeInLoop += amount / energyPerMs;
-    this.timeAcrossAllLoops += amount / energyPerMs;
-    // Only add simulant XP if there's actually an unlocked simulant.
-    if (this.simulant.unlockedSimulants.size !== 0) {
-      this.simulant.addXp(amount / 1000);
-    }
-    const taskState = this.taskState!;
-    switch (taskState.kind) {
-      case "normal":
-        taskState.energyLeft -= amount;
-        break;
-      case "combat":
-        const { dealt, received } = damagePerEnergy(this, taskState.task.stats);
-        taskState.hpLeft -= time * dealt;
-        this.currentHp -= time * received;
-        // floating-point math strikes again; this prevents the player from
-        // surviving something that should have reduced them to exactly 0 HP.
-        if (Math.abs(this.currentHp) < 0.001) {
-          this.currentHp = 0;
-        }
-        break;
-    }
-  }
-
-  /**
    * Amount of energy that's necessary to spend until something interesting
    * happens that changes the simulation: we run out of energy or the current
    * task finishes.
@@ -325,14 +164,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     }
     return Math.min(this.energy, toTaskCompletion);
   }
-}
-
-function addEnergy(engine: Engine, amount: number) {
-  amount *=
-    1 + Math.log(1 + engine.skills.energyTransfer.level / 128) / Math.log(2);
-  amount = Math.floor(amount);
-  engine.energy += amount;
-  engine.totalEnergy += amount;
 }
 
 export type QueueEngine = Engine<QueueSchedule>;
@@ -372,5 +203,184 @@ export function getCost(engine: Engine, task: Task) {
       return task.baseCost(engine);
     case "combat":
       return task.stats.hp / damagePerEnergy(engine, task.stats).dealt;
+  }
+}
+
+export type TickResult =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      reason: TaskFailureReason;
+    };
+
+/**
+ * Advance the simulation by this many milliseconds. Returns an indication of
+ * whether there was an error in the simulation.
+ *
+ * - `taskFailed` indicates that the task failed to be performed.
+ * - `outOfEnergy` indicates that the player ran out in the middle of a task.
+ *
+ * Note that this will automatically 'slice' the tick into smaller ticks if it
+ * would cross a boundary. E.g., if there are 50 ms left on a task and you give
+ * it a 100ms tick then it'll do a 50ms and then another 50ms.
+ */
+export function tickTime(engine: Engine, duration: number): TickResult {
+  // Amount of energy we're allowed to spend in this tick.
+  const energyPerMs = engine.energyPerMs();
+  let unspentEnergy = Math.floor(duration * energyPerMs);
+  while (unspentEnergy > 0 && engine.energy > 0) {
+    if (!engine.task) {
+      return { ok: true };
+    }
+    if (!engine.canPerform(engine.task)) {
+      advanceTask(engine, false);
+      return { ok: false, reason: "taskFailed" };
+    }
+    if (!engine.taskState) {
+      throw new Error("timeLeftOnTask unset despite task being set");
+    }
+    // Spend energy until we run out or something happens.
+    const spent = Math.min(engine.energyToNextEvent(), unspentEnergy);
+    spendEnergy(engine, spent);
+
+    if (engine.currentHp <= 0) {
+      engine.schedule.recordResult(false);
+      return { ok: false, reason: "outOfHp" };
+    }
+
+    if (isTaskFinished(engine)) {
+      perform(engine, engine.task);
+      advanceTask(engine, true);
+    }
+    unspentEnergy -= spent;
+  }
+
+  if (engine.energy <= 0 && engine.task) {
+    engine.schedule.recordResult(false);
+    return { ok: false, reason: "outOfEnergy" };
+  }
+  return { ok: true };
+}
+
+// Private utility functions used for implementing the public API.
+
+/**
+ * Actually execute the given task.
+ *
+ * This subtracts requirements and adds rewards and XP. This does not advance
+ * the engine's schedule or anything like that.
+ */
+function perform(engine: Engine, task: Task) {
+  const rewards = task.rewards(engine);
+  entries(task.required.resources || {}).forEach(([res, value]) => {
+    engine.resources[res] -= value;
+  });
+  entries(rewards.resources || {}).forEach(([res, value]) => {
+    engine.resources[res] += value;
+  });
+  entries(rewards.progress || {}).forEach(([progress, xp]) => {
+    addProgressXp(
+      engine.progress[progress],
+      xp * (1 + Math.log2(1 + engine.skills.ergodicity.level / 128))
+    );
+  });
+  entries(rewards.flags || {}).forEach(([flag, value]) => {
+    engine.flags[flag] = value;
+  });
+  entries(task.trainedSkills).forEach(([id, xp]) => {
+    const metaMult = 1 + Math.log2(1 + engine.skills.metacognition.level / 256);
+    addProgressXp(engine.skills[id], xp * metaMult);
+    addProgressXp(engine.skills.metacognition, (xp * metaMult) / 4);
+  });
+  rewards.energy && addEnergy(engine, rewards.energy);
+  rewards.simulant && engine.simulant.unlockedSimulants.add(rewards.simulant);
+  task.extraPerform(engine);
+}
+
+/** Advances the schedule and records the success of the most recent task. */
+function advanceTask(engine: Engine, success: boolean | undefined) {
+  if (success !== undefined) {
+    engine.schedule.recordResult(success);
+  }
+  const next = engine.schedule.next(engine);
+  if (!next) {
+    engine.taskState = undefined;
+    return;
+  }
+  const task = TASKS[next];
+  switch (task.kind) {
+    case "normal":
+      engine.taskState = {
+        kind: "normal",
+        task,
+        energyLeft: getCost(engine, task),
+        energyTotal: getCost(engine, task),
+      };
+      return;
+    case "combat":
+      engine.taskState = {
+        kind: "combat",
+        task,
+        hpLeft: task.stats.hp,
+        hpTotal: task.stats.hp,
+      };
+  }
+}
+
+/** Whether or not the engine's current task is finished. */
+function isTaskFinished(engine: Engine): boolean {
+  if (!engine.taskState) {
+    throw new Error(
+      "Tried to figure out if the task is finished, but there was no task!"
+    );
+  }
+  const state = engine.taskState!;
+  switch (state.kind) {
+    case "normal":
+      return state.energyLeft <= 0;
+    case "combat":
+      return state.hpLeft <= 0;
+  }
+}
+
+function addEnergy(engine: Engine, amount: number) {
+  amount *=
+    1 + Math.log(1 + engine.skills.energyTransfer.level / 128) / Math.log(2);
+  amount = Math.floor(amount);
+  engine.energy += amount;
+  engine.totalEnergy += amount;
+}
+
+/**
+ * Does everything associated with spending energy: increases the time counters
+ * and simulant XP.
+ */
+function spendEnergy(engine: Engine, amount: number) {
+  const energyPerMs = engine.energyPerMs();
+  const time = amount / energyPerMs;
+  engine.energy -= amount;
+  engine.timeInLoop += amount / energyPerMs;
+  engine.timeAcrossAllLoops += amount / energyPerMs;
+  // Only add simulant XP if there's actually an unlocked simulant.
+  if (engine.simulant.unlockedSimulants.size !== 0) {
+    engine.simulant.addXp(amount / 1000);
+  }
+  const taskState = engine.taskState!;
+  switch (taskState.kind) {
+    case "normal":
+      taskState.energyLeft -= amount;
+      break;
+    case "combat":
+      const { dealt, received } = damagePerEnergy(engine, taskState.task.stats);
+      taskState.hpLeft -= time * dealt;
+      engine.currentHp -= time * received;
+      // floating-point math strikes again; engine prevents the player from
+      // surviving something that should have reduced them to exactly 0 HP.
+      if (Math.abs(engine.currentHp) < 0.001) {
+        engine.currentHp = 0;
+      }
+      break;
   }
 }
