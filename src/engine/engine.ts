@@ -16,7 +16,6 @@ import { QueueSchedule, Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { CombatTask, NormalTask, Task, TASKS } from "./task";
-import { TaskQueue } from "./taskQueue";
 import { RUINS, ZoneId } from "./zone";
 
 export const STORAGE_KEY = "save";
@@ -31,14 +30,6 @@ export type TickResult =
       ok: false;
       reason: TaskFailureReason;
     };
-
-export type SimulationStep = {
-  ok: boolean;
-  energy: number;
-  hp: number;
-};
-
-export type SimulationResult = SimulationStep[];
 
 const INITIAL_ENERGY = 5000;
 
@@ -367,26 +358,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         break;
     }
     return Math.min(this.energy, toTaskCompletion);
-  }
-
-  simulation(tasks: TaskQueue): SimulationResult {
-    // Deep-copy the engine into a new state
-    const sim = new Engine(new QueueSchedule(tasks), this.toSave());
-    const result: SimulationResult = [];
-    while (sim.task) {
-      // need to get the index *before* we tick, since that can advance the index.
-      const index = sim.schedule.index!;
-      const { ok } = sim.tickTime(Math.max(sim.cost(sim.task), 1));
-      result[index] = {
-        ok: ok,
-        energy: sim.energy,
-        hp: sim.currentHp,
-      };
-      if (!ok) {
-        break;
-      }
-    }
-    return result;
   }
 
   toSave(): EngineSave {

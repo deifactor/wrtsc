@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { SimulationStep, TASKS } from "../engine";
+import { TASKS } from "../engine";
 import { TaskId } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
@@ -18,6 +18,7 @@ import {
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
+import { SimulationStep } from "../engine/predict";
 
 const DRAG_TYPE = "TASK_BATCH";
 
