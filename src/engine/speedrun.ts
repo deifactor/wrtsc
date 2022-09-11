@@ -23,9 +23,13 @@ function benchmark(
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
-    engine.startLoop();
+    engine.startLoop(schedule);
     while (engine.task && !stopCondition(engine)) {
-      tickTime(engine, engine.energyToNextEvent() / engine.energyPerMs());
+      tickTime(
+        engine,
+        schedule,
+        engine.energyToNextEvent() / engine.energyPerMs()
+      );
     }
   }
   const duration = new Date().getTime() - now;

@@ -6,13 +6,7 @@
  * To use this in a store, use `extraReducers` and listen for `saveLoaded`.
  */
 import { createAction } from "@reduxjs/toolkit";
-import {
-  Engine,
-  EngineSave,
-  QueueEngine,
-  TaskQueue,
-  toEngineSave,
-} from "./engine";
+import { Engine, EngineSave, TaskQueue, toEngineSave } from "./engine";
 import { QueueSchedule } from "./engine/schedule";
 import { Settings } from "./settingsStore";
 import { AppThunkAction, RootState } from "./store";
@@ -37,7 +31,7 @@ export function hasSave(): boolean {
   return localStorage.getItem(STORAGE_KEY) !== undefined;
 }
 
-function toSave(state: RootState, engine: QueueEngine): GameSave {
+function toSave(state: RootState, engine: Engine): GameSave {
   return {
     state: {
       world: {

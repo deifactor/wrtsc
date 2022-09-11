@@ -1,10 +1,16 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunkAction } from "./store";
-import { Engine, TaskQueue, tickTime } from "./engine";
+import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppThunkAction, RootState } from "./store";
+import { Engine, TaskId, TaskQueue, tickTime } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
-import { QueueSchedule } from "./engine/schedule";
+import { QueueSchedule, Schedule } from "./engine/schedule";
+
+interface Completions {
+  total: number;
+  success: number;
+  failure: number;
+}
 
 interface Completions {
   total: number;
@@ -61,6 +67,7 @@ export const worldSlice = createSlice({
       if (schedule.index === undefined) {
         schedule.index = 0;
         schedule.iteration = 0;
+        return;
       }
 
       if (schedule.index >= schedule.queue.length) {
@@ -91,7 +98,13 @@ export const worldSlice = createSlice({
       }
     },
 
-    restartSchedule: ({ schedule }) => {
+    restartSchedule: (
+      { schedule },
+      action: PayloadAction<TaskQueue | undefined>
+    ) => {
+      if (action.payload) {
+        schedule.queue = action.payload;
+      }
       schedule.index = undefined;
       schedule.iteration = 0;
       schedule.completions = schedule.queue.map((batch) => ({
@@ -113,6 +126,8 @@ export const worldSlice = createSlice({
 
 export const { setPaused, setView, setUseUnspentTime } = worldSlice.actions;
 
+const { advanceSchedule, recordResult, restartSchedule } = worldSlice.actions;
+
 export function tick(now: number = new Date().getTime()): AppThunkAction {
   return (dispatch, getState, { engine }) => {
     let dt = now - getState().world.lastUpdate;
@@ -130,13 +145,12 @@ export function tick(now: number = new Date().getTime()): AppThunkAction {
       dt = Math.min(3 * dt, getState().world.unspentTime);
     }
     const { autoRestart, pauseOnFailure } = getState().settings;
-    const { ok } = tickTime(engine, dt);
+    const { ok } = tickTime(engine, wrapperSchedule(dispatch, getState), dt);
     dispatch(worldSlice.actions.ticked(dt));
     if (!ok && pauseOnFailure) {
       dispatch(setPaused(true));
     }
     if (!speedrunMode && ok && !engine.task && autoRestart) {
-      engine.startLoop(new QueueSchedule(getState().nextQueue.queue));
       dispatch(startLoop());
     }
     dispatch(worldSlice.actions.setView(project(engine)));
@@ -157,16 +171,21 @@ export function tickDelta(delta: number): AppThunkAction {
 export const startLoop: () => AppThunkAction =
   () =>
   (dispatch, getState, { engine }) => {
-    engine.startLoop(new QueueSchedule(getState().nextQueue.queue));
+    const nextQueue = getState().nextQueue.queue;
+    dispatch(restartSchedule(nextQueue));
+    engine.startLoop(wrapperSchedule(dispatch, getState));
     // Pause if the engine is empty so we properly accumulate bonus time.
-    dispatch(setPaused(engine.schedule.queue.length === 0));
+    dispatch(setPaused(getState().world.schedule.queue.length === 0));
     dispatch(saveAction());
+    dispatch(worldSlice.actions.setView(project(engine)));
   };
 
 export const hardReset: () => AppThunkAction =
   () => (dispatch, _getState, extra) => {
     extra.engine = new Engine(new QueueSchedule([]));
+
     dispatch(startLoop());
+    dispatch(worldSlice.actions.setView(project(extra.engine)));
   };
 
 /** Unlocks the given simulant subroutine. */
@@ -174,5 +193,26 @@ export function unlockSubroutine(id: SubroutineId): AppThunkAction {
   return (dispatch, _getState, { engine }) => {
     engine.simulant.unlock(id);
     dispatch(saveAction());
+  };
+}
+
+function wrapperSchedule(
+  dispatch: (action: AnyAction) => void,
+  getState: () => RootState
+): Schedule {
+  return {
+    next(): TaskId | undefined {
+      dispatch(advanceSchedule());
+      const { schedule } = getState().world;
+      return schedule.index !== undefined
+        ? schedule.queue[schedule.index]?.task
+        : undefined;
+    },
+    recordResult(success: boolean) {
+      dispatch(recordResult(success));
+    },
+    restart() {
+      dispatch(restartSchedule());
+    },
   };
 }

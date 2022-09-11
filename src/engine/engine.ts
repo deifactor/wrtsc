@@ -12,7 +12,7 @@ import {
   PROGRESS_IDS,
   addProgressXp,
 } from "./player";
-import { QueueSchedule, Schedule } from "./schedule";
+import { Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { CombatTask, NormalTask, Task, TASKS } from "./task";
@@ -40,7 +40,7 @@ export type TaskState =
     };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
-export class Engine<ScheduleT extends Schedule = Schedule> {
+export class Engine {
   // Saved player state.
   readonly progress: Record<ProgressId, Progress>;
   readonly skills: Record<SkillId, Skill>;
@@ -49,7 +49,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   timeAcrossAllLoops: number;
   simulant: Simulant;
 
-  schedule: ScheduleT;
   taskState: TaskState | undefined = undefined;
 
   // Unsaved player state that's adjusted as we go through a loop.
@@ -70,7 +69,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
 
   currentHp!: number;
 
-  constructor(schedule: ScheduleT, save?: EngineSave) {
+  constructor(schedule: Schedule, save?: EngineSave) {
     this.progress = makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 }));
     this.skills = makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 }));
     this.milestones = {};
@@ -96,7 +95,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.resources = makeValues(RESOURCE_IDS, (res) =>
       RESOURCES[res].initial(this)
     );
-    this.schedule = schedule;
     this.startLoop(schedule);
   }
 
@@ -105,7 +103,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   }
 
   /** Restart the time loop. */
-  startLoop(schedule?: ScheduleT) {
+  startLoop(schedule: Schedule) {
     this.timeInLoop = 0;
     this.energy = this.totalEnergy = INITIAL_ENERGY;
     for (const resource of RESOURCE_IDS) {
@@ -114,11 +112,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.flags = {
       shipHijacked: false,
     };
-    if (schedule) {
-      this.schedule = schedule;
-    }
     this.currentHp = getMaxHp(this);
-    advanceTask(this, undefined);
+    advanceTask(this, schedule);
   }
 
   canPerform(task: Task): boolean {
@@ -165,8 +160,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     return Math.min(this.energy, toTaskCompletion);
   }
 }
-
-export type QueueEngine = Engine<QueueSchedule>;
 
 export type EngineSave = {
   progress: Record<ProgressId, { xp: number; level: number }>;
@@ -226,7 +219,11 @@ export type TickResult =
  * would cross a boundary. E.g., if there are 50 ms left on a task and you give
  * it a 100ms tick then it'll do a 50ms and then another 50ms.
  */
-export function tickTime(engine: Engine, duration: number): TickResult {
+export function tickTime(
+  engine: Engine,
+  schedule: Schedule,
+  duration: number
+): TickResult {
   // Amount of energy we're allowed to spend in this tick.
   const energyPerMs = engine.energyPerMs();
   let unspentEnergy = Math.floor(duration * energyPerMs);
@@ -235,7 +232,8 @@ export function tickTime(engine: Engine, duration: number): TickResult {
       return { ok: true };
     }
     if (!engine.canPerform(engine.task)) {
-      advanceTask(engine, false);
+      schedule.recordResult(false);
+      advanceTask(engine, schedule);
       return { ok: false, reason: "taskFailed" };
     }
     if (!engine.taskState) {
@@ -246,19 +244,20 @@ export function tickTime(engine: Engine, duration: number): TickResult {
     spendEnergy(engine, spent);
 
     if (engine.currentHp <= 0) {
-      engine.schedule.recordResult(false);
+      schedule.recordResult(false);
       return { ok: false, reason: "outOfHp" };
     }
 
     if (isTaskFinished(engine)) {
       perform(engine, engine.task);
-      advanceTask(engine, true);
+      schedule.recordResult(true);
+      advanceTask(engine, schedule);
     }
     unspentEnergy -= spent;
   }
 
   if (engine.energy <= 0 && engine.task) {
-    engine.schedule.recordResult(false);
+    schedule.recordResult(false);
     return { ok: false, reason: "outOfEnergy" };
   }
   return { ok: true };
@@ -299,12 +298,9 @@ function perform(engine: Engine, task: Task) {
   task.extraPerform(engine);
 }
 
-/** Advances the schedule and records the success of the most recent task. */
-function advanceTask(engine: Engine, success: boolean | undefined) {
-  if (success !== undefined) {
-    engine.schedule.recordResult(success);
-  }
-  const next = engine.schedule.next(engine);
+/** Sets the engine's task to the next task from the given schedule. */
+function advanceTask(engine: Engine, schedule: Schedule) {
+  const next = schedule.next(engine);
   if (!next) {
     engine.taskState = undefined;
     return;
@@ -326,6 +322,7 @@ function advanceTask(engine: Engine, success: boolean | undefined) {
         hpLeft: task.stats.hp,
         hpTotal: task.stats.hp,
       };
+      return;
   }
 }
 

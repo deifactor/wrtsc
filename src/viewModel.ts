@@ -3,7 +3,7 @@
  * defined here are guaranteed to *attempt* to not needlessly duplicate objects.
  */
 import {
-  QueueEngine,
+  Engine,
   LoopFlagId,
   ResourceId,
   ProgressId,
@@ -33,20 +33,6 @@ export type ProgressView = Record<
   ProgressId,
   { level: number; xp: number; totalToNextLevel: number; visible: boolean }
 >;
-export type ScheduleView = {
-  /** `completed` is the number of iterations of that task that has been completed. */
-  tasks: {
-    id: TaskId;
-    count: number;
-    success: number;
-    failure: number;
-  }[];
-  currentTask?: {
-    index: number;
-    cost: number;
-    progress: number;
-  };
-};
 export type SimulantView = {
   unlockedSimulants: SimulantId[];
   unlockedSubroutines: SubroutineId[];
@@ -80,13 +66,18 @@ export type EngineView = {
   defense: number;
   currentHp: number;
   maxHp: number;
-  schedule: ScheduleView;
   tasks: Record<TaskId, TaskView>;
   timeAcrossAllLoops: number;
   simulant: SimulantView;
+  currentTask:
+    | {
+        cost: number;
+        progress: number;
+      }
+    | undefined;
 };
 
-export function project(engine: QueueEngine): EngineView {
+export function project(engine: Engine): EngineView {
   const visibles = findVisibles(engine);
   return {
     resources: mapValues(engine.resources, (amount, id) => {
@@ -116,7 +107,6 @@ export function project(engine: QueueEngine): EngineView {
     zoneId: engine.zoneId,
     energy: engine.energy,
     totalEnergy: engine.totalEnergy,
-    schedule: projectSchedule(engine),
     tasks: mapValues(TASKS, (task) => ({
       id: task.id,
       cost: getCost(engine, task),
@@ -128,47 +118,34 @@ export function project(engine: QueueEngine): EngineView {
     })),
     timeAcrossAllLoops: engine.timeAcrossAllLoops,
     simulant: simulantView(engine),
+    currentTask: getCurrentTask(engine),
   };
 }
 
-function projectSchedule(engine: QueueEngine): ScheduleView {
-  const schedule = engine.schedule;
-  const taskState = engine.taskState;
-  const stats =
-    taskState &&
-    (function () {
-      switch (taskState.kind) {
-        case "normal":
-          return {
-            progress: taskState.energyTotal - taskState.energyLeft,
-            cost: taskState.energyTotal,
-          };
-        case "combat":
-          return {
-            progress: taskState.hpTotal - taskState.hpLeft,
-            cost: taskState.hpTotal,
-          };
-      }
-    })();
-  return {
-    tasks: schedule.queue.map(({ task, count }, index) => ({
-      id: task,
-      count,
-      success: schedule.completions[index].success,
-      failure: schedule.completions[index].failure,
-    })),
-    currentTask: engine.task && {
-      index: schedule.index!,
-      ...stats!,
-    },
-  };
+function getCurrentTask(engine: Engine) {
+  const { taskState } = engine;
+  if (!taskState) {
+    return undefined;
+  }
+  switch (taskState.kind) {
+    case "normal":
+      return {
+        progress: taskState.energyTotal - taskState.energyLeft,
+        cost: taskState.energyTotal,
+      };
+    case "combat":
+      return {
+        progress: taskState.hpTotal - taskState.hpLeft,
+        cost: taskState.hpTotal,
+      };
+  }
 }
 
 /**
  * True if we should even allow the player to add this task to the queue. This
  * should only return false if there is no possible way for this task to succeed.
  */
-function canAddToQueue(engine: QueueEngine, task: Task): boolean {
+function canAddToQueue(engine: Engine, task: Task): boolean {
   // Zero max iterations means it's impossible.
   if (task.maxIterations && task.maxIterations(engine) === 0) {
     return false;
@@ -179,7 +156,7 @@ function canAddToQueue(engine: QueueEngine, task: Task): boolean {
   );
 }
 
-function findVisibles(engine: QueueEngine): {
+function findVisibles(engine: Engine): {
   resources: Set<ResourceId>;
   progresses: Set<ProgressId>;
 } {
@@ -201,7 +178,7 @@ function findVisibles(engine: QueueEngine): {
   return { resources, progresses };
 }
 
-function simulantView(engine: QueueEngine): SimulantView {
+function simulantView(engine: Engine): SimulantView {
   return {
     unlockedSimulants: Array.from(engine.simulant.unlockedSimulants),
     unlockedSubroutines: Array.from(engine.simulant.unlocked),
