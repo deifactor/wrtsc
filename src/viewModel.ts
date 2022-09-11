@@ -12,6 +12,7 @@ import {
   Task,
   Rewards,
   totalToNextProgressLevel,
+  getCost,
 } from "./engine";
 import { getCombat, getDefense, getMaxHp } from "./engine/combat";
 import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
@@ -118,7 +119,7 @@ export function project(engine: QueueEngine): EngineView {
     schedule: projectSchedule(engine),
     tasks: mapValues(TASKS, (task) => ({
       id: task.id,
-      cost: engine.cost(task),
+      cost: getCost(engine, task),
       visible: task.visible(engine),
       canAddToQueue: canAddToQueue(engine, task),
       shortName: task.shortName,

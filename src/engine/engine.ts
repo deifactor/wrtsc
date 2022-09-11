@@ -134,16 +134,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.next(undefined);
   }
 
-  /** Energy cost of the task after applying any global cost modifiers. */
-  cost(task: Task) {
-    switch (task.kind) {
-      case "normal":
-        return task.baseCost(this);
-      case "combat":
-        return task.stats.hp / damagePerEnergy(this, task.stats).dealt;
-    }
-  }
-
   private perform(task: Task) {
     const rewards = task.rewards(this);
     entries(task.required.resources || {}).forEach(([res, value]) => {
@@ -260,8 +250,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         this.taskState = {
           kind: "normal",
           task,
-          energyLeft: this.cost(task),
-          energyTotal: this.cost(task),
+          energyLeft: getCost(this, task),
+          energyTotal: getCost(this, task),
         };
         return;
       case "combat":
@@ -369,4 +359,18 @@ export function toEngineSave(engine: Engine): EngineSave {
     timeAcrossAllLoops: engine.timeAcrossAllLoops,
     simulant: engine.simulant.toSave(),
   };
+}
+
+/**
+ * Energy cost of the task after applying any global cost modifiers. For normal
+ * tasks, this is just the cost; for combat tasks, it's the amount of energy
+ * necessary to do damage equal to the task's HP.
+ */
+export function getCost(engine: Engine, task: Task) {
+  switch (task.kind) {
+    case "normal":
+      return task.baseCost(engine);
+    case "combat":
+      return task.stats.hp / damagePerEnergy(engine, task.stats).dealt;
+  }
 }

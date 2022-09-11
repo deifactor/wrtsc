@@ -1,4 +1,4 @@
-import { Engine } from "./engine";
+import { Engine, getCost } from "./engine";
 import {
   DISABLE_LOCKOUTS,
   DRAIN_TERACAPACITOR,
@@ -20,7 +20,7 @@ export function first(...agents: Agent[]): Agent {
       const task = agent(engine);
       if (
         task &&
-        engine.cost(task) < engine.energy &&
+        getCost(engine, task) < engine.energy &&
         engine.canPerform(task)
       ) {
         return task;
@@ -38,10 +38,11 @@ export function withTeracapacitors(agent: Agent): Agent {
     }
     // If the inner task would leave us unable to drain, then drain first.
     if (
-      engine.cost(DRAIN_TERACAPACITOR) + engine.cost(inner) > engine.energy &&
+      getCost(engine, DRAIN_TERACAPACITOR) + getCost(engine, inner) >
+        engine.energy &&
       engine.canPerform(DRAIN_TERACAPACITOR) &&
       DRAIN_TERACAPACITOR.rewards(engine).energy! >
-        engine.cost(DRAIN_TERACAPACITOR)
+        getCost(engine, DRAIN_TERACAPACITOR)
     ) {
       return DRAIN_TERACAPACITOR;
     }
