@@ -1,10 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction } from "./store";
-import { Engine, tickTime } from "./engine";
+import { Engine, TaskQueue, tickTime } from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
 import { QueueSchedule } from "./engine/schedule";
+
+interface Completions {
+  total: number;
+  success: number;
+  failure: number;
+}
 
 export const worldSlice = createSlice({
   name: "world",
@@ -16,6 +22,12 @@ export const worldSlice = createSlice({
       unspentTime: 0,
       useUnspentTime: false,
       paused: true,
+      schedule: {
+        queue: [] as TaskQueue,
+        index: undefined as number | undefined,
+        iteration: 0,
+        completions: [] as Completions[],
+      },
     };
   },
   reducers: {
@@ -43,6 +55,50 @@ export const worldSlice = createSlice({
 
     setUseUnspentTime: (state, action: PayloadAction<boolean>) => {
       state.useUnspentTime = action.payload;
+    },
+
+    advanceSchedule: ({ schedule }) => {
+      if (schedule.index === undefined) {
+        schedule.index = 0;
+        schedule.iteration = 0;
+      }
+
+      if (schedule.index >= schedule.queue.length) {
+        return;
+      }
+
+      schedule.iteration++;
+      if (schedule.iteration >= schedule.queue[schedule.index].count) {
+        schedule.index++;
+        schedule.iteration = 0;
+      }
+    },
+
+    recordResult: ({ schedule }, action: PayloadAction<boolean>) => {
+      if (schedule.index === undefined) {
+        throw new Error("Can't record success when we haven't even started");
+      } else if (schedule.index >= schedule.queue.length) {
+        throw new Error(
+          `Can't record when we're done (index ${schedule.index} queue length ${schedule.queue.length})`
+        );
+      } else {
+        const completions = schedule.completions[schedule.index];
+        if (action.payload) {
+          completions.success++;
+        } else {
+          completions.failure++;
+        }
+      }
+    },
+
+    restartSchedule: ({ schedule }) => {
+      schedule.index = undefined;
+      schedule.iteration = 0;
+      schedule.completions = schedule.queue.map((batch) => ({
+        total: batch.count,
+        success: 0,
+        failure: 0,
+      }));
     },
   },
 
