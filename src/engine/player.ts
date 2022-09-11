@@ -1,24 +1,24 @@
 import { Engine } from "./engine";
 import { ZoneId } from "./zone";
 
-export class Progress {
-  public xp: number = 0;
-  public level: number = 0;
+export interface Progress {
+  xp: number;
+  level: number;
+}
 
-  get totalToNextLevel(): number {
-    return (this.level + 1) * 1024;
+export function totalToNextProgressLevel(progress: Progress): number {
+  return (progress.level + 1) * 1024;
+}
+
+export function addProgressXp(progress: Progress, xp: number) {
+  progress.xp += xp;
+  while (progress.xp >= totalToNextProgressLevel(progress)) {
+    progress.xp -= totalToNextProgressLevel(progress);
+    progress.level++;
   }
-
-  addXp(xp: number) {
-    this.xp += xp;
-    while (this.xp >= this.totalToNextLevel) {
-      this.xp -= this.totalToNextLevel;
-      this.level++;
-    }
-    if (this.level >= 100) {
-      this.level = 100;
-      this.xp = 0;
-    }
+  if (progress.level >= 100) {
+    progress.level = 100;
+    progress.xp = 0;
   }
 }
 

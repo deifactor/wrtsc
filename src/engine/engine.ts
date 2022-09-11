@@ -10,6 +10,7 @@ import {
   RESOURCE_IDS,
   MilestoneId,
   PROGRESS_IDS,
+  addProgressXp,
 } from "./player";
 import { QueueSchedule, Schedule } from "./schedule";
 import { Simulant, SimulantSave } from "./simulant";
@@ -83,8 +84,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   currentHp!: number;
 
   constructor(schedule: ScheduleT, save?: EngineSave) {
-    this.progress = makeValues(PROGRESS_IDS, () => new Progress());
-    this.skills = makeValues(SKILL_IDS, () => new Skill());
+    this.progress = makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 }));
+    this.skills = makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 }));
     this._milestones = new Set();
     this.simulant = new Simulant(save?.simulant);
     this.timeAcrossAllLoops = 0;
@@ -162,7 +163,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       this.resources[res] += value;
     });
     entries(rewards.progress || {}).forEach(([progress, xp]) => {
-      this.progress[progress].addXp(
+      addProgressXp(
+        this.progress[progress],
         xp * (1 + Math.log2(1 + this.skills.ergodicity.level / 128))
       );
     });
@@ -171,8 +173,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     });
     entries(task.trainedSkills).forEach(([id, xp]) => {
       const metaMult = 1 + Math.log2(1 + this.skills.metacognition.level / 256);
-      this.skills[id].addXp(xp * metaMult);
-      this.skills.metacognition.addXp((xp * metaMult) / 4);
+      addProgressXp(this.skills[id], xp * metaMult);
+      addProgressXp(this.skills.metacognition, (xp * metaMult) / 4);
     });
     rewards.energy && this.addEnergy(rewards.energy);
     rewards.simulant && this.simulant.unlockedSimulants.add(rewards.simulant);

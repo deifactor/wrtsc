@@ -11,9 +11,10 @@ import {
   TASKS,
   Task,
   Rewards,
+  totalToNextProgressLevel,
 } from "./engine";
 import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
-import { SkillId } from "./engine/skills";
+import { SkillId, totalToNextSkillLevel } from "./engine/skills";
 import { ZoneId } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
 
@@ -97,13 +98,13 @@ export function project(engine: QueueEngine): EngineView {
     progress: mapValues(engine.progress, (level, id) => ({
       level: level.level,
       xp: level.xp,
-      totalToNextLevel: level.totalToNextLevel,
+      totalToNextLevel: totalToNextProgressLevel(level),
       visible: visibles.progresses.has(id),
     })),
     skills: mapValues(engine.skills, (skill) => ({
       level: skill.level,
       xp: skill.xp,
-      totalToNextLevel: skill.totalToNextLevel,
+      totalToNextLevel: totalToNextSkillLevel(skill),
       visible: true,
     })),
     combat: engine.combat,
