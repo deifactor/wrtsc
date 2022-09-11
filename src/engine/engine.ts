@@ -69,9 +69,13 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   /** Time, in milliseconds, since the start of the loop. */
   private _timeInLoop: number = 0;
 
-  private _energy: number = INITIAL_ENERGY;
+  /**
+   * Current amount of energy the player has. If adding energy, make sure to use
+   * addEnergy instead.
+   */
+  energy: number = INITIAL_ENERGY;
   /** The total amount of energy acquired in this loop. */
-  private _totalEnergy: number = INITIAL_ENERGY;
+  totalEnergy: number = INITIAL_ENERGY;
 
   currentHp!: number;
 
@@ -105,14 +109,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     this.startLoop(schedule);
   }
 
-  get energy(): number {
-    return this._energy;
-  }
-
-  get totalEnergy(): number {
-    return this._totalEnergy;
-  }
-
   get timeInLoop(): number {
     return this._timeInLoop;
   }
@@ -124,7 +120,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   /** Restart the time loop. */
   startLoop(schedule?: ScheduleT) {
     this._timeInLoop = 0;
-    this._energy = this._totalEnergy = INITIAL_ENERGY;
+    this.energy = this.totalEnergy = INITIAL_ENERGY;
     for (const resource of RESOURCE_IDS) {
       this.resources[resource] = RESOURCES[resource].initial(this);
     }
@@ -170,7 +166,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
       addProgressXp(this.skills[id], xp * metaMult);
       addProgressXp(this.skills.metacognition, (xp * metaMult) / 4);
     });
-    rewards.energy && this.addEnergy(rewards.energy);
+    rewards.energy && addEnergy(this, rewards.energy);
     rewards.simulant && this.simulant.unlockedSimulants.add(rewards.simulant);
     task.extraPerform(this);
   }
@@ -288,14 +284,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     }
   }
 
-  private addEnergy(amount: number) {
-    amount *=
-      1 + Math.log(1 + this.skills.energyTransfer.level / 128) / Math.log(2);
-    amount = Math.floor(amount);
-    this._energy += amount;
-    this._totalEnergy += amount;
-  }
-
   /**
    * Does everything associated with spending energy: increases the time
    * counters and simulant XP.
@@ -303,7 +291,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   private spendEnergy(amount: number) {
     const energyPerMs = this.energyPerMs();
     const time = amount / energyPerMs;
-    this._energy -= amount;
+    this.energy -= amount;
     this._timeInLoop += amount / energyPerMs;
     this.timeAcrossAllLoops += amount / energyPerMs;
     // Only add simulant XP if there's actually an unlocked simulant.
@@ -347,6 +335,14 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     }
     return Math.min(this.energy, toTaskCompletion);
   }
+}
+
+function addEnergy(engine: Engine, amount: number) {
+  amount *=
+    1 + Math.log(1 + engine.skills.energyTransfer.level / 128) / Math.log(2);
+  amount = Math.floor(amount);
+  engine.energy += amount;
+  engine.totalEnergy += amount;
 }
 
 export type QueueEngine = Engine<QueueSchedule>;
