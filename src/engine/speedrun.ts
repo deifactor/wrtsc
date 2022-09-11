@@ -30,7 +30,7 @@ function benchmark(
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
     startLoop(engine, schedule);
-    while (engine.task && !stopCondition(engine)) {
+    while (engine.taskState?.task && !stopCondition(engine)) {
       tickTime(
         engine,
         schedule,

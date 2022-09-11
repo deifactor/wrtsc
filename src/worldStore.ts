@@ -151,7 +151,7 @@ export function tick(now: number = new Date().getTime()): AppThunkAction {
     if (!ok && pauseOnFailure) {
       dispatch(setPaused(true));
     }
-    if (!speedrunMode && ok && !engine.task && autoRestart) {
+    if (!speedrunMode && ok && !engine.taskState?.task && autoRestart) {
       dispatch(startLoop());
     }
     dispatch(worldSlice.actions.setView(project(engine)));

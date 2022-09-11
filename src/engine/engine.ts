@@ -97,10 +97,6 @@ export class Engine {
     );
     startLoop(this, schedule);
   }
-
-  get task(): Task | undefined {
-    return this.taskState?.task;
-  }
 }
 
 export type EngineSave = {
@@ -188,10 +184,10 @@ export function tickTime(
   const energyPerMs = getEnergyPerMs(engine);
   let unspentEnergy = Math.floor(duration * energyPerMs);
   while (unspentEnergy > 0 && engine.energy > 0) {
-    if (!engine.task) {
+    if (!engine.taskState?.task) {
       return { ok: true };
     }
-    if (!canPerform(engine, engine.task)) {
+    if (!canPerform(engine, engine.taskState?.task)) {
       schedule.recordResult(false);
       advanceTask(engine, schedule);
       return { ok: false, reason: "taskFailed" };
@@ -209,14 +205,14 @@ export function tickTime(
     }
 
     if (isTaskFinished(engine)) {
-      perform(engine, engine.task);
+      perform(engine, engine.taskState?.task);
       schedule.recordResult(true);
       advanceTask(engine, schedule);
     }
     unspentEnergy -= spent;
   }
 
-  if (engine.energy <= 0 && engine.task) {
+  if (engine.energy <= 0 && engine.taskState?.task) {
     schedule.recordResult(false);
     return { ok: false, reason: "outOfEnergy" };
   }
