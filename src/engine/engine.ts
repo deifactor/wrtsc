@@ -95,69 +95,11 @@ export class Engine {
     this.resources = makeValues(RESOURCE_IDS, (res) =>
       RESOURCES[res].initial(this)
     );
-    this.startLoop(schedule);
+    startLoop(this, schedule);
   }
 
   get task(): Task | undefined {
     return this.taskState?.task;
-  }
-
-  /** Restart the time loop. */
-  startLoop(schedule: Schedule) {
-    this.timeInLoop = 0;
-    this.energy = this.totalEnergy = INITIAL_ENERGY;
-    for (const resource of RESOURCE_IDS) {
-      this.resources[resource] = RESOURCES[resource].initial(this);
-    }
-    this.flags = {
-      shipHijacked: false,
-    };
-    this.currentHp = getMaxHp(this);
-    advanceTask(this, schedule);
-  }
-
-  canPerform(task: Task): boolean {
-    return (
-      entries(task.required.progress || {}).every(
-        ([id, min]) => this.progress[id].level >= min
-      ) &&
-      entries(task.required.resources || {}).every(
-        ([id, min]) => this.resources[id] >= min
-      ) &&
-      entries(task.required.flags || {}).every(
-        ([id, value]) => this.flags[id] === value
-      )
-    );
-  }
-
-  /**
-   * 1 millisecond will spend this many AEUs. This is effectively an increase in
-   * tickspeed; you can't do more things, but you can do them faster.
-   */
-  energyPerMs(): number {
-    return this.simulant.unlocked.has("burstClock")
-      ? Math.max(1, 2 - this.timeInLoop / 16384)
-      : 1;
-  }
-
-  /**
-   * Amount of energy that's necessary to spend until something interesting
-   * happens that changes the simulation: we run out of energy or the current
-   * task finishes.
-   */
-  energyToNextEvent(): number {
-    const taskState = this.taskState!;
-    let toTaskCompletion;
-    switch (taskState.kind) {
-      case "normal":
-        toTaskCompletion = taskState.energyLeft;
-        break;
-      case "combat":
-        toTaskCompletion =
-          taskState.hpLeft / damagePerEnergy(this, taskState.task.stats).dealt;
-        break;
-    }
-    return Math.min(this.energy, toTaskCompletion);
   }
 }
 
@@ -183,6 +125,24 @@ export function toEngineSave(engine: Engine): EngineSave {
     timeAcrossAllLoops: engine.timeAcrossAllLoops,
     simulant: engine.simulant.toSave(),
   };
+}
+
+/**
+ * True if the engine meets the requiriments for the task. Does *not* check
+ * energy or HP. XXX: rename this or something.
+ */
+export function canPerform(engine: Engine, task: Task): boolean {
+  return (
+    entries(task.required.progress || {}).every(
+      ([id, min]) => engine.progress[id].level >= min
+    ) &&
+    entries(task.required.resources || {}).every(
+      ([id, min]) => engine.resources[id] >= min
+    ) &&
+    entries(task.required.flags || {}).every(
+      ([id, value]) => engine.flags[id] === value
+    )
+  );
 }
 
 /**
@@ -225,13 +185,13 @@ export function tickTime(
   duration: number
 ): TickResult {
   // Amount of energy we're allowed to spend in this tick.
-  const energyPerMs = engine.energyPerMs();
+  const energyPerMs = getEnergyPerMs(engine);
   let unspentEnergy = Math.floor(duration * energyPerMs);
   while (unspentEnergy > 0 && engine.energy > 0) {
     if (!engine.task) {
       return { ok: true };
     }
-    if (!engine.canPerform(engine.task)) {
+    if (!canPerform(engine, engine.task)) {
       schedule.recordResult(false);
       advanceTask(engine, schedule);
       return { ok: false, reason: "taskFailed" };
@@ -240,7 +200,7 @@ export function tickTime(
       throw new Error("timeLeftOnTask unset despite task being set");
     }
     // Spend energy until we run out or something happens.
-    const spent = Math.min(engine.energyToNextEvent(), unspentEnergy);
+    const spent = Math.min(getEnergyToNextEvent(engine), unspentEnergy);
     spendEnergy(engine, spent);
 
     if (engine.currentHp <= 0) {
@@ -261,6 +221,36 @@ export function tickTime(
     return { ok: false, reason: "outOfEnergy" };
   }
   return { ok: true };
+}
+
+/**
+ * 1 millisecond will spend this many AEUs. This is effectively an increase in
+ * tickspeed; you can't do more things, but you can do them faster.
+ */
+export function getEnergyPerMs(engine: Engine): number {
+  return engine.simulant.unlocked.has("burstClock")
+    ? Math.max(1, 2 - engine.timeInLoop / 16384)
+    : 1;
+}
+
+/**
+ * Amount of energy that's necessary to spend until something interesting
+ * happens that changes the simulation: we run out of energy or the current task
+ * finishes.
+ */
+export function getEnergyToNextEvent(engine: Engine): number {
+  const taskState = engine.taskState!;
+  let toTaskCompletion;
+  switch (taskState.kind) {
+    case "normal":
+      toTaskCompletion = taskState.energyLeft;
+      break;
+    case "combat":
+      toTaskCompletion =
+        taskState.hpLeft / damagePerEnergy(engine, taskState.task.stats).dealt;
+      break;
+  }
+  return Math.min(engine.energy, toTaskCompletion);
 }
 
 // Private utility functions used for implementing the public API.
@@ -296,6 +286,20 @@ function perform(engine: Engine, task: Task) {
   rewards.energy && addEnergy(engine, rewards.energy);
   rewards.simulant && engine.simulant.unlockedSimulants.add(rewards.simulant);
   task.extraPerform(engine);
+}
+
+/** Restart the time loop. */
+export function startLoop(engine: Engine, schedule: Schedule) {
+  engine.timeInLoop = 0;
+  engine.energy = engine.totalEnergy = INITIAL_ENERGY;
+  for (const resource of RESOURCE_IDS) {
+    engine.resources[resource] = RESOURCES[resource].initial(engine);
+  }
+  engine.flags = {
+    shipHijacked: false,
+  };
+  engine.currentHp = getMaxHp(engine);
+  advanceTask(engine, schedule);
 }
 
 /** Sets the engine's task to the next task from the given schedule. */
@@ -355,7 +359,7 @@ function addEnergy(engine: Engine, amount: number) {
  * and simulant XP.
  */
 function spendEnergy(engine: Engine, amount: number) {
-  const energyPerMs = engine.energyPerMs();
+  const energyPerMs = getEnergyPerMs(engine);
   const time = amount / energyPerMs;
   engine.energy -= amount;
   engine.timeInLoop += amount / energyPerMs;

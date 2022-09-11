@@ -1,4 +1,4 @@
-import { Engine, getCost } from "./engine";
+import { canPerform, Engine, getCost } from "./engine";
 import {
   DISABLE_LOCKOUTS,
   DRAIN_TERACAPACITOR,
@@ -21,7 +21,7 @@ export function first(...agents: Agent[]): Agent {
       if (
         task &&
         getCost(engine, task) < engine.energy &&
-        engine.canPerform(task)
+        canPerform(engine, task)
       ) {
         return task;
       }
@@ -40,7 +40,7 @@ export function withTeracapacitors(agent: Agent): Agent {
     if (
       getCost(engine, DRAIN_TERACAPACITOR) + getCost(engine, inner) >
         engine.energy &&
-      engine.canPerform(DRAIN_TERACAPACITOR) &&
+      canPerform(engine, DRAIN_TERACAPACITOR) &&
       DRAIN_TERACAPACITOR.rewards(engine).energy! >
         getCost(engine, DRAIN_TERACAPACITOR)
     ) {

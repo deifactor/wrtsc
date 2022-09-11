@@ -1,6 +1,7 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction, RootState } from "./store";
 import { Engine, TaskId, TaskQueue, tickTime } from "./engine";
+import * as e from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
@@ -173,7 +174,7 @@ export const startLoop: () => AppThunkAction =
   (dispatch, getState, { engine }) => {
     const nextQueue = getState().nextQueue.queue;
     dispatch(restartSchedule(nextQueue));
-    engine.startLoop(wrapperSchedule(dispatch, getState));
+    e.startLoop(engine, wrapperSchedule(dispatch, getState));
     // Pause if the engine is empty so we properly accumulate bonus time.
     dispatch(setPaused(getState().world.schedule.queue.length === 0));
     dispatch(saveAction());

@@ -1,6 +1,12 @@
 import { Agent } from "./agent";
 import * as agent from "./agent";
-import { Engine, tickTime } from "./engine";
+import {
+  Engine,
+  getEnergyPerMs,
+  getEnergyToNextEvent,
+  startLoop,
+  tickTime,
+} from "./engine";
 import { entries } from "../records";
 
 function benchmark(
@@ -23,12 +29,12 @@ function benchmark(
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
-    engine.startLoop(schedule);
+    startLoop(engine, schedule);
     while (engine.task && !stopCondition(engine)) {
       tickTime(
         engine,
         schedule,
-        engine.energyToNextEvent() / engine.energyPerMs()
+        getEnergyToNextEvent(engine) / getEnergyPerMs(engine)
       );
     }
   }
