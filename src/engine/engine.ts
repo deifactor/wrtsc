@@ -238,7 +238,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     // Amount of energy we're allowed to spend in this tick.
     const energyPerMs = this.energyPerMs();
     let unspentEnergy = Math.floor(duration * energyPerMs);
-    console.log(duration);
     while (unspentEnergy > 0 && this.energy > 0) {
       if (!this.task) {
         return { ok: true };
@@ -275,19 +274,15 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
 
   /** Advances the schedule and records the success of the most recent task. */
   private next(success: boolean | undefined) {
-    console.log("next");
     if (success !== undefined) {
       this.schedule.recordResult(success);
     }
-    console.log(this.schedule);
     const next = this.schedule.next(this);
     if (!next) {
       this.taskState = undefined;
-      console.log("finished");
       return;
     }
     const task = TASKS[next];
-    console.log("moving to", task.id);
     switch (task.kind) {
       case "normal":
         this.taskState = {
@@ -304,7 +299,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
           hpLeft: task.stats.hp,
           hpTotal: task.stats.hp,
         };
-        console.log("resetting to", this.taskState);
     }
   }
 
