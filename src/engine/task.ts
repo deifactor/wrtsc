@@ -253,7 +253,7 @@ export const HIJACK_SHIP: Task = {
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
-    engine.addMilestone("shipHijacked");
+    engine.milestones.shipHijacked = true;
   },
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 128, spatial: 128 },
@@ -269,7 +269,7 @@ export const DISABLE_LOCKOUTS: Task = {
     "Hack your stolen ship to bring the weapons, thrusters, and jump drive online.",
   flavor:
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
-  visible: (engine) => engine.hasMilestone("shipHijacked"),
+  visible: (engine) => "shipHijacked" in engine.milestones,
   maxIterations: (engine) =>
     LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
   required: { resources: { qhLockoutAttempts: 1 } },
@@ -287,7 +287,7 @@ export const STRAFING_RUN: Task = {
     "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
-  visible: (engine) => engine.hasMilestone("shipHijacked"),
+  visible: (engine) => "shipHijacked" in engine.milestones,
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 50 },
@@ -306,7 +306,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     "Use your stolen ship to fly to your sensor drone array. Each drone dismantled provides 3000 AEU.",
   flavor:
     "There is nothing left for them to monitor. The Sixteenth Flower is gone.",
-  visible: (engine) => engine.hasMilestone("shipHijacked"),
+  visible: (engine) => "shipHijacked" in engine.milestones,
   required: {
     flags: { shipHijacked: true },
     progress: { qhLockout: 25 },
@@ -333,7 +333,7 @@ export const LEAVE_RUINS: Task = {
   extraPerform: (engine) => {
     engine.zoneId = "phobosDeimos";
   },
-  visible: (engine) => engine.hasMilestone("shipHijacked"),
+  visible: (engine) => "shipHijacked" in engine.milestones,
   trainedSkills: { spatial: 128 },
 };
 

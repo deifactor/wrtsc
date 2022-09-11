@@ -1,4 +1,4 @@
-import { entries, makeValues, mapValues } from "../records";
+import { entries, keys, makeValues, mapValues } from "../records";
 import { damagePerEnergy } from "./combat";
 
 import {
@@ -62,7 +62,8 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   // Saved player state.
   readonly progress: Record<ProgressId, Progress>;
   readonly skills: Record<SkillId, Skill>;
-  protected readonly _milestones: Set<MilestoneId>;
+  // We use a Record<T, true> here instead of a Set because Sets aren't serializable.
+  milestones: Partial<Record<MilestoneId, true>>;
   timeAcrossAllLoops: number;
   simulant: Simulant;
 
@@ -86,7 +87,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   constructor(schedule: ScheduleT, save?: EngineSave) {
     this.progress = makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 }));
     this.skills = makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 }));
-    this._milestones = new Set();
+    this.milestones = {};
     this.simulant = new Simulant(save?.simulant);
     this.timeAcrossAllLoops = 0;
     if (save) {
@@ -98,7 +99,9 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         this.skills[id].xp = xp;
         this.skills[id].level = level;
       });
-      this._milestones = new Set(save.milestones);
+      for (const milestone of save.milestones) {
+        this.milestones[milestone] = true;
+      }
       this.timeAcrossAllLoops = save.timeAcrossAllLoops;
     }
     this.flags = {
@@ -193,14 +196,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         ([id, value]) => this.flags[id] === value
       )
     );
-  }
-
-  hasMilestone(milestone: MilestoneId) {
-    return this._milestones.has(milestone);
-  }
-
-  addMilestone(milestone: MilestoneId) {
-    this._milestones.add(milestone);
   }
 
   get combat(): number {
@@ -404,7 +399,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
         xp: skill.xp,
         level: skill.level,
       })),
-      milestones: Array.from(this._milestones),
+      milestones: Array.from(keys(this.milestones)),
       timeAcrossAllLoops: this.timeAcrossAllLoops,
       simulant: this.simulant.toSave(),
     };
