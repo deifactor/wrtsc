@@ -15,8 +15,10 @@ export function damagePerEnergy(
   engine: Engine,
   taskStats: CombatStats
 ): { dealt: number; received: number } {
+  const armorMultiplier =
+    taskStats.offense / (taskStats.offense + engine.defense);
   return {
     dealt: engine.combat / 1000,
-    received: taskStats.offense / 1000,
+    received: (taskStats.offense * armorMultiplier) / 1000,
   };
 }

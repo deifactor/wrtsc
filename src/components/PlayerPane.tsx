@@ -79,6 +79,7 @@ export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
   const combat = useEngineSelector((engine) => engine.combat.toFixed(0));
+  const defense = useEngineSelector((engine) => engine.defense.toFixed(0));
   const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
   const maxHp = useEngineSelector((engine) => engine.maxHp);
   const isPaused = useAppSelector((state) => state.world.paused);
@@ -103,6 +104,9 @@ export const PlayerPane = React.memo(() => {
       <ResourceDisplay id="weaponSalvage" />
       <p>
         <strong>Combat:</strong> {combat}
+      </p>
+      <p>
+        <strong>Defense:</strong> {defense}
       </p>
       <p>
         <strong>HP:</strong> {currentHp}/{maxHp}

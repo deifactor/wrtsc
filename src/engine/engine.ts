@@ -206,7 +206,7 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
   }
 
   get defense(): number {
-    return 100;
+    return 100 * Math.log2(1 + this.skills.lethality.level / 32);
   }
 
   get maxHp(): number {

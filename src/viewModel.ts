@@ -74,6 +74,7 @@ export type EngineView = {
   energy: number;
   totalEnergy: number;
   combat: number;
+  defense: number;
   currentHp: number;
   maxHp: number;
   schedule: ScheduleView;
@@ -106,6 +107,7 @@ export function project(engine: QueueEngine): EngineView {
       visible: true,
     })),
     combat: engine.combat,
+    defense: engine.defense,
     currentHp: engine.currentHp,
     maxHp: engine.maxHp,
     zoneId: engine.zoneId,
