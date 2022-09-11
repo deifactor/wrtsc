@@ -6,7 +6,13 @@
  * To use this in a store, use `extraReducers` and listen for `saveLoaded`.
  */
 import { createAction } from "@reduxjs/toolkit";
-import { Engine, EngineSave, QueueEngine, TaskQueue } from "./engine";
+import {
+  Engine,
+  EngineSave,
+  QueueEngine,
+  TaskQueue,
+  toEngineSave,
+} from "./engine";
 import { QueueSchedule } from "./engine/schedule";
 import { Settings } from "./settingsStore";
 import { AppThunkAction, RootState } from "./store";
@@ -41,7 +47,7 @@ function toSave(state: RootState, engine: QueueEngine): GameSave {
       },
       settings: state.settings,
     },
-    engine: engine.toSave(),
+    engine: toEngineSave(engine),
   };
 }
 

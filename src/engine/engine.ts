@@ -347,22 +347,6 @@ export class Engine<ScheduleT extends Schedule = Schedule> {
     }
     return Math.min(this.energy, toTaskCompletion);
   }
-
-  toSave(): EngineSave {
-    return {
-      progress: mapValues(this.progress, (progress) => ({
-        xp: progress.xp,
-        level: progress.level,
-      })),
-      skills: mapValues(this.skills, (skill) => ({
-        xp: skill.xp,
-        level: skill.level,
-      })),
-      milestones: Array.from(keys(this.milestones)),
-      timeAcrossAllLoops: this.timeAcrossAllLoops,
-      simulant: this.simulant.toSave(),
-    };
-  }
 }
 
 export type QueueEngine = Engine<QueueSchedule>;
@@ -374,3 +358,19 @@ export type EngineSave = {
   simulant: SimulantSave;
   timeAcrossAllLoops: number;
 };
+
+export function toEngineSave(engine: Engine): EngineSave {
+  return {
+    progress: mapValues(engine.progress, (progress) => ({
+      xp: progress.xp,
+      level: progress.level,
+    })),
+    skills: mapValues(engine.skills, (skill) => ({
+      xp: skill.xp,
+      level: skill.level,
+    })),
+    milestones: Array.from(keys(engine.milestones)),
+    timeAcrossAllLoops: engine.timeAcrossAllLoops,
+    simulant: engine.simulant.toSave(),
+  };
+}

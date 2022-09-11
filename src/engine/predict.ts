@@ -3,7 +3,7 @@
  * after each task batch.
  */
 
-import { Engine } from "./engine";
+import { Engine, toEngineSave } from "./engine";
 import { QueueSchedule } from "./schedule";
 import { TaskQueue } from "./taskQueue";
 
@@ -19,7 +19,7 @@ export function simulate(
   engine: Engine<QueueSchedule>,
   tasks: TaskQueue
 ): SimulationResult {
-  engine = new Engine(new QueueSchedule(tasks), engine.toSave());
+  engine = new Engine(new QueueSchedule(tasks), toEngineSave(engine));
   const result: SimulationResult = [];
   while (engine.task) {
     // need to get the index *before* we tick, since that can advance the index.
