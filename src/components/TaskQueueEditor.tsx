@@ -188,7 +188,7 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   // vertical alignment.
   return (
     <div className={classNames("flex flex-col", className)}>
-      <div className="flex-auto overflow-y-scroll">
+      <div className="flex-auto overflow-y-auto">
         {indices.map((index) => (
           <TaskQueueItem key={index} index={index} showHp={showHp} />
         ))}
