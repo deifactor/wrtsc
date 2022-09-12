@@ -1,6 +1,6 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunkAction, RootState } from "./store";
-import { Engine, TaskId, TaskQueue, tickTime } from "./engine";
+import { makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
@@ -23,7 +23,7 @@ interface Completions {
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
-    const engine = new Engine(new QueueSchedule([]));
+    const engine = makeEngine(new QueueSchedule([]));
     return {
       view: project(engine),
       lastUpdate: new Date().getTime(),
@@ -184,7 +184,7 @@ export const startLoop: () => AppThunkAction =
 
 export const hardReset: () => AppThunkAction =
   () => (dispatch, _getState, extra) => {
-    extra.engine = new Engine(new QueueSchedule([]));
+    extra.engine = makeEngine(new QueueSchedule([]));
 
     dispatch(startLoop());
     dispatch(worldSlice.actions.setView(project(extra.engine)));

@@ -4,6 +4,7 @@ import {
   Engine,
   getEnergyPerMs,
   getEnergyToNextEvent,
+  makeEngine,
   startLoop,
   tickTime,
 } from "./engine";
@@ -25,7 +26,7 @@ function benchmark(
     },
     restart() {},
   };
-  const engine = new Engine(schedule);
+  const engine = makeEngine(schedule);
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {

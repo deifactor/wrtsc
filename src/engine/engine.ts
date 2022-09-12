@@ -45,63 +45,74 @@ export type TaskState =
     };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
-export class Engine {
+export interface Engine {
   // Saved player state.
-  readonly progress: Record<ProgressId, Progress>;
-  readonly skills: Record<SkillId, Skill>;
+  progress: Record<ProgressId, Progress>;
+  skills: Record<SkillId, Skill>;
   // We use a Record<T, true> here instead of a Set because Sets aren't serializable.
   milestones: Partial<Record<MilestoneId, true>>;
   timeAcrossAllLoops: number;
   simulant: SimulantState;
 
-  taskState: TaskState | undefined = undefined;
+  taskState: TaskState | undefined;
 
   // Unsaved player state that's adjusted as we go through a loop.
   resources: Record<ResourceId, number>;
   flags: Record<LoopFlagId, boolean>;
-  zoneId: ZoneId = RUINS.id;
+  zoneId: ZoneId;
 
   /** Time, in milliseconds, since the start of the loop. */
-  timeInLoop: number = 0;
+  timeInLoop: number;
 
   /**
    * Current amount of energy the player has. If adding energy, make sure to use
    * addEnergy instead.
    */
-  energy: number = INITIAL_ENERGY;
+  energy: number;
   /** The total amount of energy acquired in this loop. */
-  totalEnergy: number = INITIAL_ENERGY;
+  totalEnergy: number;
 
-  currentHp!: number;
+  currentHp: number;
+}
 
-  constructor(schedule: Schedule, save?: EngineSave) {
-    this.progress = makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 }));
-    this.skills = makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 }));
-    this.milestones = {};
-    this.simulant = makeSimulantState(save?.simulant);
-    this.timeAcrossAllLoops = 0;
-    if (save) {
-      entries(save.progress).forEach(([id, { xp, level }]) => {
-        this.progress[id].xp = xp;
-        this.progress[id].level = level;
-      });
-      entries(save.skills).forEach(([id, { xp, level }]) => {
-        this.skills[id].xp = xp;
-        this.skills[id].level = level;
-      });
-      for (const milestone of save.milestones) {
-        this.milestones[milestone] = true;
-      }
-      this.timeAcrossAllLoops = save.timeAcrossAllLoops;
-    }
-    this.flags = {
+export function makeEngine(schedule: Schedule, save?: EngineSave): Engine {
+  const engine: Engine = {
+    progress: makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 })),
+    skills: makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 })),
+    milestones: {},
+    simulant: makeSimulantState(save?.simulant),
+    timeAcrossAllLoops: 0,
+    flags: {
       shipHijacked: false,
-    };
-    this.resources = makeValues(RESOURCE_IDS, (res) =>
-      RESOURCES[res].initial(this)
-    );
-    startLoop(this, schedule);
+    },
+    energy: INITIAL_ENERGY,
+    totalEnergy: INITIAL_ENERGY,
+    timeInLoop: 0,
+    zoneId: RUINS.id,
+    taskState: undefined,
+    // we'll set these two later in this function
+    resources: makeValues(RESOURCE_IDS, () => 0),
+    currentHp: 0,
+  };
+  if (save) {
+    entries(save.progress).forEach(([id, { xp, level }]) => {
+      engine.progress[id].xp = xp;
+      engine.progress[id].level = level;
+    });
+    entries(save.skills).forEach(([id, { xp, level }]) => {
+      engine.skills[id].xp = xp;
+      engine.skills[id].level = level;
+    });
+    for (const milestone of save.milestones) {
+      engine.milestones[milestone] = true;
+    }
+    engine.timeAcrossAllLoops = save.timeAcrossAllLoops;
   }
+  engine.resources = makeValues(RESOURCE_IDS, (res) =>
+    RESOURCES[res].initial(engine)
+  );
+  startLoop(engine, schedule);
+  return engine;
 }
 
 export type EngineSave = {
