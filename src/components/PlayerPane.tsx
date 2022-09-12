@@ -9,6 +9,7 @@ import { SkillIcon } from "./common/SkillIcon";
 import classNames from "classnames";
 import prettyMilliseconds from "pretty-ms";
 import { getCombat, getDefense, getMaxHp } from "../engine/combat";
+import { GiBatteryPack, GiHealthNormal } from "react-icons/gi";
 
 // We have to explicitly write out the class names, otherwise PostCSS will
 // "optimize" them out.
@@ -75,10 +76,11 @@ const TimeStats = React.memo(() => {
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
+  const totalEnergy = useEngineSelector((engine) => engine.totalEnergy);
   const combat = useEngineSelector((engine) => getCombat(engine).toFixed(0));
   const defense = useEngineSelector((engine) => getDefense(engine).toFixed(0));
-  const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
-  const maxHp = useEngineSelector((engine) => getMaxHp(engine).toFixed(0));
+  const currentHp = useEngineSelector((engine) => engine.currentHp);
+  const maxHp = useEngineSelector(getMaxHp);
   const isPaused = useAppSelector((state) => state.world.paused);
   const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
@@ -92,13 +94,32 @@ export const PlayerPane = React.memo(() => {
   );
   return (
     <div>
-      <h1>Stats</h1>
-      <div>
-        <strong>AEU</strong>: {energy.toFixed(0)}
+      <h1>Vitals</h1>
+      <div className="flex font-mono h-8 text-yellow-300">
+        <GiBatteryPack className="flex-0 mr-3" size="1.5em" />
+        <ProgressBar
+          current={energy}
+          max={totalEnergy}
+          text={energy.toFixed(0)}
+          className="h-full flex-grow"
+        />
       </div>
+      <div className="flex font-mono h-8 text-green-300">
+        <GiHealthNormal className="flex-0 mr-3" size="1.5em" />
+        <ProgressBar
+          current={currentHp}
+          max={maxHp}
+          text={`${currentHp.toFixed(0)} / ${maxHp.toFixed(0)}`}
+          className="h-full flex-grow"
+        />
+      </div>
+      <hr className="mx-3 my-4 border-gray-800" />
+      <h1>Resources</h1>
       <ResourceDisplay id="linkedSensorDrones" />
       <ResourceDisplay id="qhLockoutAttempts" />
       <ResourceDisplay id="weaponSalvage" />
+      <hr className="mx-3 my-4 border-gray-800" />
+      <h1>Stats</h1>
       <p>
         <strong>Combat:</strong> {combat}
       </p>
@@ -106,25 +127,26 @@ export const PlayerPane = React.memo(() => {
         <strong>Defense:</strong> {defense}
       </p>
       <p>
-        <strong>HP:</strong> {currentHp}/{maxHp}
-      </p>
-      <p>
         <strong>Simulant XP:</strong> {simulantXp.toFixed(0)}
       </p>
       <hr className="mx-3 my-4 border-gray-800" />
+      <h1>Skills</h1>
       <SkillDisplay skillId="ergodicity" />
       <SkillDisplay skillId="datalink" />
       <SkillDisplay skillId="lethality" />
       <SkillDisplay skillId="spatial" />
       <SkillDisplay skillId="energyTransfer" />
       <SkillDisplay skillId="metacognition" />
-      <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
-      <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
-      <Button onClick={toggleUnspentTime}>
-        {useUnspentTime ? "Disable" : "Enable"} Unspent Time
-      </Button>
       <hr className="mx-3 my-4 border-gray-800" />
+      <h1>Time</h1>
       <TimeStats />
+      <div className="mt-2">
+        <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
+        <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
+        <Button onClick={toggleUnspentTime}>
+          {useUnspentTime ? "Disable" : "Enable"} Unspent Time
+        </Button>
+      </div>
     </div>
   );
 });
