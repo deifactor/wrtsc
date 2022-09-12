@@ -37,3 +37,21 @@ div.tooltip-container {
 div.tooltip-arrow::after {
   --tooltipBackground: black;
 }
+
+/* it is 2022 and we are still having to do vendor prefixes, apparently */
+
+* {
+  scrollbar-color: #999999 #222222;
+}
+
+*::-webkit-scrollbar {
+  width: initial;
+}
+
+*::-webkit-scrollbar-track {
+  background: #222222;        /* color of the tracking area */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #999999;    /* color of the scroll thumb */
+}
