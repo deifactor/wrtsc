@@ -84,7 +84,7 @@ const App = () => {
   // https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content
 
   return (
-    <div className="app flex space-x-10 p-4 items-start h-full">
+    <div className="app flex space-x-6 p-4 items-start h-full max-w-screen-2xl mx-auto">
       <Pane className="w-3/12">
         <PlayerPane />
       </Pane>
