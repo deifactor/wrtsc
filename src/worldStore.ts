@@ -1,5 +1,10 @@
-import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunkAction, useAppSelector } from "./store";
+import {
+  createSelector,
+  createSlice,
+  isAnyOf,
+  PayloadAction,
+} from "@reduxjs/toolkit";
+import { AppThunkAction, RootState, useAppSelector } from "./store";
 import { Engine, makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
 import { project } from "./viewModel";
@@ -7,8 +12,10 @@ import { saveAction, loadSave } from "./save";
 import { SubroutineId } from "./engine/simulant";
 import * as sim from "./engine/simulant";
 import { QueueSchedule, Schedule } from "./engine/schedule";
+import { TASKS } from "./engine/task";
 import { Settings } from "./settingsStore";
 import { startAppListening } from "./listener";
+import equal from "fast-deep-equal";
 
 interface Completions {
   total: number;
@@ -242,3 +249,12 @@ export function useEngineSelector<Args extends unknown[], Return>(
 ): Return {
   return useAppSelector((store) => func(store.world.engine, ...args));
 }
+
+export const selectVisibleTasks = createSelector(
+  (state: RootState) => state.world.engine,
+  (engine: Engine) =>
+    Object.values(TASKS)
+      .filter((task) => task.visible(engine))
+      .map((task) => task.id),
+  { memoizeOptions: { resultEqualityCheck: equal } }
+);

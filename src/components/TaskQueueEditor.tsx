@@ -16,13 +16,10 @@ import {
   setBatchCount,
 } from "../nextQueueStore";
 import equal from "fast-deep-equal";
-import {
-  useAppDispatch,
-  useAppSelector,
-  useEngineViewSelector,
-} from "../store";
+import { useAppDispatch, useAppSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
 import { SimulationStep } from "../engine/predict";
+import { selectVisibleTasks, useEngineSelector } from "../worldStore";
 
 const DRAG_TYPE = "TASK_BATCH";
 
@@ -77,9 +74,10 @@ const TaskQueueItem = React.memo(
       (store) => store.nextQueue.queue[index],
       equal
     );
-    const maxIterations = useEngineViewSelector(
-      (view) => view.tasks[entry.task].maxIterations
-    );
+    const maxIterations = useEngineSelector((engine) => {
+      const { maxIterations } = TASKS[entry.task];
+      return maxIterations && maxIterations(engine);
+    });
     const step: SimulationStep | undefined = useAppSelector(
       (store) => store.nextQueue.simulation[index],
       equal
@@ -164,11 +162,7 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const length = useAppSelector((store) => store.nextQueue.queue.length);
   const indices = Array.from(Array(length).keys());
 
-  const visibleTasks = useEngineViewSelector((engine) =>
-    Object.values(engine.tasks)
-      .filter((task) => task.visible)
-      .map((task) => task.id)
-  );
+  const visibleTasks = useAppSelector(selectVisibleTasks);
   const addButtons = visibleTasks.map((id) => (
     <AddTaskButton key={id} id={id} />
   ));

@@ -1,16 +1,12 @@
 import React, { useCallback, useState } from "react";
-import { SkillId } from "../engine/skills";
+import { SkillId, totalToNextSkillLevel } from "../engine/skills";
 import {
   setPaused,
   setUseUnspentTime,
   startLoop,
   useEngineSelector,
 } from "../worldStore";
-import {
-  useAppDispatch,
-  useAppSelector,
-  useEngineViewSelector,
-} from "../store";
+import { useAppDispatch, useAppSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressBar } from "./common/ProgressBar";
@@ -39,12 +35,8 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   // Randomly offset the background image so it doesn't look weird.
   const [offsetX] = useState(Math.random() * 100);
   const { skillId } = props;
-  const { xp, level, totalToNextLevel, visible } = useEngineViewSelector(
-    (engine) => engine.skills[skillId]
-  );
-  if (!visible) {
-    return null;
-  }
+  const { xp, level } = useEngineSelector((engine) => engine.skills[skillId]);
+  const totalToNextLevel = totalToNextSkillLevel({ xp, level });
 
   const text = `${level} (${scientific.format(xp)}/${scientific.format(
     totalToNextLevel

@@ -4,12 +4,10 @@ import {
   configureStore,
   ThunkAction,
 } from "@reduxjs/toolkit";
-import equal from "fast-deep-equal";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { worldSlice } from "./worldStore";
 import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
-import { EngineView } from "./viewModel";
 import { nextQueueSlice } from "./nextQueueStore";
 
 const rootReducer = combineReducers({
@@ -37,11 +35,5 @@ export type AppThunkAction<T = void> = ThunkAction<
   void,
   AnyAction
 >;
-export function useEngineViewSelector<T>(selector: (view: EngineView) => T): T {
-  return useSelector<RootState, T>(
-    (store) => selector(store.world.view),
-    equal
-  );
-}
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
