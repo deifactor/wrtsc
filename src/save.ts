@@ -6,23 +6,18 @@
  * To use this in a store, use `extraReducers` and listen for `saveLoaded`.
  */
 import { createAction } from "@reduxjs/toolkit";
-import { Engine, EngineSave, QueueEngine, TaskQueue } from "./engine";
-import { QueueSchedule } from "./engine/schedule";
+import { EngineSave, TaskQueue, toEngineSave } from "./engine";
 import { Settings } from "./settingsStore";
 import { AppThunkAction, RootState } from "./store";
-import { project } from "./viewModel";
-import { setView } from "./worldStore";
 
 export type GameSave = {
-  state: {
-    world: {
-      nextQueue: TaskQueue;
-      lastUpdate: number;
-      unspentTime: number;
-    };
-    settings: Settings;
+  world: {
+    engine: EngineSave;
+    nextQueue: TaskQueue;
+    lastUpdate: number;
+    unspentTime: number;
   };
-  engine: EngineSave;
+  settings: Settings;
 };
 
 export const STORAGE_KEY = "save";
@@ -31,46 +26,38 @@ export function hasSave(): boolean {
   return localStorage.getItem(STORAGE_KEY) !== undefined;
 }
 
-function toSave(state: RootState, engine: QueueEngine): GameSave {
+function toSave(state: RootState): GameSave {
   return {
-    state: {
-      world: {
-        nextQueue: state.nextQueue.queue,
-        lastUpdate: state.world.lastUpdate,
-        unspentTime: state.world.unspentTime,
-      },
-      settings: state.settings,
+    world: {
+      nextQueue: state.nextQueue.queue,
+      lastUpdate: state.world.lastUpdate,
+      unspentTime: state.world.unspentTime,
+      engine: toEngineSave(state.world.engine),
     },
-    engine: engine.toSave(),
+    settings: state.settings,
   };
 }
 
 export function saveAction(): AppThunkAction {
-  return (_dispatch, getState, { engine }) => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(toSave(getState(), engine))
-    );
+  return (_dispatch, getState) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave(getState())));
   };
 }
 
 export function loadAction(): AppThunkAction {
-  return (dispatch, _getState, extra) => {
+  return (dispatch) => {
     const stringified = localStorage.getItem(STORAGE_KEY);
     if (!stringified) {
       return;
     }
-    const save: GameSave = JSON.parse(stringified);
-    extra.engine = new Engine(new QueueSchedule([]), save.engine);
-    dispatch(setView(project(extra.engine)));
-    dispatch(saveLoaded(save.state));
+    dispatch(loadSave(JSON.parse(stringified) as GameSave));
   };
 }
 
 /** Returns the current save as a string, suitable for export/import. */
 export function exportSave(): AppThunkAction<string> {
-  return (_dispatch, getState, { engine }) => {
-    const save = toSave(getState(), engine);
+  return (_dispatch, getState) => {
+    const save = toSave(getState());
     return JSON.stringify(save);
   };
 }
@@ -88,4 +75,4 @@ export function importSave(saveString: string): AppThunkAction {
  * Dispatched after the game's save has been loaded. This is guaranteed to run
  * *after* any thunk-y save loading has occurred (i.e., `extra.engine` has been set).
  */
-export const saveLoaded = createAction<GameSave["state"]>("saveLoaded");
+export const loadSave = createAction<GameSave>("loadSave");

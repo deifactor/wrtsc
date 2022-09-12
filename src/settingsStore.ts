@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { saveLoaded } from "./save";
+import { loadSave } from "./save";
 
 export type Settings = {
   /** Whether to automatically restart the loop when it finishes. */
@@ -36,7 +36,7 @@ export const settingsSlice = createSlice({
   },
 
   extraReducers(builder) {
-    builder.addCase(saveLoaded, (_state, action) => {
+    builder.addCase(loadSave, (_state, action) => {
       return action.payload.settings;
     });
   },

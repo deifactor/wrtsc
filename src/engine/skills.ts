@@ -1,22 +1,23 @@
 import { Engine } from "./engine";
 
 /** Skills are trained by performing tasks that are marked as training that skill. */
-export class Skill {
-  public xp: number = 0;
-  public level: number = 0;
+export interface Skill {
+  xp: number;
+  level: number;
+}
 
-  get totalToNextLevel(): number {
-    return (this.level + 1) * 1024;
-  }
+export function totalToNextSkillLevel(skill: Skill): number {
+  return (skill.level + 1) * 1024;
+}
 
-  addXp(xp: number) {
-    this.xp += xp;
-    while (this.xp >= this.totalToNextLevel) {
-      this.xp -= this.totalToNextLevel;
-      this.level++;
-    }
+export function addSkillXp(skill: Skill, xp: number) {
+  skill.xp += xp;
+  while (skill.xp >= totalToNextSkillLevel(skill)) {
+    skill.xp -= totalToNextSkillLevel(skill);
+    skill.level++;
   }
 }
+
 export const SKILL_IDS = [
   "lethality",
   "ergodicity",

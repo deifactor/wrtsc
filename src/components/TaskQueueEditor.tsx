@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { SimulationStep, TASKS } from "../engine";
+import { Engine, Task, TASKS } from "../engine";
 import { TaskId } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
@@ -18,14 +18,30 @@ import {
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
+import { SimulationStep } from "../engine/predict";
+import { selectVisibleTasks } from "../worldStore";
+import { entries } from "../records";
 
 const DRAG_TYPE = "TASK_BATCH";
 
+/**
+ * True if we should even allow the player to add this task to the queue. This
+ * should only return false if there is no possible way for this task to succeed.
+ */
+function selectCanAddToQueue(engine: Engine, task: Task): boolean {
+  // Zero max iterations means it's impossible.
+  if (task.maxIterations && task.maxIterations(engine) === 0) {
+    return false;
+  }
+  // Check progress against the minima. We can't check resources or flags because those vary.
+  return entries(task.required.progress || {}).every(
+    ([progress, min]) => engine.progress[progress].level >= min
+  );
+}
+
 const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   const dispatch = useAppDispatch();
-  const canAddToQueue = useAppSelector(
-    (store) => store.world.view.tasks[id].canAddToQueue
-  );
+  const canAddToQueue = useEngineSelector(selectCanAddToQueue, TASKS[id]);
   return (
     <Button
       className="font-mono whitespace-pre"
@@ -72,9 +88,10 @@ const TaskQueueItem = React.memo(
       (store) => store.nextQueue.queue[index],
       equal
     );
-    const maxIterations = useEngineSelector(
-      (view) => view.tasks[entry.task].maxIterations
-    );
+    const maxIterations = useEngineSelector((engine) => {
+      const { maxIterations } = TASKS[entry.task];
+      return maxIterations && maxIterations(engine);
+    });
     const step: SimulationStep | undefined = useAppSelector(
       (store) => store.nextQueue.simulation[index],
       equal
@@ -159,11 +176,7 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const length = useAppSelector((store) => store.nextQueue.queue.length);
   const indices = Array.from(Array(length).keys());
 
-  const visibleTasks = useEngineSelector((engine) =>
-    Object.values(engine.tasks)
-      .filter((task) => task.visible)
-      .map((task) => task.id)
-  );
+  const visibleTasks = useAppSelector(selectVisibleTasks);
   const addButtons = visibleTasks.map((id) => (
     <AddTaskButton key={id} id={id} />
   ));

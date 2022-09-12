@@ -5,7 +5,6 @@ import { TaskQueue } from "./taskQueue";
 export interface Schedule {
   next(engine: Engine): TaskId | undefined;
   recordResult(success: boolean): void;
-  restart(): void;
 }
 
 export class QueueSchedule {

@@ -1,6 +1,13 @@
 import { Agent } from "./agent";
 import * as agent from "./agent";
-import { Engine } from "./engine";
+import {
+  Engine,
+  getEnergyPerMs,
+  getEnergyToNextEvent,
+  makeEngine,
+  startLoop,
+  tickTime,
+} from "./engine";
 import { entries } from "../records";
 
 function benchmark(
@@ -19,13 +26,17 @@ function benchmark(
     },
     restart() {},
   };
-  const engine = new Engine(schedule);
+  const engine = makeEngine(schedule);
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
-    engine.startLoop();
-    while (engine.task && !stopCondition(engine)) {
-      engine.tickTime(engine.energyToNextEvent() / engine.energyPerMs());
+    startLoop(engine, schedule);
+    while (engine.taskState?.task && !stopCondition(engine)) {
+      tickTime(
+        engine,
+        schedule,
+        getEnergyToNextEvent(engine) / getEnergyPerMs(engine)
+      );
     }
   }
   const duration = new Date().getTime() - now;

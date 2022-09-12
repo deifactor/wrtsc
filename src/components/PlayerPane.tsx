@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { SkillId } from "../engine/skills";
+import { SkillId, totalToNextSkillLevel } from "../engine/skills";
 import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
@@ -8,6 +8,7 @@ import { ProgressBar } from "./common/ProgressBar";
 import { SkillIcon } from "./common/SkillIcon";
 import classNames from "classnames";
 import prettyMilliseconds from "pretty-ms";
+import { getCombat, getDefense, getMaxHp } from "../engine/combat";
 
 // We have to explicitly write out the class names, otherwise PostCSS will
 // "optimize" them out.
@@ -29,12 +30,8 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   // Randomly offset the background image so it doesn't look weird.
   const [offsetX] = useState(Math.random() * 100);
   const { skillId } = props;
-  const { xp, level, totalToNextLevel, visible } = useEngineSelector(
-    (engine) => engine.skills[skillId]
-  );
-  if (!visible) {
-    return null;
-  }
+  const { xp, level } = useEngineSelector((engine) => engine.skills[skillId]);
+  const totalToNextLevel = totalToNextSkillLevel({ xp, level });
 
   const text = `${level} (${scientific.format(xp)}/${scientific.format(
     totalToNextLevel
@@ -78,10 +75,10 @@ const TimeStats = React.memo(() => {
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
-  const combat = useEngineSelector((engine) => engine.combat.toFixed(0));
-  const defense = useEngineSelector((engine) => engine.defense.toFixed(0));
+  const combat = useEngineSelector((engine) => getCombat(engine).toFixed(0));
+  const defense = useEngineSelector((engine) => getDefense(engine).toFixed(0));
   const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
-  const maxHp = useEngineSelector((engine) => engine.maxHp);
+  const maxHp = useEngineSelector((engine) => getMaxHp(engine).toFixed(0));
   const isPaused = useAppSelector((state) => state.world.paused);
   const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
