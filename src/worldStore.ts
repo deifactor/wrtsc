@@ -7,7 +7,6 @@ import {
 import { AppThunkAction, RootState } from "./store";
 import { Engine, makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
-import { project } from "./viewModel";
 import { saveAction, loadSave } from "./save";
 import { SubroutineId } from "./engine/simulant";
 import * as sim from "./engine/simulant";
@@ -38,7 +37,6 @@ export const worldSlice = createSlice({
     const engine = makeEngine(new QueueSchedule([]));
     return {
       engine: engine,
-      view: project(engine),
       lastUpdate: new Date().getTime(),
       unspentTime: 0,
       useUnspentTime: false,
@@ -54,10 +52,6 @@ export const worldSlice = createSlice({
     };
   },
   reducers: {
-    setView: (state) => {
-      state.view = project(state.engine);
-    },
-
     setPaused: (state, action: PayloadAction<boolean>) => {
       state.paused = action.payload;
     },
@@ -101,8 +95,6 @@ export const worldSlice = createSlice({
       } else {
         state.loopFinished = undefined;
       }
-      state.view = project(engine);
-      worldSlice.caseReducers.setView(state);
     },
 
     /** Starts a new loop with the given task queue. */
@@ -124,7 +116,6 @@ export const worldSlice = createSlice({
       }));
       e.startLoop(state.engine, wrapperSchedule(state));
       state.paused = schedule.queue.length === 0;
-      worldSlice.caseReducers.setView(state);
     },
   },
 
@@ -137,7 +128,7 @@ export const worldSlice = createSlice({
   },
 });
 
-export const { setPaused, setView, setUseUnspentTime, unlockSubroutine } =
+export const { setPaused, setUseUnspentTime, unlockSubroutine } =
   worldSlice.actions;
 
 const { startLoopWithQueue, tickWithSettings } = worldSlice.actions;

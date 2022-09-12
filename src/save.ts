@@ -9,7 +9,6 @@ import { createAction } from "@reduxjs/toolkit";
 import { EngineSave, TaskQueue, toEngineSave } from "./engine";
 import { Settings } from "./settingsStore";
 import { AppThunkAction, RootState } from "./store";
-import { setView } from "./worldStore";
 
 export type GameSave = {
   world: {
@@ -52,7 +51,6 @@ export function loadAction(): AppThunkAction {
       return;
     }
     dispatch(loadSave(JSON.parse(stringified) as GameSave));
-    dispatch(setView());
   };
 }
 
