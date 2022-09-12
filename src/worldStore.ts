@@ -1,6 +1,6 @@
 import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunkAction } from "./store";
-import { makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
+import { AppThunkAction, useAppSelector } from "./store";
+import { Engine, makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
 import { project } from "./viewModel";
 import { saveAction, loadSave } from "./save";
@@ -229,3 +229,16 @@ startAppListening({
     api.dispatch(saveAction());
   },
 });
+
+/**
+ * Get a selector over the engine.
+ *
+ * This has the shape it does because it lets us say `useEngineSelector(getCost,
+ * SOME_TASK)`.
+ */
+export function useEngineSelector<Args extends unknown[], Return>(
+  func: (engine: Engine, ...args: Args) => Return,
+  ...args: Args
+): Return {
+  return useAppSelector((store) => func(store.world.engine, ...args));
+}

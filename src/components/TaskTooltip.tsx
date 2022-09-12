@@ -7,12 +7,13 @@ import {
   TaskId,
   Requirements,
   Rewards,
+  getCost,
 } from "../engine";
 import React, { ReactNode } from "react";
-import { useEngineViewSelector } from "../store";
 import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
 import { Tooltip } from "./common/Tooltip";
+import { useEngineSelector } from "../worldStore";
 
 interface Props {
   id: TaskId;
@@ -83,8 +84,8 @@ function taskMetadata({
 
 export const TaskTooltip = React.memo(({ id }: Props) => {
   const task = TASKS[id];
-  const cost = useEngineViewSelector((engine) => engine.tasks[id].cost);
-  const rewards = useEngineViewSelector((engine) => engine.tasks[id].rewards);
+  const cost = useEngineSelector(getCost, task);
+  const rewards = useEngineSelector(task.rewards);
 
   const metadata = taskMetadata({
     id,

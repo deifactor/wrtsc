@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import { TaskIcon } from "./common/TaskIcon";
-import { useEngineViewSelector, useAppSelector } from "../store";
+import { useAppSelector } from "../store";
 import equal from "fast-deep-equal";
+import { useEngineSelector } from "../worldStore";
 
 interface Props {
   className?: string;
@@ -15,7 +16,23 @@ function formatCompletion(frac: number): string {
 export const ScheduleDisplay = (props: Props) => {
   const { className } = props;
   const schedule = useAppSelector((store) => store.world.schedule, equal);
-  const currentTask = useEngineViewSelector((engine) => engine.currentTask);
+  const taskState = useEngineSelector(({ taskState }) => {
+    if (!taskState) {
+      return undefined;
+    }
+    switch (taskState.kind) {
+      case "normal":
+        return {
+          progress: taskState.energyTotal - taskState.energyLeft,
+          cost: taskState.energyTotal,
+        };
+      case "combat":
+        return {
+          progress: taskState.hpTotal - taskState.hpLeft,
+          cost: taskState.hpTotal,
+        };
+    }
+  });
 
   const entries = schedule.queue.map((entry, idx) => {
     const { success, failure } = schedule.completions[idx];
@@ -31,7 +48,7 @@ export const ScheduleDisplay = (props: Props) => {
         </span>
       );
     } else if (idx === schedule.index) {
-      const completionFraction = currentTask!.progress / currentTask!.cost;
+      const completionFraction = taskState!.progress / taskState!.cost;
       progressInner = formatCompletion(completionFraction);
     } else {
       progressInner = <span>[{"    "}]</span>;

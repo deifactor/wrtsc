@@ -1,6 +1,11 @@
 import React, { useCallback, useState } from "react";
 import { SkillId } from "../engine/skills";
-import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
+import {
+  setPaused,
+  setUseUnspentTime,
+  startLoop,
+  useEngineSelector,
+} from "../worldStore";
 import {
   useAppDispatch,
   useAppSelector,
@@ -12,6 +17,7 @@ import { ProgressBar } from "./common/ProgressBar";
 import { SkillIcon } from "./common/SkillIcon";
 import classNames from "classnames";
 import prettyMilliseconds from "pretty-ms";
+import { getCombat, getDefense, getMaxHp } from "../engine/combat";
 
 // We have to explicitly write out the class names, otherwise PostCSS will
 // "optimize" them out.
@@ -60,7 +66,7 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
 /** We move this into its own component because it's potentially updating quite a bit. */
 const TimeStats = React.memo(() => {
   const options = { secondsDecimalDigits: 0 };
-  const totalTime = useEngineViewSelector((engine) =>
+  const totalTime = useEngineSelector((engine) =>
     prettyMilliseconds(engine.timeAcrossAllLoops, options)
   );
   const bonusTime = useAppSelector((state) =>
@@ -81,15 +87,13 @@ const TimeStats = React.memo(() => {
 
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
-  const energy = useEngineViewSelector((engine) => engine.energy);
-  const combat = useEngineViewSelector((engine) => engine.combat.toFixed(0));
-  const defense = useEngineViewSelector((engine) => engine.defense.toFixed(0));
-  const currentHp = useEngineViewSelector((engine) =>
-    engine.currentHp.toFixed(0)
-  );
-  const maxHp = useEngineViewSelector((engine) => engine.maxHp);
+  const energy = useEngineSelector((engine) => engine.energy);
+  const combat = useEngineSelector((engine) => getCombat(engine).toFixed(0));
+  const defense = useEngineSelector((engine) => getDefense(engine).toFixed(0));
+  const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
+  const maxHp = useEngineSelector((engine) => getMaxHp(engine).toFixed(0));
   const isPaused = useAppSelector((state) => state.world.paused);
-  const simulantXp = useEngineViewSelector((engine) => engine.simulant.freeXp);
+  const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
   const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
   const togglePause = useCallback(
     () => dispatch(setPaused(!isPaused)),
