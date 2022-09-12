@@ -37,7 +37,7 @@ export type AppThunkAction<T = void> = ThunkAction<
   void,
   AnyAction
 >;
-export function useEngineSelector<T>(selector: (view: EngineView) => T): T {
+export function useEngineViewSelector<T>(selector: (view: EngineView) => T): T {
   return useSelector<RootState, T>(
     (store) => selector(store.world.view),
     equal

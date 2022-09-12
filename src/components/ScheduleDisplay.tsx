@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { TaskIcon } from "./common/TaskIcon";
-import { useEngineSelector, useAppSelector } from "../store";
+import { useEngineViewSelector, useAppSelector } from "../store";
 import equal from "fast-deep-equal";
 
 interface Props {
@@ -15,7 +15,7 @@ function formatCompletion(frac: number): string {
 export const ScheduleDisplay = (props: Props) => {
   const { className } = props;
   const schedule = useAppSelector((store) => store.world.schedule, equal);
-  const currentTask = useEngineSelector((engine) => engine.currentTask);
+  const currentTask = useEngineViewSelector((engine) => engine.currentTask);
 
   const entries = schedule.queue.map((entry, idx) => {
     const { success, failure } = schedule.completions[idx];

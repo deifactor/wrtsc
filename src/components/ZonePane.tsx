@@ -1,14 +1,14 @@
 import { ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressDisplay } from "./ProgressDisplay";
-import { useEngineSelector } from "../store";
+import { useEngineViewSelector } from "../store";
 
 type Props = {
   className?: string;
 };
 
 export const ZonePane = (props: Props) => {
-  const zone = ZONES[useEngineSelector((engine) => engine.zoneId)];
+  const zone = ZONES[useEngineViewSelector((engine) => engine.zoneId)];
   const { className } = props;
 
   const body = (() => {

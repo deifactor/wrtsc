@@ -1,7 +1,11 @@
 import React, { useCallback, useState } from "react";
 import { SkillId } from "../engine/skills";
 import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
-import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useEngineViewSelector,
+} from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressBar } from "./common/ProgressBar";
@@ -29,7 +33,7 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   // Randomly offset the background image so it doesn't look weird.
   const [offsetX] = useState(Math.random() * 100);
   const { skillId } = props;
-  const { xp, level, totalToNextLevel, visible } = useEngineSelector(
+  const { xp, level, totalToNextLevel, visible } = useEngineViewSelector(
     (engine) => engine.skills[skillId]
   );
   if (!visible) {
@@ -56,7 +60,7 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
 /** We move this into its own component because it's potentially updating quite a bit. */
 const TimeStats = React.memo(() => {
   const options = { secondsDecimalDigits: 0 };
-  const totalTime = useEngineSelector((engine) =>
+  const totalTime = useEngineViewSelector((engine) =>
     prettyMilliseconds(engine.timeAcrossAllLoops, options)
   );
   const bonusTime = useAppSelector((state) =>
@@ -77,13 +81,15 @@ const TimeStats = React.memo(() => {
 
 export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
-  const energy = useEngineSelector((engine) => engine.energy);
-  const combat = useEngineSelector((engine) => engine.combat.toFixed(0));
-  const defense = useEngineSelector((engine) => engine.defense.toFixed(0));
-  const currentHp = useEngineSelector((engine) => engine.currentHp.toFixed(0));
-  const maxHp = useEngineSelector((engine) => engine.maxHp);
+  const energy = useEngineViewSelector((engine) => engine.energy);
+  const combat = useEngineViewSelector((engine) => engine.combat.toFixed(0));
+  const defense = useEngineViewSelector((engine) => engine.defense.toFixed(0));
+  const currentHp = useEngineViewSelector((engine) =>
+    engine.currentHp.toFixed(0)
+  );
+  const maxHp = useEngineViewSelector((engine) => engine.maxHp);
   const isPaused = useAppSelector((state) => state.world.paused);
-  const simulantXp = useEngineSelector((engine) => engine.simulant.freeXp);
+  const simulantXp = useEngineViewSelector((engine) => engine.simulant.freeXp);
   const useUnspentTime = useAppSelector((state) => state.world.useUnspentTime);
   const togglePause = useCallback(
     () => dispatch(setPaused(!isPaused)),

@@ -9,7 +9,7 @@ import {
   Rewards,
 } from "../engine";
 import React, { ReactNode } from "react";
-import { useEngineSelector } from "../store";
+import { useEngineViewSelector } from "../store";
 import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
 import { Tooltip } from "./common/Tooltip";
@@ -83,8 +83,8 @@ function taskMetadata({
 
 export const TaskTooltip = React.memo(({ id }: Props) => {
   const task = TASKS[id];
-  const cost = useEngineSelector((engine) => engine.tasks[id].cost);
-  const rewards = useEngineSelector((engine) => engine.tasks[id].rewards);
+  const cost = useEngineViewSelector((engine) => engine.tasks[id].cost);
+  const rewards = useEngineViewSelector((engine) => engine.tasks[id].rewards);
 
   const metadata = taskMetadata({
     id,

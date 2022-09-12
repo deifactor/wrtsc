@@ -1,5 +1,5 @@
 import { ProgressId, PROGRESS_NAME } from "../engine";
-import { useEngineSelector } from "../store";
+import { useEngineViewSelector } from "../store";
 
 type Props = {
   id: ProgressId;
@@ -7,7 +7,7 @@ type Props = {
 
 export const ProgressDisplay = (props: Props) => {
   const { id } = props;
-  const { level, xp, totalToNextLevel, visible } = useEngineSelector(
+  const { level, xp, totalToNextLevel, visible } = useEngineViewSelector(
     (engine) => engine.progress[id]
   );
   if (!visible) {

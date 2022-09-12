@@ -16,7 +16,11 @@ import {
   setBatchCount,
 } from "../nextQueueStore";
 import equal from "fast-deep-equal";
-import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useEngineViewSelector,
+} from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
 import { SimulationStep } from "../engine/predict";
 
@@ -73,7 +77,7 @@ const TaskQueueItem = React.memo(
       (store) => store.nextQueue.queue[index],
       equal
     );
-    const maxIterations = useEngineSelector(
+    const maxIterations = useEngineViewSelector(
       (view) => view.tasks[entry.task].maxIterations
     );
     const step: SimulationStep | undefined = useAppSelector(
@@ -160,7 +164,7 @@ const TaskQueueEditor = React.memo((props: { className?: string }) => {
   const length = useAppSelector((store) => store.nextQueue.queue.length);
   const indices = Array.from(Array(length).keys());
 
-  const visibleTasks = useEngineSelector((engine) =>
+  const visibleTasks = useEngineViewSelector((engine) =>
     Object.values(engine.tasks)
       .filter((task) => task.visible)
       .map((task) => task.id)
