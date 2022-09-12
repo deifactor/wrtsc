@@ -1,5 +1,5 @@
 import { Button } from "./common/Button";
-import { TASKS } from "../engine";
+import { Engine, Task, TASKS } from "../engine";
 import { TaskId } from "../engine";
 import classNames from "classnames";
 import { ICONS, TaskIcon } from "./common/TaskIcon";
@@ -20,14 +20,28 @@ import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
 import { SimulationStep } from "../engine/predict";
 import { selectVisibleTasks } from "../worldStore";
+import { entries } from "../records";
 
 const DRAG_TYPE = "TASK_BATCH";
 
+/**
+ * True if we should even allow the player to add this task to the queue. This
+ * should only return false if there is no possible way for this task to succeed.
+ */
+function selectCanAddToQueue(engine: Engine, task: Task): boolean {
+  // Zero max iterations means it's impossible.
+  if (task.maxIterations && task.maxIterations(engine) === 0) {
+    return false;
+  }
+  // Check progress against the minima. We can't check resources or flags because those vary.
+  return entries(task.required.progress || {}).every(
+    ([progress, min]) => engine.progress[progress].level >= min
+  );
+}
+
 const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   const dispatch = useAppDispatch();
-  const canAddToQueue = useAppSelector(
-    (store) => store.world.view.tasks[id].canAddToQueue
-  );
+  const canAddToQueue = useEngineSelector(selectCanAddToQueue, TASKS[id]);
   return (
     <Button
       className="font-mono whitespace-pre"
