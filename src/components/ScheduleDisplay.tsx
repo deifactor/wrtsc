@@ -1,8 +1,7 @@
 import classNames from "classnames";
 import { TaskIcon } from "./common/TaskIcon";
-import { useAppSelector } from "../store";
+import { useAppSelector, useEngineSelector } from "../store";
 import equal from "fast-deep-equal";
-import { useEngineSelector } from "../worldStore";
 
 interface Props {
   className?: string;

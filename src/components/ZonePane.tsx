@@ -1,7 +1,7 @@
 import { ZONES } from "../engine/zone";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressDisplay } from "./ProgressDisplay";
-import { useEngineSelector } from "../worldStore";
+import { useEngineSelector } from "../store";
 
 type Props = {
   className?: string;

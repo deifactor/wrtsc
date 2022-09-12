@@ -1,12 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { SkillId, totalToNextSkillLevel } from "../engine/skills";
-import {
-  setPaused,
-  setUseUnspentTime,
-  startLoop,
-  useEngineSelector,
-} from "../worldStore";
-import { useAppDispatch, useAppSelector } from "../store";
+import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
+import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
 import { ResourceDisplay } from "./ResourceDisplay";
 import { ProgressBar } from "./common/ProgressBar";

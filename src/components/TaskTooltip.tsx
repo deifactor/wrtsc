@@ -13,7 +13,7 @@ import React, { ReactNode } from "react";
 import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
 import { Tooltip } from "./common/Tooltip";
-import { useEngineSelector } from "../worldStore";
+import { useEngineSelector } from "../store";
 
 interface Props {
   id: TaskId;

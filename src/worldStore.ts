@@ -4,7 +4,7 @@ import {
   isAnyOf,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { AppThunkAction, RootState, useAppSelector } from "./store";
+import { AppThunkAction, RootState } from "./store";
 import { Engine, makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
 import { project } from "./viewModel";
@@ -236,19 +236,6 @@ startAppListening({
     api.dispatch(saveAction());
   },
 });
-
-/**
- * Get a selector over the engine.
- *
- * This has the shape it does because it lets us say `useEngineSelector(getCost,
- * SOME_TASK)`.
- */
-export function useEngineSelector<Args extends unknown[], Return>(
-  func: (engine: Engine, ...args: Args) => Return,
-  ...args: Args
-): Return {
-  return useAppSelector((store) => func(store.world.engine, ...args));
-}
 
 export const selectVisibleTasks = createSelector(
   (state: RootState) => state.world.engine,

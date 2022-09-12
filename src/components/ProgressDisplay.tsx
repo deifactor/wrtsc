@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { keys } from "../records";
-import { RootState, useAppSelector } from "../store";
-import { selectVisibleTasks, useEngineSelector } from "../worldStore";
+import { RootState, useAppSelector, useEngineSelector } from "../store";
+import { selectVisibleTasks } from "../worldStore";
 import equal from "fast-deep-equal";
 import {
   ProgressId,

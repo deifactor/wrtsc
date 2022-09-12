@@ -3,8 +3,8 @@ import equal from "fast-deep-equal";
 import React from "react";
 import { ResourceId, RESOURCES, TASKS } from "../engine";
 import { keys } from "../records";
-import { RootState, useAppSelector } from "../store";
-import { selectVisibleTasks, useEngineSelector } from "../worldStore";
+import { RootState, useAppSelector, useEngineSelector } from "../store";
+import { selectVisibleTasks } from "../worldStore";
 
 type Props = {
   id: ResourceId;

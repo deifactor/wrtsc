@@ -9,6 +9,7 @@ import { worldSlice } from "./worldStore";
 import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
 import { nextQueueSlice } from "./nextQueueStore";
+import { Engine } from "./engine";
 
 const rootReducer = combineReducers({
   world: worldSlice.reducer,
@@ -37,3 +38,16 @@ export type AppThunkAction<T = void> = ThunkAction<
 >;
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+/**
+ * Get a selector over the engine.
+ *
+ * This has the shape it does because it lets us say `useEngineSelector(getCost,
+ * SOME_TASK)`.
+ */
+export function useEngineSelector<Args extends unknown[], Return>(
+  func: (engine: Engine, ...args: Args) => Return,
+  ...args: Args
+): Return {
+  return useAppSelector((store) => func(store.world.engine, ...args));
+}

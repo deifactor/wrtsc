@@ -16,10 +16,10 @@ import {
   setBatchCount,
 } from "../nextQueueStore";
 import equal from "fast-deep-equal";
-import { useAppDispatch, useAppSelector } from "../store";
+import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { ConnectableElement, useDrag, useDrop } from "react-dnd";
 import { SimulationStep } from "../engine/predict";
-import { selectVisibleTasks, useEngineSelector } from "../worldStore";
+import { selectVisibleTasks } from "../worldStore";
 
 const DRAG_TYPE = "TASK_BATCH";
 
