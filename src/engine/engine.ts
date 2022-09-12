@@ -240,7 +240,7 @@ export function tickTime(
  * tickspeed; you can't do more things, but you can do them faster.
  */
 export function getEnergyPerMs(engine: Engine): number {
-  return engine.simulant.unlocked.has("burstClock")
+  return "burstClock" in engine.simulant.unlocked
     ? Math.max(1, 2 - engine.timeInLoop / 16384)
     : 1;
 }
@@ -296,7 +296,9 @@ function perform(engine: Engine, task: Task) {
     addProgressXp(engine.skills.metacognition, (xp * metaMult) / 4);
   });
   rewards.energy && addEnergy(engine, rewards.energy);
-  rewards.simulant && engine.simulant.unlockedSimulants.add(rewards.simulant);
+  if (rewards.simulant) {
+    engine.simulant.unlockedSimulants[rewards.simulant] = true;
+  }
   task.extraPerform(engine);
 }
 
@@ -377,7 +379,7 @@ function spendEnergy(engine: Engine, amount: number) {
   engine.timeInLoop += amount / energyPerMs;
   engine.timeAcrossAllLoops += amount / energyPerMs;
   // Only add simulant XP if there's actually an unlocked simulant.
-  if (engine.simulant.unlockedSimulants.size !== 0) {
+  if (keys(engine.simulant.unlockedSimulants).length !== 0) {
     engine.simulant.freeXp += amount / 1000;
   }
   const taskState = engine.taskState!;

@@ -185,8 +185,8 @@ function findVisibles(engine: Engine): {
 
 function simulantView(engine: Engine): SimulantView {
   return {
-    unlockedSimulants: Array.from(engine.simulant.unlockedSimulants),
-    unlockedSubroutines: Array.from(engine.simulant.unlocked),
+    unlockedSimulants: Array.from(keys(engine.simulant.unlockedSimulants)),
+    unlockedSubroutines: Array.from(keys(engine.simulant.unlocked)),
     availableSubroutines: SUBROUTINE_IDS.filter((sub) =>
       isSubroutineAvailable(engine, sub)
     ),
