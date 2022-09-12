@@ -15,7 +15,12 @@ import {
   getCost,
 } from "./engine";
 import { getCombat, getDefense, getMaxHp } from "./engine/combat";
-import { SimulantId, SubroutineId, SUBROUTINE_IDS } from "./engine/simulant";
+import {
+  isSubroutineAvailable,
+  SimulantId,
+  SubroutineId,
+  SUBROUTINE_IDS,
+} from "./engine/simulant";
 import { SkillId, totalToNextSkillLevel } from "./engine/skills";
 import { ZoneId } from "./engine/zone";
 import { entries, keys, mapValues } from "./records";
@@ -183,7 +188,7 @@ function simulantView(engine: Engine): SimulantView {
     unlockedSimulants: Array.from(engine.simulant.unlockedSimulants),
     unlockedSubroutines: Array.from(engine.simulant.unlocked),
     availableSubroutines: SUBROUTINE_IDS.filter((sub) =>
-      engine.simulant.subroutineAvailable(sub)
+      isSubroutineAvailable(engine, sub)
     ),
     freeXp: engine.simulant.freeXp,
   };

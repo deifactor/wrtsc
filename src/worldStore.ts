@@ -5,6 +5,7 @@ import * as e from "./engine";
 import { EngineView, project } from "./viewModel";
 import { saveAction, saveLoaded } from "./save";
 import { SubroutineId } from "./engine/simulant";
+import * as sim from "./engine/simulant";
 import { QueueSchedule, Schedule } from "./engine/schedule";
 
 interface Completions {
@@ -192,7 +193,7 @@ export const hardReset: () => AppThunkAction =
 /** Unlocks the given simulant subroutine. */
 export function unlockSubroutine(id: SubroutineId): AppThunkAction {
   return (dispatch, _getState, { engine }) => {
-    engine.simulant.unlock(id);
+    sim.unlockSubroutine(engine, id);
     dispatch(saveAction());
   };
 }

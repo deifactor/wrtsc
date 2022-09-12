@@ -1,3 +1,5 @@
+import { Engine } from "./engine";
+
 export const SIMULANT_IDS = ["tekhne", "ergon"] as const;
 export type SimulantId = typeof SIMULANT_IDS[number];
 
@@ -10,67 +12,55 @@ export const SIMULANT_TO_SUBROUTINE: Record<SimulantId, SubroutineId[]> = {
   ergon: [],
 };
 
-const REQUIREMENTS: Record<SubroutineId, SubroutineId[]> = {
-  burstClock: [],
-};
-
 const COSTS: Record<SubroutineId, number> = {
   // This one costs a very small amount because we expect it to be the first the
   // player ever gets.
   burstClock: 64,
 };
 
-export class Simulant {
-  freeXp: number = 0;
-  unlockedSimulants: Set<SimulantId> = new Set();
-  unlocked: Set<SubroutineId> = new Set();
+export interface SimulantState {
+  freeXp: number;
+  unlockedSimulants: Set<SimulantId>;
+  unlocked: Set<SubroutineId>;
+}
 
-  constructor(save?: SimulantSave) {
-    this.freeXp = save?.freeXp || 0;
-    this.unlockedSimulants = new Set(save?.unlockedSimulants || []);
-    this.unlocked = new Set(save?.unlocked || []);
-  }
+export function makeSimulantState(save?: SimulantSave) {
+  return {
+    freeXp: save?.freeXp || 0,
+    unlockedSimulants: new Set(save?.unlockedSimulants || []),
+    unlocked: new Set(save?.unlocked || []),
+  };
+}
 
-  cost(id: SubroutineId): number {
-    return COSTS[id];
-  }
+export function getSubroutineCost(id: SubroutineId): number {
+  return COSTS[id];
+}
 
-  toSave(): SimulantSave {
-    return {
-      freeXp: this.freeXp,
-      unlockedSimulants: Array.from(this.unlockedSimulants),
-      unlocked: Array.from(this.unlocked),
-    };
-  }
+export function toSimulantSave(simulant: SimulantState): SimulantSave {
+  return {
+    freeXp: simulant.freeXp,
+    unlockedSimulants: Array.from(simulant.unlockedSimulants),
+    unlocked: Array.from(simulant.unlocked),
+  };
+}
 
-  visibleSubroutines(id: SimulantId): SubroutineId[] {
-    return SIMULANT_TO_SUBROUTINE[id].filter((sub) =>
-      REQUIREMENTS[sub].every((req) => this.unlocked.has(req))
-    );
+export function unlockSubroutine(engine: Engine, id: SubroutineId) {
+  if (!isSubroutineAvailable(engine, id)) {
+    throw new Error(`Tried to unlock ${id} but it wasn't available`);
   }
+  engine.simulant.unlocked.add(id);
+  engine.simulant.freeXp -= getSubroutineCost(id);
+}
 
-  unlock(id: SubroutineId) {
-    if (!this.subroutineAvailable(id)) {
-      throw new Error(`Tried to unlock ${id} but it wasn't available`);
-    }
-    this.unlocked.add(id);
-    this.freeXp -= this.cost(id);
-  }
-
-  /** Whether the given subroutine is unlocked. */
-  subroutineAvailable(id: SubroutineId) {
-    const subToSim: Record<SubroutineId, SimulantId> = {
-      burstClock: "tekhne",
-    };
-    return (
-      this.unlockedSimulants.has(subToSim[id]) && this.freeXp >= this.cost(id)
-    );
-  }
-
-  /** Adds free XP, to be spent on unlocked levels. XP is added at 1 per *second*. */
-  addXp(xp: number) {
-    this.freeXp += xp;
-  }
+/** Whether the given subroutine is unlocked. */
+export function isSubroutineAvailable({ simulant }: Engine, id: SubroutineId) {
+  const subToSim: Record<SubroutineId, SimulantId> = {
+    burstClock: "tekhne",
+  };
+  return (
+    simulant.unlockedSimulants.has(subToSim[id]) &&
+    simulant.freeXp >= getSubroutineCost(id)
+  );
 }
 
 export type SimulantSave = {

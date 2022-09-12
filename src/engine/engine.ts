@@ -13,7 +13,12 @@ import {
   addProgressXp,
 } from "./player";
 import { Schedule } from "./schedule";
-import { Simulant, SimulantSave } from "./simulant";
+import {
+  makeSimulantState,
+  SimulantSave,
+  SimulantState,
+  toSimulantSave,
+} from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
 import { CombatTask, NormalTask, Task, TASKS } from "./task";
 import { RUINS, ZoneId } from "./zone";
@@ -47,7 +52,7 @@ export class Engine {
   // We use a Record<T, true> here instead of a Set because Sets aren't serializable.
   milestones: Partial<Record<MilestoneId, true>>;
   timeAcrossAllLoops: number;
-  simulant: Simulant;
+  simulant: SimulantState;
 
   taskState: TaskState | undefined = undefined;
 
@@ -73,7 +78,7 @@ export class Engine {
     this.progress = makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 }));
     this.skills = makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 }));
     this.milestones = {};
-    this.simulant = new Simulant(save?.simulant);
+    this.simulant = makeSimulantState(save?.simulant);
     this.timeAcrossAllLoops = 0;
     if (save) {
       entries(save.progress).forEach(([id, { xp, level }]) => {
@@ -119,7 +124,7 @@ export function toEngineSave(engine: Engine): EngineSave {
     })),
     milestones: Array.from(keys(engine.milestones)),
     timeAcrossAllLoops: engine.timeAcrossAllLoops,
-    simulant: engine.simulant.toSave(),
+    simulant: toSimulantSave(engine.simulant),
   };
 }
 
@@ -362,7 +367,7 @@ function spendEnergy(engine: Engine, amount: number) {
   engine.timeAcrossAllLoops += amount / energyPerMs;
   // Only add simulant XP if there's actually an unlocked simulant.
   if (engine.simulant.unlockedSimulants.size !== 0) {
-    engine.simulant.addXp(amount / 1000);
+    engine.simulant.freeXp += amount / 1000;
   }
   const taskState = engine.taskState!;
   switch (taskState.kind) {
