@@ -2,7 +2,7 @@ import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
 import { TaskQueue, TaskId } from "./engine";
 import { simulate, SimulationResult } from "./engine/predict";
 import { startAppListening } from "./listener";
-import { saveLoaded } from "./save";
+import { loadSave } from "./save";
 import { AppThunkAction } from "./store";
 
 /**
@@ -116,9 +116,13 @@ function checkBounds(queue: TaskQueue, index: number) {
 }
 
 export function setSimulationFromEngine(): AppThunkAction {
-  return (dispatch, getState, { engine }) => {
+  return (dispatch, getState) => {
     const { queue } = getState().nextQueue;
-    dispatch(nextQueueSlice.actions.setSimulation(simulate(engine, queue)));
+    dispatch(
+      nextQueueSlice.actions.setSimulation(
+        simulate(getState().world.engine, queue)
+      )
+    );
   };
 }
 
@@ -141,7 +145,7 @@ startAppListening({
 // We dispatch instead of using an extraBuilder because this will trigger things
 // that listen on setNextQueue.
 startAppListening({
-  actionCreator: saveLoaded,
+  actionCreator: loadSave,
   effect(action, api) {
     api.dispatch(
       nextQueueSlice.actions.setNextQueue(action.payload.world.nextQueue)

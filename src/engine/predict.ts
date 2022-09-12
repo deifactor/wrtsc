@@ -5,6 +5,7 @@
 
 import { Engine, getCost, makeEngine, tickTime, toEngineSave } from "./engine";
 import { QueueSchedule } from "./schedule";
+import { TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 
 export interface SimulationStep {
@@ -25,7 +26,7 @@ export function simulate(engine: Engine, tasks: TaskQueue): SimulationResult {
     const { ok } = tickTime(
       engine,
       schedule,
-      Math.max(getCost(engine, engine.taskState?.task), 1)
+      Math.max(getCost(engine, TASKS[engine.taskState?.task]), 1)
     );
     result[index] = {
       ok: ok,

@@ -1,12 +1,14 @@
-import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunkAction, RootState } from "./store";
+import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
+import { AppThunkAction } from "./store";
 import { makeEngine, TaskId, TaskQueue, tickTime } from "./engine";
 import * as e from "./engine";
-import { EngineView, project } from "./viewModel";
-import { saveAction, saveLoaded } from "./save";
+import { project } from "./viewModel";
+import { saveAction, loadSave } from "./save";
 import { SubroutineId } from "./engine/simulant";
 import * as sim from "./engine/simulant";
 import { QueueSchedule, Schedule } from "./engine/schedule";
+import { Settings } from "./settingsStore";
+import { startAppListening } from "./listener";
 
 interface Completions {
   total: number;
@@ -19,17 +21,23 @@ interface Completions {
   success: number;
   failure: number;
 }
+
+/** If we're finished with this particular loop, why are we finished with it? */
+type FinishReason = "outOfTasks" | "failure";
 
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
     const engine = makeEngine(new QueueSchedule([]));
     return {
+      engine: engine,
       view: project(engine),
       lastUpdate: new Date().getTime(),
       unspentTime: 0,
       useUnspentTime: false,
       paused: true,
+      /** `undefined` indicates we're still in the middle of the loop. */
+      loopFinished: undefined as undefined | FinishReason,
       schedule: {
         queue: [] as TaskQueue,
         index: undefined as number | undefined,
@@ -39,22 +47,8 @@ export const worldSlice = createSlice({
     };
   },
   reducers: {
-    setLastUpdate: (state, action: PayloadAction<number>) => {
-      const now = action.payload;
-      state.unspentTime += now - state.lastUpdate;
-      state.lastUpdate = now;
-    },
-
-    ticked: (state, action: PayloadAction<number>) => {
-      state.unspentTime -= action.payload;
-      if (state.unspentTime < 0) {
-        console.error("Somehow got to negative unspent time");
-        state.unspentTime = 0;
-      }
-    },
-
-    setView: (state, action: PayloadAction<EngineView>) => {
-      state.view = action.payload;
+    setView: (state) => {
+      state.view = project(state.engine);
     },
 
     setPaused: (state, action: PayloadAction<boolean>) => {
@@ -65,45 +59,52 @@ export const worldSlice = createSlice({
       state.useUnspentTime = action.payload;
     },
 
-    advanceSchedule: ({ schedule }) => {
-      if (schedule.index === undefined) {
-        schedule.index = 0;
-        schedule.iteration = 0;
-        return;
-      }
-
-      if (schedule.index >= schedule.queue.length) {
-        return;
-      }
-
-      schedule.iteration++;
-      if (schedule.iteration >= schedule.queue[schedule.index].count) {
-        schedule.index++;
-        schedule.iteration = 0;
-      }
+    unlockSubroutine: (state, action: PayloadAction<SubroutineId>) => {
+      sim.unlockSubroutine(state.engine, action.payload);
     },
 
-    recordResult: ({ schedule }, action: PayloadAction<boolean>) => {
-      if (schedule.index === undefined) {
-        throw new Error("Can't record success when we haven't even started");
-      } else if (schedule.index >= schedule.queue.length) {
-        throw new Error(
-          `Can't record when we're done (index ${schedule.index} queue length ${schedule.queue.length})`
-        );
+    tickWithSettings: (
+      state,
+      action: PayloadAction<{ now: number; settings: Settings }>
+    ) => {
+      const { engine } = state;
+      const { now, settings } = action.payload;
+      let dt = now - state.lastUpdate;
+      state.unspentTime += dt;
+      state.lastUpdate = now;
+      if (state.paused) {
+        return;
+      }
+      const speedrunMode = settings.speedrunMode;
+      if (speedrunMode) {
+        dt *= 1000;
+      } else if (state.unspentTime > 0 && state.useUnspentTime) {
+        dt = Math.min(3 * dt, state.unspentTime);
+      }
+      const { ok } = tickTime(engine, wrapperSchedule(state), dt);
+      state.unspentTime -= dt;
+      if (state.unspentTime < 0) {
+        console.error("Somehow got to negative unspent time");
+        state.unspentTime = 0;
+      }
+      if (!ok) {
+        state.loopFinished = "failure";
+      } else if (!state.engine.taskState) {
+        state.loopFinished = "outOfTasks";
       } else {
-        const completions = schedule.completions[schedule.index];
-        if (action.payload) {
-          completions.success++;
-        } else {
-          completions.failure++;
-        }
+        state.loopFinished = undefined;
       }
+      state.view = project(engine);
+      worldSlice.caseReducers.setView(state);
     },
 
-    restartSchedule: (
-      { schedule },
+    /** Starts a new loop with the given task queue. */
+    startLoopWithQueue: (
+      state,
       action: PayloadAction<TaskQueue | undefined>
     ) => {
+      const { schedule } = state;
+      state.loopFinished = undefined;
       if (action.payload) {
         schedule.queue = action.payload;
       }
@@ -114,11 +115,14 @@ export const worldSlice = createSlice({
         success: 0,
         failure: 0,
       }));
+      e.startLoop(state.engine, wrapperSchedule(state));
+      state.paused = schedule.queue.length === 0;
+      worldSlice.caseReducers.setView(state);
     },
   },
 
   extraReducers(builder) {
-    builder.addCase(saveLoaded, (state, action) => {
+    builder.addCase(loadSave, (state, action) => {
       const world = action.payload.world;
       state.lastUpdate = world.lastUpdate;
       state.unspentTime = world.unspentTime;
@@ -126,95 +130,102 @@ export const worldSlice = createSlice({
   },
 });
 
-export const { setPaused, setView, setUseUnspentTime } = worldSlice.actions;
+export const { setPaused, setView, setUseUnspentTime, unlockSubroutine } =
+  worldSlice.actions;
 
-const { advanceSchedule, recordResult, restartSchedule } = worldSlice.actions;
-
-export function tick(now: number = new Date().getTime()): AppThunkAction {
-  return (dispatch, getState, { engine }) => {
-    let dt = now - getState().world.lastUpdate;
-    dispatch(worldSlice.actions.setLastUpdate(now));
-    if (getState().world.paused) {
-      return;
-    }
-    const speedrunMode = getState().settings.speedrunMode;
-    if (speedrunMode) {
-      dt *= 1000;
-    } else if (
-      getState().world.unspentTime > 0 &&
-      getState().world.useUnspentTime
-    ) {
-      dt = Math.min(3 * dt, getState().world.unspentTime);
-    }
-    const { autoRestart, pauseOnFailure } = getState().settings;
-    const { ok } = tickTime(engine, wrapperSchedule(dispatch, getState), dt);
-    dispatch(worldSlice.actions.ticked(dt));
-    if (!ok && pauseOnFailure) {
-      dispatch(setPaused(true));
-    }
-    if (!speedrunMode && ok && !engine.taskState?.task && autoRestart) {
-      dispatch(startLoop());
-    }
-    dispatch(worldSlice.actions.setView(project(engine)));
-  };
-}
+const { startLoopWithQueue, tickWithSettings } = worldSlice.actions;
 
 /**
  * As `tick`, but takes the size of the timestamp instead. This is mostly useful
  * for tests so we don't have to keep doing `lastUpdate + 100` or whatever everywhere.
  */
 export function tickDelta(delta: number): AppThunkAction {
-  return (dispatch, getState, { engine }) => {
+  return (dispatch, getState) => {
     const lastUpdate = getState().world.lastUpdate;
     dispatch(tick(lastUpdate + delta));
   };
 }
-
-export const startLoop: () => AppThunkAction =
-  () =>
-  (dispatch, getState, { engine }) => {
-    const nextQueue = getState().nextQueue.queue;
-    dispatch(restartSchedule(nextQueue));
-    e.startLoop(engine, wrapperSchedule(dispatch, getState));
-    // Pause if the engine is empty so we properly accumulate bonus time.
-    dispatch(setPaused(getState().world.schedule.queue.length === 0));
-    dispatch(saveAction());
-    dispatch(worldSlice.actions.setView(project(engine)));
-  };
-
-export const hardReset: () => AppThunkAction =
-  () => (dispatch, _getState, extra) => {
-    extra.engine = makeEngine(new QueueSchedule([]));
-
-    dispatch(startLoop());
-    dispatch(worldSlice.actions.setView(project(extra.engine)));
-  };
-
-/** Unlocks the given simulant subroutine. */
-export function unlockSubroutine(id: SubroutineId): AppThunkAction {
-  return (dispatch, _getState, { engine }) => {
-    sim.unlockSubroutine(engine, id);
-    dispatch(saveAction());
+export function tick(now: number = new Date().getTime()): AppThunkAction {
+  return (dispatch, getState) => {
+    const settings = getState().settings;
+    dispatch(
+      tickWithSettings({
+        now,
+        settings,
+      })
+    );
+    const { autoRestart, pauseOnFailure } = settings;
+    const { loopFinished } = getState().world;
+    if (!loopFinished) {
+      return;
+    }
+    if (
+      (loopFinished === "failure" && !pauseOnFailure) ||
+      (loopFinished === "outOfTasks" && autoRestart)
+    ) {
+      dispatch(startLoop());
+    } else {
+      dispatch(setPaused(true));
+    }
   };
 }
 
+export const startLoop: () => AppThunkAction = () => (dispatch, getState) => {
+  const nextQueue = getState().nextQueue.queue;
+  dispatch(startLoopWithQueue(nextQueue));
+};
+
+export const hardReset: () => AppThunkAction = () => () => {
+  // XXX: fixme
+  throw new Error("temporarily broken");
+};
+
 function wrapperSchedule(
-  dispatch: (action: AnyAction) => void,
-  getState: () => RootState
+  state: ReturnType<typeof worldSlice.getInitialState>
 ): Schedule {
   return {
     next(): TaskId | undefined {
-      dispatch(advanceSchedule());
-      const { schedule } = getState().world;
+      const { schedule } = state;
+      if (schedule.index === undefined) {
+        schedule.index = 0;
+        schedule.iteration = 0;
+      } else {
+        schedule.iteration++;
+        if (schedule.iteration >= schedule.queue[schedule.index].count) {
+          schedule.index++;
+          schedule.iteration = 0;
+        }
+      }
+      if (schedule.index >= schedule.queue.length) {
+        return;
+      }
       return schedule.index !== undefined
         ? schedule.queue[schedule.index]?.task
         : undefined;
     },
     recordResult(success: boolean) {
-      dispatch(recordResult(success));
-    },
-    restart() {
-      dispatch(restartSchedule());
+      const { schedule } = state;
+      if (schedule.index === undefined) {
+        throw new Error("Can't record success when we haven't even started");
+      } else if (schedule.index >= schedule.queue.length) {
+        throw new Error(
+          `Can't record when we're done (index ${schedule.index} queue length ${schedule.queue.length})`
+        );
+      } else {
+        const completions = schedule.completions[schedule.index];
+        if (success) {
+          completions.success++;
+        } else {
+          completions.failure++;
+        }
+      }
     },
   };
 }
+
+startAppListening({
+  matcher: isAnyOf(unlockSubroutine),
+  effect(_action, api) {
+    api.dispatch(saveAction());
+  },
+});

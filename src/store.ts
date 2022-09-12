@@ -11,8 +11,6 @@ import { listener } from "./listener";
 import { settingsSlice } from "./settingsStore";
 import { EngineView } from "./viewModel";
 import { nextQueueSlice } from "./nextQueueStore";
-import { Engine, makeEngine } from "./engine";
-import { QueueSchedule } from "./engine/schedule";
 
 const rootReducer = combineReducers({
   world: worldSlice.reducer,
@@ -20,35 +18,23 @@ const rootReducer = combineReducers({
   nextQueue: nextQueueSlice.reducer,
 });
 
-/**
- * Create a store as initialized from scratch. This returns the engine for
- * convenience in tests.
- */
-export function createStore(
-  engine: Engine = makeEngine(new QueueSchedule([]))
-) {
-  return {
-    store: configureStore({
-      reducer: rootReducer,
-      middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-          thunk: {
-            extraArgument: { engine },
-          },
-        }).prepend(listener.middleware),
-    }),
-    engine,
-  };
+/** Create a store as initialized from scratch. */
+export function createStore() {
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().prepend(listener.middleware),
+  });
 }
 
-export const { store } = createStore();
+export const store = createStore();
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 export type AppThunkAction<T = void> = ThunkAction<
   T,
   RootState,
-  { engine: Engine },
+  void,
   AnyAction
 >;
 export function useEngineSelector<T>(selector: (view: EngineView) => T): T {

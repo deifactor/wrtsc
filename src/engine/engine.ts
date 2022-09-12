@@ -20,7 +20,7 @@ import {
   toSimulantSave,
 } from "./simulant";
 import { Skill, SkillId, SKILL_IDS } from "./skills";
-import { CombatTask, NormalTask, Task, TASKS } from "./task";
+import { CombatTask, Task, TaskId, TASKS } from "./task";
 import { RUINS, ZoneId } from "./zone";
 
 export const STORAGE_KEY = "save";
@@ -35,13 +35,13 @@ export type TaskState =
       kind: "normal";
       energyTotal: number;
       energyLeft: number;
-      task: NormalTask;
+      task: TaskId;
     }
   | {
       kind: "combat";
       hpTotal: number;
       hpLeft: number;
-      task: CombatTask;
+      task: TaskId;
     };
 
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
@@ -200,10 +200,11 @@ export function tickTime(
   const energyPerMs = getEnergyPerMs(engine);
   let unspentEnergy = Math.floor(duration * energyPerMs);
   while (unspentEnergy > 0 && engine.energy > 0) {
-    if (!engine.taskState?.task) {
+    const task = getCurrentTask(engine);
+    if (!task) {
       return { ok: true };
     }
-    if (!canPerform(engine, engine.taskState?.task)) {
+    if (!canPerform(engine, task)) {
       schedule.recordResult(false);
       advanceTask(engine, schedule);
       return { ok: false, reason: "taskFailed" };
@@ -221,7 +222,7 @@ export function tickTime(
     }
 
     if (isTaskFinished(engine)) {
-      perform(engine, engine.taskState?.task);
+      perform(engine, task);
       schedule.recordResult(true);
       advanceTask(engine, schedule);
     }
@@ -258,11 +259,17 @@ export function getEnergyToNextEvent(engine: Engine): number {
       toTaskCompletion = taskState.energyLeft;
       break;
     case "combat":
+      const task = TASKS[taskState.task] as CombatTask;
       toTaskCompletion =
-        taskState.hpLeft / damagePerEnergy(engine, taskState.task.stats).dealt;
+        taskState.hpLeft / damagePerEnergy(engine, task.stats).dealt;
       break;
   }
   return Math.min(engine.energy, toTaskCompletion);
+}
+
+export function getCurrentTask(engine: Engine): Task | undefined {
+  const id = engine.taskState?.task;
+  return id && TASKS[id];
 }
 
 // Private utility functions used for implementing the public API.
@@ -328,7 +335,7 @@ function advanceTask(engine: Engine, schedule: Schedule) {
     case "normal":
       engine.taskState = {
         kind: "normal",
-        task,
+        task: task.id,
         energyLeft: getCost(engine, task),
         energyTotal: getCost(engine, task),
       };
@@ -336,7 +343,7 @@ function advanceTask(engine: Engine, schedule: Schedule) {
     case "combat":
       engine.taskState = {
         kind: "combat",
-        task,
+        task: task.id,
         hpLeft: task.stats.hp,
         hpTotal: task.stats.hp,
       };
@@ -388,7 +395,8 @@ function spendEnergy(engine: Engine, amount: number) {
       taskState.energyLeft -= amount;
       break;
     case "combat":
-      const { dealt, received } = damagePerEnergy(engine, taskState.task.stats);
+      const task = getCurrentTask(engine)! as CombatTask;
+      const { dealt, received } = damagePerEnergy(engine, task.stats);
       taskState.hpLeft -= time * dealt;
       engine.currentHp -= time * received;
       // floating-point math strikes again; engine prevents the player from
