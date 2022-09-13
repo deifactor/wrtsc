@@ -198,6 +198,10 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   trainedSkills: { ergodicity: 16 },
 };
 
+// The intent here is that you kill the first few scouts with your matter
+// processor set to weaponry to decrease ttk on the scout ship, then kill a fer
+// more to get extra hijack attempts.
+
 export const KILL_SCOUT: Task = {
   ...defaults,
   kind: "combat",
@@ -206,7 +210,7 @@ export const KILL_SCOUT: Task = {
   shortName: "KILL_SCT",
   stats: {
     offense: 100,
-    defense: 50,
+    defense: 25,
     hp: 100,
   },
   description:
@@ -217,13 +221,16 @@ export const KILL_SCOUT: Task = {
     resources: { scouts: 1 },
     progress: { patrolRoutesObserved: 10 },
   },
-  rewards: () => ({
-    resources: {
-      weaponSalvage: 1,
-      unoccupiedShips: 1,
-      matter: 20,
-    },
-  }),
+  rewards: (engine) => {
+    return {
+      resources: {
+        weaponSalvage: 1,
+        unoccupiedShips: 1,
+        matter: 20,
+        qhLockoutAttempts: lockoutsPerScout(engine),
+      },
+    };
+  },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 16 },
@@ -274,33 +281,30 @@ export const MATTER_WEAPONRY: Task = {
   },
 };
 
-const LOCKOUTS_PER_SHIP = 8;
-
 export const HIJACK_SHIP: Task = {
   ...defaults,
+  kind: "combat",
   id: "hijackShip",
   name: "Hijack Ship",
   shortName: "HJCK_SHP",
-  baseCost: (engine) =>
-    Math.max(60000 - engine.progress.patrolRoutesObserved.level * 200, 24000),
+  stats: {
+    offense: 0,
+    defense: 250,
+    hp: 1000,
+  },
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
   flavor:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   required: {
+    flags: { shipHijacked: false },
     resources: { unoccupiedShips: 1 },
     progress: { patrolRoutesObserved: 15 },
   },
-  rewards: (engine) => {
-    const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 64);
-    return {
-      flags: { shipHijacked: true },
-      resources: {
-        qhLockoutAttempts: Math.floor(LOCKOUTS_PER_SHIP * (1 + datalinkBonus)),
-      },
-      simulant: "tekhne",
-    };
-  },
+  rewards: () => ({
+    flags: { shipHijacked: true },
+    simulant: "tekhne",
+  }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
     engine.milestones.shipHijacked = true;
@@ -321,8 +325,11 @@ export const DISABLE_LOCKOUTS: Task = {
     "QH-283 lockouts must be disabled before the jump drive engages. Anti-brute-force mechanisms prevent repeated attacks. Recommened attempting over multiple temporal iterations.",
   visible: (engine) => "shipHijacked" in engine.milestones,
   maxIterations: (engine) =>
-    LOCKOUTS_PER_SHIP * RESOURCES.scouts.initial(engine),
-  required: { resources: { qhLockoutAttempts: 1 } },
+    lockoutsPerScout(engine) * RESOURCES.scouts.initial(engine),
+  required: {
+    resources: { qhLockoutAttempts: 1 },
+    flags: { shipHijacked: true },
+  },
   rewards: () => ({ progress: { qhLockout: 1024 } }),
   trainedSkills: { datalink: 4 },
 };
@@ -434,4 +441,7 @@ function exploreMultiplier(engine: Engine): number {
   const shipBonus = engine.flags.shipHijacked ? 1.5 : 0;
   const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 32);
   return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
+}
+function lockoutsPerScout(engine: Engine): number {
+  return Math.floor(8 * (1 + Math.log2(1 + engine.skills.datalink.level / 64)));
 }
