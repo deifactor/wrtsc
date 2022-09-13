@@ -2,8 +2,6 @@ import {
   TASKS,
   ProgressId,
   PROGRESS_NAME,
-  RESOURCES,
-  ResourceId,
   TaskId,
   Requirements,
   Rewards,
@@ -14,6 +12,7 @@ import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
 import { Tooltip } from "./common/Tooltip";
 import { useEngineSelector } from "../store";
+import { ResourceId, RESOURCES } from "../engine/resources";
 
 interface Props {
   id: TaskId;

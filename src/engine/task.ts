@@ -1,6 +1,7 @@
 import { CombatStats } from "./combat";
 import { Engine } from "./engine";
-import { LoopFlagId, ResourceId, ProgressId, RESOURCES } from "./player";
+import { LoopFlagId, ProgressId } from "./player";
+import { ResourceId, RESOURCES } from "./resources";
 import { SimulantId } from "./simulant";
 import { SkillId } from "./skills";
 

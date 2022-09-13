@@ -4,14 +4,12 @@ import { damagePerEnergy, getMaxHp } from "./combat";
 import {
   Progress,
   LoopFlagId,
-  ResourceId,
   ProgressId,
-  RESOURCES,
-  RESOURCE_IDS,
   MilestoneId,
   PROGRESS_IDS,
   addProgressXp,
 } from "./player";
+import { ResourceId, RESOURCES, RESOURCE_IDS } from "./resources";
 import { Schedule } from "./schedule";
 import {
   makeSimulantState,

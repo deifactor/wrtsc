@@ -1,7 +1,8 @@
 import { createSelector } from "@reduxjs/toolkit";
 import equal from "fast-deep-equal";
 import React from "react";
-import { ResourceId, RESOURCES, TASKS } from "../engine";
+import { TASKS } from "../engine";
+import { ResourceId, RESOURCES } from "../engine/resources";
 import { keys } from "../records";
 import { RootState, useAppSelector, useEngineSelector } from "../store";
 import { selectVisibleTasks } from "../worldStore";
