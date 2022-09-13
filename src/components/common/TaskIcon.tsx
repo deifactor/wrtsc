@@ -1,6 +1,7 @@
 import { TaskId } from "../../engine";
 import { IconType } from "react-icons";
 import {
+  GiAutoRepair,
   GiBatteryPack,
   GiHoodedAssassin,
   GiJourney,
@@ -29,6 +30,7 @@ export const ICONS: Partial<Record<TaskId, IconType>> = {
   eradicateScout: GiHoodedAssassin,
   strafingRun: GiStrafe,
   dismantleSensorDrones: FaWrench,
+  selfRepair: GiAutoRepair,
   completeRuins: DEBUG_ICON,
 };
 

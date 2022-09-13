@@ -1,4 +1,4 @@
-import { CombatStats } from "./combat";
+import { CombatStats, getMaxHp } from "./combat";
 import { Engine } from "./engine";
 import { LoopFlagId, ProgressId } from "./player";
 import { ResourceId, RESOURCES } from "./resources";
@@ -17,7 +17,8 @@ export type TaskId =
   | "strafingRun"
   | "dismantleSensorDrones"
   | "leaveRuins"
-  | "completeRuins";
+  | "completeRuins"
+  | "selfRepair";
 
 const always = () => true;
 
@@ -218,11 +219,36 @@ export const KILL_SCOUT: Task = {
     resources: {
       weaponSalvage: 1,
       unoccupiedShips: 1,
+      matter: 25,
     },
   }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 16 },
+};
+
+export const SELF_REPAIR: Task = {
+  ...defaults,
+  kind: "normal",
+  id: "selfRepair",
+  name: "Self-Repair",
+  shortName: "SELF_REP",
+  baseCost: () => 1000,
+  description:
+    "Consume all your matter to regenerate your HP. 1 matter restores 1 HP. Will not waste matter",
+  flavor:
+    "Damage to chassis systems detected. Matter breakdown systems and repair systems online and functional.",
+  visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
+  required: {},
+  rewards: () => ({}),
+  extraPerform: (engine) => {
+    const consumed = Math.min(
+      getMaxHp(engine) - engine.currentHp,
+      engine.resources.matter
+    );
+    engine.resources.matter -= consumed;
+    engine.currentHp += consumed;
+  },
 };
 
 const LOCKOUTS_PER_SHIP = 8;
@@ -376,6 +402,7 @@ export const TASKS: Record<TaskId, Task> = {
   strafingRun: STRAFING_RUN,
   leaveRuins: LEAVE_RUINS,
   completeRuins: COMPLETE_RUINS,
+  selfRepair: SELF_REPAIR,
 };
 
 function exploreMultiplier(engine: Engine): number {

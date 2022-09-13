@@ -118,6 +118,7 @@ export const PlayerPane = React.memo(() => {
       <ResourceDisplay id="linkedSensorDrones" />
       <ResourceDisplay id="qhLockoutAttempts" />
       <ResourceDisplay id="weaponSalvage" />
+      <ResourceDisplay id="matter" />
       <hr className="mx-3 my-4 border-gray-800" />
       <h1>Stats</h1>
       <p>

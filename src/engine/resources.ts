@@ -10,6 +10,9 @@ export const RESOURCE_IDS = [
   "unoccupiedShips",
   "weaponSalvage",
   "qhLockoutAttempts",
+  // 'Matter' is something the player can use to augment their abilities.
+  "matter",
+  "weaponizedMatter",
 ] as const;
 export type ResourceId = typeof RESOURCE_IDS[number];
 
@@ -72,6 +75,18 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     id: "qhLockoutAttempts",
     name: "QH Lockout Attempts",
     zone: "ruins",
+    initial: () => 0,
+  },
+  matter: {
+    id: "matter",
+    name: "Matter",
+    zone: null,
+    initial: () => 0,
+  },
+  weaponizedMatter: {
+    id: "weaponizedMatter",
+    name: "Weaponized Matter",
+    zone: null,
     initial: () => 0,
   },
 };
