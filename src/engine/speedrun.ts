@@ -26,7 +26,8 @@ function benchmark(
     },
     restart() {},
   };
-  const engine = makeEngine(schedule);
+  const engine = makeEngine();
+  startLoop(engine, schedule);
 
   const now = new Date().getTime();
   while (!stopCondition(engine)) {

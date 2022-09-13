@@ -10,7 +10,7 @@ import * as e from "./engine";
 import { saveAction, loadSave } from "./save";
 import { SubroutineId } from "./engine/simulant";
 import * as sim from "./engine/simulant";
-import { QueueSchedule, Schedule } from "./engine/schedule";
+import { Schedule } from "./engine/schedule";
 import { TASKS } from "./engine/task";
 import { Settings } from "./settingsStore";
 import { startAppListening } from "./listener";
@@ -34,7 +34,7 @@ type FinishReason = "outOfTasks" | "failure";
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
-    const engine = makeEngine(new QueueSchedule([]));
+    const engine = makeEngine();
     return {
       engine: engine,
       lastUpdate: new Date().getTime(),
@@ -124,7 +124,7 @@ export const worldSlice = createSlice({
       const world = action.payload.world;
       state.lastUpdate = world.lastUpdate;
       state.unspentTime = world.unspentTime;
-      state.engine = makeEngine(new QueueSchedule([]), world.engine);
+      state.engine = makeEngine(world.engine);
     });
   },
 });

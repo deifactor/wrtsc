@@ -77,7 +77,7 @@ export interface Engine {
   currentHp: number;
 }
 
-export function makeEngine(schedule: Schedule, save?: EngineSave): Engine {
+export function makeEngine(save?: EngineSave): Engine {
   const engine: Engine = {
     progress: makeValues(PROGRESS_IDS, () => ({ level: 0, xp: 0 })),
     skills: makeValues(SKILL_IDS, () => ({ level: 0, xp: 0 })),
@@ -114,7 +114,7 @@ export function makeEngine(schedule: Schedule, save?: EngineSave): Engine {
   engine.resources = makeValues(RESOURCE_IDS, (res) =>
     RESOURCES[res].initial(engine)
   );
-  startLoop(engine, schedule);
+  startLoop(engine);
   return engine;
 }
 
@@ -317,7 +317,7 @@ function perform(engine: Engine, task: Task) {
 }
 
 /** Restart the time loop. */
-export function startLoop(engine: Engine, schedule: Schedule) {
+export function startLoop(engine: Engine, schedule?: Schedule) {
   engine.timeInLoop = 0;
   engine.energy = engine.totalEnergy = INITIAL_ENERGY;
   for (const resource of RESOURCE_IDS) {
@@ -328,7 +328,7 @@ export function startLoop(engine: Engine, schedule: Schedule) {
   };
   engine.currentHp = getMaxHp(engine);
   engine.matterMode = "save";
-  advanceTask(engine, schedule);
+  schedule && advanceTask(engine, schedule);
 }
 
 /** Sets the engine's task to the next task from the given schedule. */
