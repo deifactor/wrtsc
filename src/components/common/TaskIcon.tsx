@@ -6,6 +6,7 @@ import {
   GiHoodedAssassin,
   GiJourney,
   GiLockPicking,
+  GiSinusoidalBeam,
   GiSpaceship,
   GiSpyglass,
   GiStrafe,
@@ -30,7 +31,8 @@ export const ICONS: Partial<Record<TaskId, IconType>> = {
   eradicateScout: GiHoodedAssassin,
   strafingRun: GiStrafe,
   dismantleSensorDrones: FaWrench,
-  selfRepair: GiAutoRepair,
+  matterRepair: GiAutoRepair,
+  matterWeaponry: GiSinusoidalBeam,
   completeRuins: DEBUG_ICON,
 };
 

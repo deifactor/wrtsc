@@ -42,6 +42,9 @@ export type TaskState =
       task: TaskId;
     };
 
+/** What to do with matter from defeated enemies? */
+export type MatterMode = "save" | "repair" | "weaponry";
+
 /** Contains all of the game state. If this was MVC, this would correspond to the model. */
 export interface Engine {
   // Saved player state.
@@ -51,6 +54,7 @@ export interface Engine {
   milestones: Partial<Record<MilestoneId, true>>;
   timeAcrossAllLoops: number;
   simulant: SimulantState;
+  matterMode: MatterMode;
 
   taskState: TaskState | undefined;
 
@@ -83,6 +87,7 @@ export function makeEngine(schedule: Schedule, save?: EngineSave): Engine {
     flags: {
       shipHijacked: false,
     },
+    matterMode: "repair",
     energy: INITIAL_ENERGY,
     totalEnergy: INITIAL_ENERGY,
     timeInLoop: 0,
@@ -284,7 +289,11 @@ function perform(engine: Engine, task: Task) {
     engine.resources[res] -= value;
   });
   entries(rewards.resources || {}).forEach(([res, value]) => {
-    engine.resources[res] += value;
+    if (res !== "matter") {
+      engine.resources[res] += value;
+      return;
+    }
+    processMatter(engine, value);
   });
   entries(rewards.progress || {}).forEach(([progress, xp]) => {
     addProgressXp(
@@ -318,6 +327,7 @@ export function startLoop(engine: Engine, schedule: Schedule) {
     shipHijacked: false,
   };
   engine.currentHp = getMaxHp(engine);
+  engine.matterMode = "save";
   advanceTask(engine, schedule);
 }
 
@@ -403,5 +413,24 @@ function spendEnergy(engine: Engine, amount: number) {
         engine.currentHp = 0;
       }
       break;
+  }
+}
+
+/* Invoked whenever the player receives matter. Does something different based on the player's matter mode. */
+export function processMatter(engine: Engine, value: number) {
+  switch (engine.matterMode) {
+    case "save":
+      engine.resources.matter += value;
+      return;
+    case "weaponry":
+      engine.resources.weaponizedMatter += value;
+      return;
+    case "repair":
+      const consumed = Math.min(getMaxHp(engine) - engine.currentHp, value);
+      engine.currentHp += consumed;
+      value -= consumed;
+      if (value > 0) {
+        engine.resources.matter += value;
+      }
   }
 }

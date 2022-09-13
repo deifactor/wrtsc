@@ -43,6 +43,7 @@ export class QueueSchedule {
       this.index++;
       this.iteration = 0;
     }
+    console.log("at ", this.index, this.iteration);
     return this.queue[this.index]?.task;
   }
 

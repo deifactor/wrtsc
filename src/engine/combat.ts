@@ -24,7 +24,11 @@ export function damagePerEnergy(
 }
 
 export function getCombat(engine: Engine): number {
-  return 100 * (1 + Math.log2(1 + engine.skills.lethality.level / 16));
+  return (
+    100 *
+    (1 + Math.log2(1 + engine.skills.lethality.level / 16)) *
+    (1 + Math.log2(1 + engine.resources.weaponizedMatter / 512))
+  );
 }
 
 export function getDefense(engine: Engine): number {

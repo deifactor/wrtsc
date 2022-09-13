@@ -1,5 +1,5 @@
 import { CombatStats, getMaxHp } from "./combat";
-import { Engine } from "./engine";
+import { Engine, processMatter } from "./engine";
 import { LoopFlagId, ProgressId } from "./player";
 import { ResourceId, RESOURCES } from "./resources";
 import { SimulantId } from "./simulant";
@@ -18,7 +18,8 @@ export type TaskId =
   | "dismantleSensorDrones"
   | "leaveRuins"
   | "completeRuins"
-  | "selfRepair";
+  | "matterRepair"
+  | "matterWeaponry";
 
 const always = () => true;
 
@@ -205,7 +206,7 @@ export const KILL_SCOUT: Task = {
   shortName: "KILL_SCT",
   stats: {
     offense: 100,
-    hp: 50,
+    hp: 100,
   },
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
@@ -219,7 +220,7 @@ export const KILL_SCOUT: Task = {
     resources: {
       weaponSalvage: 1,
       unoccupiedShips: 1,
-      matter: 25,
+      matter: 20,
     },
   }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
@@ -227,27 +228,48 @@ export const KILL_SCOUT: Task = {
   trainedSkills: { lethality: 16 },
 };
 
-export const SELF_REPAIR: Task = {
+export const MATTER_REPAIR: Task = {
   ...defaults,
   kind: "normal",
-  id: "selfRepair",
-  name: "Self-Repair",
-  shortName: "SELF_REP",
-  baseCost: () => 1000,
+  id: "matterRepair",
+  name: "Matter: Repair",
+  shortName: "MAT_REP",
+  baseCost: () => 100,
   description:
-    "Consume all your matter to regenerate your HP. 1 matter restores 1 HP. Will not waste matter",
+    "Obtained matter will be used to instantly regenerate HP. 1 matter restores 1 HP. Will not waste matter.",
   flavor:
     "Damage to chassis systems detected. Matter breakdown systems and repair systems online and functional.",
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   required: {},
   rewards: () => ({}),
   extraPerform: (engine) => {
+    engine.matterMode = "repair";
     const consumed = Math.min(
       getMaxHp(engine) - engine.currentHp,
       engine.resources.matter
     );
     engine.resources.matter -= consumed;
     engine.currentHp += consumed;
+  },
+};
+
+export const MATTER_WEAPONRY: Task = {
+  ...defaults,
+  kind: "normal",
+  id: "matterWeaponry",
+  name: "Matter: Weaponry",
+  shortName: "MAT_WEPN",
+  baseCost: () => 100,
+  description:
+    "Obtained matter will be used to augment offensive capabilities. Also consumes any spare matter.",
+  flavor:
+    "Preserver materiel is not mechanically compatible with weapon systems, but can be used for parts.",
+  visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
+  required: {},
+  rewards: () => ({}),
+  extraPerform: (engine) => {
+    engine.matterMode = "weaponry";
+    processMatter(engine, engine.resources.matter);
   },
 };
 
@@ -402,7 +424,8 @@ export const TASKS: Record<TaskId, Task> = {
   strafingRun: STRAFING_RUN,
   leaveRuins: LEAVE_RUINS,
   completeRuins: COMPLETE_RUINS,
-  selfRepair: SELF_REPAIR,
+  matterRepair: MATTER_REPAIR,
+  matterWeaponry: MATTER_WEAPONRY,
 };
 
 function exploreMultiplier(engine: Engine): number {
