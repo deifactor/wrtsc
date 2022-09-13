@@ -206,6 +206,7 @@ export const KILL_SCOUT: Task = {
   shortName: "KILL_SCT",
   stats: {
     offense: 100,
+    defense: 50,
     hp: 100,
   },
   description:

@@ -38,7 +38,9 @@ function taskMetadata({
     .join(", ");
 
   if (task.kind === "combat") {
-    metadata["Combat"] = `${task.stats.offense} offense, ${task.stats.hp} HP`;
+    metadata[
+      "Combat"
+    ] = `${task.stats.offense} offense, ${task.stats.defense} defense, ${task.stats.hp} HP`;
   }
 
   if (requirements) {

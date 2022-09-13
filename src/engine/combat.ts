@@ -7,6 +7,7 @@ import { Engine } from "./engine";
 export type CombatStats = {
   /** Damage dealt per 1 kAEU (1 second, before tickspeed/etc). */
   offense: number;
+  defense: number;
   hp: number;
 };
 
@@ -15,12 +16,20 @@ export function damagePerEnergy(
   engine: Engine,
   taskStats: CombatStats
 ): { dealt: number; received: number } {
-  const armorMultiplier =
-    taskStats.offense / (taskStats.offense + getDefense(engine));
   return {
-    dealt: getCombat(engine) / 1000,
-    received: (taskStats.offense * armorMultiplier) / 1000,
+    dealt:
+      (getCombat(engine) *
+        armorMultiplier(getCombat(engine), taskStats.defense)) /
+      1000,
+    received:
+      (taskStats.offense *
+        armorMultiplier(taskStats.offense, getDefense(engine))) /
+      1000,
   };
+}
+
+function armorMultiplier(offense: number, defense: number) {
+  return Math.pow(offense / (offense + defense), 2);
 }
 
 export function getCombat(engine: Engine): number {
