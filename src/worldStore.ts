@@ -124,6 +124,7 @@ export const worldSlice = createSlice({
       const world = action.payload.world;
       state.lastUpdate = world.lastUpdate;
       state.unspentTime = world.unspentTime;
+      state.engine = makeEngine(new QueueSchedule([]), world.engine);
     });
   },
 });
