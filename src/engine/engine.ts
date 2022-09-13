@@ -208,7 +208,10 @@ export function tickTime(
       return { ok: true };
     }
     if (!canPerform(engine, task)) {
-      schedule.recordResult(false);
+      schedule.recordResult(false, {
+        hp: engine.currentHp,
+        energy: engine.energy,
+      });
       advanceTask(engine, schedule);
       return { ok: false, reason: "taskFailed" };
     }
@@ -220,20 +223,29 @@ export function tickTime(
     spendEnergy(engine, spent);
 
     if (engine.currentHp <= 0) {
-      schedule.recordResult(false);
+      schedule.recordResult(false, {
+        hp: engine.currentHp,
+        energy: engine.energy,
+      });
       return { ok: false, reason: "outOfHp" };
     }
 
     if (isTaskFinished(engine)) {
       perform(engine, task);
-      schedule.recordResult(true);
+      schedule.recordResult(true, {
+        hp: engine.currentHp,
+        energy: engine.energy,
+      });
       advanceTask(engine, schedule);
     }
     unspentEnergy -= spent;
   }
 
   if (engine.energy <= 0 && engine.taskState?.task) {
-    schedule.recordResult(false);
+    schedule.recordResult(false, {
+      hp: engine.currentHp,
+      energy: engine.energy,
+    });
     return { ok: false, reason: "outOfEnergy" };
   }
   return { ok: true };

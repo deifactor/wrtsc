@@ -2,9 +2,19 @@ import { Engine } from "./engine";
 import { TaskId } from "./task";
 import { TaskQueue } from "./taskQueue";
 
+/**
+ * State of the engine after completing a task. This is useful for things like
+ * the predictor and the speedrunner. We use the word "metrics" because "state"
+ * tends to mean things like the Redux store.
+ */
+export interface EngineMetrics {
+  hp: number;
+  energy: number;
+}
+
 export interface Schedule {
   next(engine: Engine): TaskId | undefined;
-  recordResult(success: boolean): void;
+  recordResult(success: boolean, metrics: EngineMetrics): void;
 }
 
 export class QueueSchedule {
@@ -17,6 +27,7 @@ export class QueueSchedule {
    */
   iteration = 0;
   completions: { total: number; success: number; failure: number }[];
+  metrics: EngineMetrics[];
 
   constructor(queue: TaskQueue) {
     this.queue = queue;
@@ -25,6 +36,7 @@ export class QueueSchedule {
       success: 0,
       failure: 0,
     }));
+    this.metrics = [];
   }
 
   next(): TaskId | undefined {
@@ -47,7 +59,7 @@ export class QueueSchedule {
     return this.queue[this.index]?.task;
   }
 
-  recordResult(success: boolean) {
+  recordResult(success: boolean, metrics: EngineMetrics) {
     if (this.index === undefined) {
       throw new Error("Can't record success when we haven't even started");
     } else if (this.index >= this.queue.length) {
@@ -56,21 +68,12 @@ export class QueueSchedule {
       );
     } else {
       const completions = this.completions[this.index];
+      this.metrics[this.index] = metrics;
       if (success) {
         completions.success++;
       } else {
         completions.failure++;
       }
     }
-  }
-
-  restart() {
-    this.index = undefined;
-    this.iteration = 0;
-    this.completions = this.queue.map((batch) => ({
-      total: batch.count,
-      success: 0,
-      failure: 0,
-    }));
   }
 }
