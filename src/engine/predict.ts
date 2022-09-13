@@ -26,7 +26,7 @@ export function simulate(engine: Engine, tasks: TaskQueue): SimulationResult {
     const { ok } = tickTime(
       engine,
       schedule,
-      Math.max(getCost(engine, TASKS[engine.taskState?.task]), 1)
+      Math.max(Math.ceil(getCost(engine, TASKS[engine.taskState?.task])), 1)
     );
     result[index] = {
       ok: ok,
