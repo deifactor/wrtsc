@@ -408,8 +408,7 @@ function isTaskFinished(engine: Engine): boolean {
 }
 
 function addEnergy(engine: Engine, amount: number) {
-  amount *=
-    1 + Math.log(1 + engine.skills.energyTransfer.level / 128) / Math.log(2);
+  amount *= 1 + Math.log2(1 + engine.skills.energyTransfer.level / 128);
   amount = Math.floor(amount);
   engine.energy += amount;
   engine.totalEnergy += amount;
