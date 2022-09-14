@@ -142,10 +142,10 @@ const TaskQueueItem = React.memo(
             { invisible: !showHp }
           )}
         >
-          {step?.hp.toFixed(0)}
+          {step.hp?.toFixed(0)}
         </div>
         <div className="px-2 text-yellow-300 font-mono font-bold text-lg w-16 text-right">
-          {step?.energy.toFixed(0)}
+          {step.energy?.toFixed(0)}
         </div>
         <div className="text-sm">
           {setToMaxButton}

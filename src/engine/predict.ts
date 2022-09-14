@@ -17,8 +17,8 @@ import { TaskQueue } from "./taskQueue";
 
 export interface SimulationStep {
   ok: boolean;
-  energy: number;
-  hp: number;
+  energy?: number;
+  hp?: number;
 }
 
 export type SimulationResult = SimulationStep[];
