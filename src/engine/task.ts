@@ -210,9 +210,9 @@ export const KILL_SCOUT: Task = {
   name: "Kill Scout",
   shortName: "KILL_SCT",
   stats: {
-    offense: 150,
-    defense: 25,
-    hp: 80,
+    offense: 80,
+    defense: 70,
+    hp: 200,
   },
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
