@@ -125,14 +125,14 @@ export const EXPLORE_RUINS: Task = {
   trainedSkills: { ergodicity: 32 },
 };
 
-const BATTERY_AMOUNT = 1800;
+const BATTERY_AMOUNT = 1500;
 
 export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
   id: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
-  baseCost: () => 1000,
+  baseCost: () => 500,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",
@@ -155,7 +155,7 @@ export const DRAIN_TERACAPACITOR: Task = {
   required: { resources: { teracapacitors: 1 } },
   rewards: (engine) => {
     const cap = engine.simulant.unlocked.capacitiveCoupler ? 102400 : 25600;
-    return { energy: Math.min(cap, engine.timeInLoop * 0.2) };
+    return { energy: Math.min(cap, engine.timeInLoop * 0.4) };
   },
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
@@ -210,9 +210,9 @@ export const KILL_SCOUT: Task = {
   name: "Kill Scout",
   shortName: "KILL_SCT",
   stats: {
-    offense: 80,
-    defense: 70,
-    hp: 200,
+    offense: 100,
+    defense: 50,
+    hp: 100,
   },
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
@@ -469,5 +469,5 @@ function exploreMultiplier(engine: Engine): number {
   return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
 }
 function lockoutsPerScout(engine: Engine): number {
-  return Math.floor(6 * (1 + Math.log2(1 + engine.skills.datalink.level / 64)));
+  return Math.floor(4 * (1 + Math.log2(1 + engine.skills.datalink.level / 64)));
 }

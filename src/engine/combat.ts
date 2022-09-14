@@ -37,7 +37,7 @@ function armorMultiplier(offense: number, defense: number) {
 export function getCombat(engine: Engine): number {
   return (
     100 *
-    (1 + Math.log2(1 + engine.skills.lethality.level / 16)) *
+    (1 + Math.log2(1 + engine.skills.lethality.level / 32)) *
     (1 + Math.log2(1 + engine.resources.weaponizedMatter / 256))
   );
 }

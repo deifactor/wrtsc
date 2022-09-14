@@ -57,6 +57,7 @@ function benchmark(
       tickTime(engine, schedule, 1000);
     }
     if (!equal(schedule.log, lastLog)) {
+      console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
       lastLog = schedule.log;
     }
     for (const milestone of keys(engine.milestones)) {
