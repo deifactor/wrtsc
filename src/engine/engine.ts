@@ -344,7 +344,7 @@ export function startLoop(engine: Engine, schedule?: Schedule) {
 }
 
 /** Sets the engine's task to the next task from the given schedule. */
-function advanceTask(engine: Engine, schedule: Schedule) {
+export function advanceTask(engine: Engine, schedule: Schedule) {
   const next = schedule.next(engine);
   if (!next) {
     engine.taskState = undefined;

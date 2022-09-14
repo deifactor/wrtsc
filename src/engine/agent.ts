@@ -1,4 +1,5 @@
-import { canPerform, Engine, getCost } from "./engine";
+import { advanceTask, canPerform, Engine, getCost, tickTime } from "./engine";
+import { Schedule } from "./schedule";
 import {
   DISABLE_LOCKOUTS,
   DRAIN_TERACAPACITOR,
@@ -9,6 +10,8 @@ import {
   OBSERVE_PATROL_ROUTES,
   SCAVENGE_BATTERIES,
   Task,
+  TaskId,
+  TASKS,
 } from "./task";
 
 export type Agent = (engine: Engine) => Task | undefined;
@@ -18,15 +21,48 @@ export function first(...agents: Agent[]): Agent {
   return (engine) => {
     for (const agent of agents) {
       const task = agent(engine);
-      if (
-        task &&
-        getCost(engine, task) < engine.energy &&
-        canPerform(engine, task)
-      ) {
+      if (task && willSucceed(engine, task.id)) {
         return task;
+      } else {
       }
     }
   };
+}
+
+/**
+ * Returns whether performing the given course of actions starting from the
+ * engine *right now* will succeed.
+ */
+function willSucceed(engine: Engine, ...tasks: TaskId[]): boolean {
+  if (!tasks.length) {
+    return true;
+  }
+  // In the common case with a single task, we want to fall back to this to
+  // avoid the expensive clone operation.
+  if (tasks.length === 1) {
+    return (
+      getCost(engine, TASKS[tasks[0]]) <= engine.energy &&
+      canPerform(engine, TASKS[tasks[0]])
+    );
+  }
+  engine = JSON.parse(JSON.stringify(engine));
+  let allSuccess = true;
+  let iter = tasks[Symbol.iterator]();
+  let schedule: Schedule = {
+    next(): TaskId | undefined {
+      const n = iter.next().value;
+      return n;
+    },
+    recordResult(success: boolean) {
+      allSuccess = allSuccess && success;
+    },
+  };
+  advanceTask(engine, schedule);
+  while (allSuccess && engine.taskState) {
+    const { ok } = tickTime(engine, schedule, 1000);
+    allSuccess = allSuccess && ok;
+  }
+  return allSuccess;
 }
 
 /** Performs the inner agent, but draining teracapacitors as necessary. */
@@ -38,11 +74,8 @@ export function withTeracapacitors(agent: Agent): Agent {
     }
     // If the inner task would leave us unable to drain, then drain first.
     if (
-      getCost(engine, DRAIN_TERACAPACITOR) + getCost(engine, inner) >
-        engine.energy &&
-      canPerform(engine, DRAIN_TERACAPACITOR) &&
-      DRAIN_TERACAPACITOR.rewards(engine).energy! >
-        getCost(engine, DRAIN_TERACAPACITOR)
+      willSucceed(engine, "dischargeTeracapacitor") &&
+      !willSucceed(engine, inner.id, "dischargeTeracapacitor")
     ) {
       return DRAIN_TERACAPACITOR;
     }
