@@ -13,7 +13,7 @@ import { TaskId } from "./task";
 import equal from "fast-deep-equal";
 import { TaskQueue } from "./taskQueue";
 import prettyMilliseconds from "pretty-ms";
-import { MilestoneId } from "./player";
+import { MilestoneId, ProgressId } from "./player";
 import {
   isSubroutineAvailable,
   SUBROUTINE_IDS,
@@ -56,6 +56,7 @@ function benchmark(
   let lastLog = [] as TaskQueue;
   const now = new Date().getTime();
   const milestones = new Map<MilestoneId, number>();
+  const progressTimestamps = new Map<ProgressId, number>();
   while (!stopCondition(engine)) {
     const schedule = new AgentSchedule(agent);
     startLoop(engine, schedule);
@@ -73,6 +74,14 @@ function benchmark(
     for (const milestone of keys(engine.milestones)) {
       if (!milestones.has(milestone)) {
         milestones.set(milestone, engine.timeAcrossAllLoops);
+      }
+    }
+    for (const progress of keys(engine.progress)) {
+      if (
+        engine.progress[progress].level === 100 &&
+        !progressTimestamps.has(progress)
+      ) {
+        progressTimestamps.set(progress, engine.timeAcrossAllLoops);
       }
     }
     for (const subroutine of SUBROUTINE_IDS) {
@@ -97,6 +106,12 @@ function benchmark(
   console.log(
     "Milestones",
     Array.from(milestones.entries())
+      .map(([id, ms]) => `${id} @ ${prettyMilliseconds(ms)}`)
+      .join(" ")
+  );
+  console.log(
+    "Progress completion",
+    Array.from(progressTimestamps.entries())
       .map(([id, ms]) => `${id} @ ${prettyMilliseconds(ms)}`)
       .join(" ")
   );
