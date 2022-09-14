@@ -358,17 +358,23 @@ export const STRAFING_RUN: Task = {
   id: "strafingRun",
   name: "Strafing Run",
   shortName: "STRAF_RN",
-  baseCost: () => 10000,
-  description:
-    "Clean up the remaining Preservers. Consumes all Preserver Scouts Located to give an equal amount of Unoccupied Ships.",
+  baseCost: () => 1000,
+  description: "Kill all remaining Preserver scouts",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
   visible: (engine) => "shipHijacked" in engine.milestones,
   required: {
     flags: { shipHijacked: true },
-    progress: { qhLockout: 50 },
+    progress: { qhLockout: 60 },
   },
-  rewards: () => ({}),
+  rewards: (engine) => ({
+    resources: {
+      matter: engine.resources.scouts,
+    },
+  }),
+  extraPerform: (engine) => {
+    engine.resources.scouts = 0;
+  },
   trainedSkills: { lethality: 512, spatial: 256 },
 };
 
