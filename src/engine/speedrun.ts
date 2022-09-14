@@ -8,11 +8,12 @@ import {
   startLoop,
   tickTime,
 } from "./engine";
-import { entries } from "../records";
+import { entries, keys } from "../records";
 import { TaskId } from "./task";
 import equal from "fast-deep-equal";
 import { TaskQueue } from "./taskQueue";
 import prettyMilliseconds from "pretty-ms";
+import { MilestoneId } from "./player";
 
 class AgentSchedule {
   agent: Agent;
@@ -49,6 +50,7 @@ function benchmark(
 
   let lastLog = [] as TaskQueue;
   const now = new Date().getTime();
+  const milestones = new Map<MilestoneId, number>();
   while (!stopCondition(engine)) {
     const schedule = new AgentSchedule(agent);
     startLoop(engine, schedule);
@@ -63,6 +65,11 @@ function benchmark(
       console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
       lastLog = schedule.log;
     }
+    for (const milestone of keys(engine.milestones)) {
+      if (!milestones.has(milestone)) {
+        milestones.set(milestone, engine.timeAcrossAllLoops);
+      }
+    }
   }
   const duration = new Date().getTime() - now;
   console.log(`Benchmark for "${name}" finished`);
@@ -76,6 +83,12 @@ function benchmark(
     entries(engine.skills)
       .map(([id, level]) => `${id} ${level.level}`)
       .join(", ")
+  );
+  console.log(
+    "Milestones",
+    Array.from(milestones.entries())
+      .map(([id, ms]) => `${id} @ ${prettyMilliseconds(ms)}`)
+      .join(" ")
   );
 }
 
@@ -123,6 +136,7 @@ benchmark(
     agent.withTeracapacitors(
       agent.first(
         agent.linkDrones,
+        agent.unlockSimulant,
         agent.exploreRuins,
         agent.hijacker,
         agent.observe,
