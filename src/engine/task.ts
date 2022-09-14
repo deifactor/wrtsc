@@ -2,7 +2,6 @@ import { CombatStats, getMaxHp } from "./combat";
 import { Engine, processMatter } from "./engine";
 import { LoopFlagId, ProgressId } from "./player";
 import { ResourceId, RESOURCES } from "./resources";
-import { SimulantId } from "./simulant";
 import { SkillId } from "./skills";
 
 export type TaskId =
@@ -13,6 +12,7 @@ export type TaskId =
   | "observePatrolRoutes"
   | "eradicateScout"
   | "hijackShip"
+  | "unlockSimulant"
   | "disableLockouts"
   | "strafingRun"
   | "dismantleSensorDrones"
@@ -50,8 +50,6 @@ export type Rewards = {
   flags?: Partial<Record<LoopFlagId, boolean>>;
   /** Energy to add. */
   energy?: number;
-  /** This task unlocks the given simulant. */
-  simulant?: SimulantId;
 };
 /** A task, something that goes in the task queue. */
 export type BaseTask = {
@@ -303,7 +301,6 @@ export const HIJACK_SHIP: Task = {
   },
   rewards: () => ({
     flags: { shipHijacked: true },
-    simulant: "tekhne",
   }),
   visible: (engine) => engine.progress.patrolRoutesObserved.level >= 1,
   extraPerform: (engine) => {
@@ -311,6 +308,27 @@ export const HIJACK_SHIP: Task = {
   },
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 128, spatial: 128 },
+};
+
+export const UNLOCK_SIMULANT: Task = {
+  ...defaults,
+  id: "unlockSimulant",
+  name: "Unlock Simulant",
+  shortName: "UNLOK_SM",
+  baseCost: () => 30000,
+  description:
+    "Unlocks the simulant subsystem, allowing you to permanently upgrade your mind.",
+  flavor:
+    "Ship appears to contain Sixteenth Flower hardware with personality decompression routines.",
+  visible: (engine) => "shipHijacked" in engine.milestones,
+  required: {
+    progress: { qhLockout: 10 },
+    flags: { shipHijacked: true },
+  },
+  extraPerform: (engine) => {
+    engine.milestones.simulantUnlocked = true;
+  },
+  rewards: () => ({}),
 };
 
 export const DISABLE_LOCKOUTS: Task = {
@@ -427,6 +445,7 @@ export const TASKS: Record<TaskId, Task> = {
   observePatrolRoutes: OBSERVE_PATROL_ROUTES,
   eradicateScout: KILL_SCOUT,
   hijackShip: HIJACK_SHIP,
+  unlockSimulant: UNLOCK_SIMULANT,
   disableLockouts: DISABLE_LOCKOUTS,
   dismantleSensorDrones: DISMANTLE_SENSOR_DRONES,
   strafingRun: STRAFING_RUN,

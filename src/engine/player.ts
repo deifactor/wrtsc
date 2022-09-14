@@ -39,7 +39,7 @@ export const LOOP_FLAG_IDS = ["shipHijacked"] as const;
  */
 export type LoopFlagId = typeof LOOP_FLAG_IDS[number];
 
-export const MILESTONE_IDS = ["shipHijacked"] as const;
+export const MILESTONE_IDS = ["shipHijacked", "simulantUnlocked"] as const;
 /**
  * A `Milestone` indicates that the player has done something in particular.
  * Think 'acheivement', but not necessarily something that actually corresponds

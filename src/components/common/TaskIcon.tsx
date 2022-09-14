@@ -3,6 +3,7 @@ import { IconType } from "react-icons";
 import {
   GiAutoRepair,
   GiBatteryPack,
+  GiHive,
   GiHoodedAssassin,
   GiJourney,
   GiLockPicking,
@@ -26,6 +27,7 @@ export const ICONS: Partial<Record<TaskId, IconType>> = {
   observePatrolRoutes: GiSpyglass,
   hijackShip: GiSpaceship,
   disableLockouts: GiLockPicking,
+  unlockSimulant: GiHive,
   leaveRuins: GiJourney,
   linkSensorDrones: SiDrone,
   eradicateScout: GiHoodedAssassin,

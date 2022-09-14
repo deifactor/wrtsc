@@ -14,6 +14,11 @@ import equal from "fast-deep-equal";
 import { TaskQueue } from "./taskQueue";
 import prettyMilliseconds from "pretty-ms";
 import { MilestoneId } from "./player";
+import {
+  isSubroutineAvailable,
+  SUBROUTINE_IDS,
+  unlockSubroutine,
+} from "./simulant";
 
 class AgentSchedule {
   agent: Agent;
@@ -62,12 +67,16 @@ function benchmark(
       );
     }
     if (!equal(schedule.log, lastLog)) {
-      console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
       lastLog = schedule.log;
     }
     for (const milestone of keys(engine.milestones)) {
       if (!milestones.has(milestone)) {
         milestones.set(milestone, engine.timeAcrossAllLoops);
+      }
+    }
+    for (const subroutine of SUBROUTINE_IDS) {
+      if (isSubroutineAvailable(engine, subroutine)) {
+        unlockSubroutine(engine, subroutine);
       }
     }
   }

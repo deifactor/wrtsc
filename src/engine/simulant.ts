@@ -21,14 +21,12 @@ const COSTS: Record<SubroutineId, number> = {
 
 export interface SimulantState {
   freeXp: number;
-  unlockedSimulants: Partial<Record<SimulantId, true>>;
   unlocked: Partial<Record<SubroutineId, true>>;
 }
 
 export function makeSimulantState(save?: SimulantSave): SimulantState {
   return {
     freeXp: save?.freeXp || 0,
-    unlockedSimulants: makeValues(save?.unlockedSimulants || [], () => true),
     unlocked: makeValues(save?.unlocked || [], () => true),
   };
 }
@@ -40,7 +38,6 @@ export function getSubroutineCost(id: SubroutineId): number {
 export function toSimulantSave(simulant: SimulantState): SimulantSave {
   return {
     freeXp: simulant.freeXp,
-    unlockedSimulants: Array.from(keys(simulant.unlockedSimulants)),
     unlocked: Array.from(keys(simulant.unlocked)),
   };
 }
@@ -55,17 +52,10 @@ export function unlockSubroutine(engine: Engine, id: SubroutineId) {
 
 /** Whether the given subroutine is unlocked. */
 export function isSubroutineAvailable({ simulant }: Engine, id: SubroutineId) {
-  const subToSim: Record<SubroutineId, SimulantId> = {
-    burstClock: "tekhne",
-  };
-  return (
-    subToSim[id] in simulant.unlockedSimulants &&
-    simulant.freeXp >= getSubroutineCost(id)
-  );
+  return simulant.freeXp >= getSubroutineCost(id);
 }
 
 export type SimulantSave = {
   freeXp: number;
-  unlockedSimulants: SimulantId[];
   unlocked: SubroutineId[];
 };

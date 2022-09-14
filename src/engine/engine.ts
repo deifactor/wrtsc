@@ -322,9 +322,6 @@ function perform(engine: Engine, task: Task) {
     addProgressXp(engine.skills.metacognition, (xp * metaMult) / 4);
   });
   rewards.energy && addEnergy(engine, rewards.energy);
-  if (rewards.simulant) {
-    engine.simulant.unlockedSimulants[rewards.simulant] = true;
-  }
   task.extraPerform(engine);
 }
 
@@ -406,7 +403,7 @@ function spendEnergy(engine: Engine, amount: number) {
   engine.timeInLoop += amount / energyPerMs;
   engine.timeAcrossAllLoops += amount / energyPerMs;
   // Only add simulant XP if there's actually an unlocked simulant.
-  if (keys(engine.simulant.unlockedSimulants).length !== 0) {
+  if (engine.milestones.simulantUnlocked) {
     engine.simulant.freeXp += amount / 1000;
   }
   const taskState = engine.taskState!;

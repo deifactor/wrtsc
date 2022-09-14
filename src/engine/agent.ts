@@ -10,6 +10,7 @@ import {
   Task,
   TaskId,
   TASKS,
+  UNLOCK_SIMULANT,
 } from "./task";
 
 export type Agent = (engine: Engine) => Task | undefined;
@@ -119,6 +120,12 @@ export const hijacker: Agent = (engine) => {
 export const observe: Agent = (engine) => {
   if (engine.progress.patrolRoutesObserved.level < 100) {
     return OBSERVE_PATROL_ROUTES;
+  }
+};
+
+export const unlockSimulant: Agent = (engine) => {
+  if (!("simulantUnlocked" in engine.milestones)) {
+    return UNLOCK_SIMULANT;
   }
 };
 
