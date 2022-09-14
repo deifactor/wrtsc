@@ -439,7 +439,7 @@ export function processMatter(engine: Engine, value: number) {
       return;
     case "repair":
       const consumed = Math.min(getMaxHp(engine) - engine.currentHp, value);
-      engine.currentHp += 5 * consumed;
+      engine.currentHp += consumed;
       value -= consumed;
       if (value > 0) {
         engine.resources.matter += value;

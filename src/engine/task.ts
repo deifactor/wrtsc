@@ -210,7 +210,7 @@ export const KILL_SCOUT: Task = {
   shortName: "KILL_SCT",
   stats: {
     offense: 100,
-    defense: 25,
+    defense: 15,
     hp: 100,
   },
   description:
@@ -289,8 +289,8 @@ export const HIJACK_SHIP: Task = {
   shortName: "HJCK_SHP",
   stats: {
     offense: 0,
-    defense: 250,
-    hp: 1000,
+    defense: 150,
+    hp: 2000,
   },
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
@@ -330,7 +330,7 @@ export const DISABLE_LOCKOUTS: Task = {
     resources: { qhLockoutAttempts: 1 },
     flags: { shipHijacked: true },
   },
-  rewards: () => ({ progress: { qhLockout: 1024 } }),
+  rewards: () => ({ progress: { qhLockout: 512 } }),
   trainedSkills: { datalink: 4 },
 };
 
