@@ -74,10 +74,10 @@ function benchmark(
   const duration = new Date().getTime() - now;
   console.log(`Benchmark for "${name}" finished`);
   console.log(
-    "Simulated time taken (sec):",
-    (engine.timeAcrossAllLoops / 1000).toFixed(0)
+    "Simulated time taken:",
+    prettyMilliseconds(engine.timeAcrossAllLoops)
   );
-  console.log("Wall-clock time taken (ms): ", duration.toFixed(0));
+  console.log("Wall-clock time taken: ", prettyMilliseconds(duration));
   console.log(
     "Skills",
     entries(engine.skills)
