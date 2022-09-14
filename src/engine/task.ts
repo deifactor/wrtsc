@@ -125,14 +125,14 @@ export const EXPLORE_RUINS: Task = {
   trainedSkills: { ergodicity: 32 },
 };
 
-const BATTERY_AMOUNT = 3000;
+const BATTERY_AMOUNT = 1800;
 
 export const SCAVENGE_BATTERIES: Task = {
   ...defaults,
   id: "scavengeBatteries",
   name: "Scavenge Batteries",
   shortName: "SCAV_BAT",
-  baseCost: () => 2000,
+  baseCost: () => 1000,
   description: `Increases energy by ${BATTERY_AMOUNT}.`,
   flavor:
     "Power source: located. Integration of power source will lead to loop extension.",

@@ -27,7 +27,7 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     id: "ruinsBatteries",
     name: "Intact Batteries",
     zone: "ruins",
-    initial: (engine) => Math.floor(engine.progress.ruinsExploration.level / 2),
+    initial: (engine) => Math.floor(engine.progress.ruinsExploration.level / 4),
   },
   teracapacitors: {
     id: "teracapacitors",
