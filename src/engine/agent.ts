@@ -4,8 +4,6 @@ import {
   DISABLE_LOCKOUTS,
   DRAIN_TERACAPACITOR,
   EXPLORE_RUINS,
-  HIJACK_SHIP,
-  KILL_SCOUT,
   LINK_SENSOR_DRONES,
   OBSERVE_PATROL_ROUTES,
   SCAVENGE_BATTERIES,
@@ -39,7 +37,7 @@ function willSucceed(engine: Engine, ...tasks: TaskId[]): boolean {
   }
   // In the common case with a single task, we want to fall back to this to
   // avoid the expensive clone operation.
-  if (tasks.length === 1) {
+  if (tasks.length === 1 && TASKS[tasks[0]].kind === "normal") {
     return (
       getCost(engine, TASKS[tasks[0]]) <= engine.energy &&
       canPerform(engine, TASKS[tasks[0]])
@@ -88,7 +86,12 @@ export const scavengeBatteries: Agent = (engine) => {
 };
 
 export const linkDrones: Agent = (engine) => {
-  return LINK_SENSOR_DRONES;
+  if (
+    engine.progress.ruinsExploration.level < 100 ||
+    engine.progress.patrolRoutesObserved.level < 100
+  ) {
+    return LINK_SENSOR_DRONES;
+  }
 };
 
 export const exploreRuins: Agent = (engine) => {
@@ -98,11 +101,13 @@ export const exploreRuins: Agent = (engine) => {
 };
 
 export const hijacker: Agent = (engine) => {
-  if (engine.resources.unoccupiedShips) {
-    return HIJACK_SHIP;
-  } else if (engine.resources.scouts) {
-    return KILL_SCOUT;
+  if (engine.matterMode === "save") {
+    return TASKS.matterWeaponry;
   }
+  return first(
+    () => TASKS.eradicateScout,
+    () => TASKS.hijackShip
+  )(engine);
 };
 
 export const observe: Agent = (engine) => {

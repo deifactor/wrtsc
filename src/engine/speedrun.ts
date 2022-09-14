@@ -36,7 +36,7 @@ function benchmark(
       tickTime(
         engine,
         schedule,
-        getEnergyToNextEvent(engine) / getEnergyPerMs(engine)
+        Math.max(getEnergyToNextEvent(engine) / getEnergyPerMs(engine), 1)
       );
     }
   }
