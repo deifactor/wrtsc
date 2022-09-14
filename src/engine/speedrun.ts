@@ -1,13 +1,6 @@
 import { Agent } from "./agent";
 import * as agent from "./agent";
-import {
-  Engine,
-  getEnergyPerMs,
-  getEnergyToNextEvent,
-  makeEngine,
-  startLoop,
-  tickTime,
-} from "./engine";
+import { Engine, makeEngine, startLoop, tickTime } from "./engine";
 import { entries, keys } from "../records";
 import { TaskId } from "./task";
 import equal from "fast-deep-equal";
@@ -61,14 +54,9 @@ function benchmark(
     const schedule = new AgentSchedule(agent);
     startLoop(engine, schedule);
     while (engine.taskState?.task && !stopCondition(engine)) {
-      tickTime(
-        engine,
-        schedule,
-        Math.max(getEnergyToNextEvent(engine) / getEnergyPerMs(engine), 1)
-      );
+      tickTime(engine, schedule, 1000);
     }
     if (!equal(schedule.log, lastLog)) {
-      console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
       lastLog = schedule.log;
     }
     for (const milestone of keys(engine.milestones)) {
@@ -85,7 +73,10 @@ function benchmark(
       }
     }
     for (const subroutine of SUBROUTINE_IDS) {
-      if (isSubroutineAvailable(engine, subroutine)) {
+      if (
+        isSubroutineAvailable(engine, subroutine) &&
+        !(subroutine in engine.simulant.unlocked)
+      ) {
         unlockSubroutine(engine, subroutine);
       }
     }
@@ -160,8 +151,11 @@ benchmark(
     agent.scavengeBatteries,
     agent.withTeracapacitors(
       agent.first(
+        agent.when(
+          (engine) => !engine.milestones.simulantUnlocked,
+          agent.first(agent.unlockSimulant, agent.hijacker, agent.lockout)
+        ),
         agent.linkDrones,
-        agent.unlockSimulant,
         agent.exploreRuins,
         agent.hijacker,
         agent.observe,

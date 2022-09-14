@@ -13,6 +13,7 @@ import { ResourceId, RESOURCES, RESOURCE_IDS } from "./resources";
 import { Schedule } from "./schedule";
 import {
   makeSimulantState,
+  selfOptimizingDivider,
   SimulantSave,
   SimulantState,
   toSimulantSave,
@@ -166,12 +167,19 @@ export function canPerform(engine: Engine, task: Task): boolean {
  * necessary to do damage equal to the task's HP.
  */
 export function getCost(engine: Engine, task: Task) {
+  let cost;
   switch (task.kind) {
     case "normal":
-      return task.baseCost(engine);
+      cost = task.baseCost(engine);
+      break;
     case "combat":
-      return task.stats.hp / damagePerEnergy(engine, task.stats).dealt;
+      cost = task.stats.hp / damagePerEnergy(engine, task.stats).dealt;
+      break;
   }
+  if ("selfOptimizing" in engine.simulant.unlocked) {
+    cost /= selfOptimizingDivider(engine);
+  }
+  return cost;
 }
 
 export type TickResult =
@@ -199,10 +207,8 @@ export function tickTime(
   schedule: Schedule,
   duration: number
 ): TickResult {
-  // Amount of energy we're allowed to spend in this tick.
-  const energyPerMs = getEnergyPerMs(engine);
-  let unspentEnergy = Math.floor(duration * energyPerMs);
-  while (unspentEnergy > 0 && engine.energy > 0) {
+  let unspentTime = duration;
+  while (unspentTime > 0 && engine.energy > 0) {
     const task = getCurrentTask(engine);
     if (!task) {
       return { ok: true };
@@ -219,7 +225,12 @@ export function tickTime(
       throw new Error("timeLeftOnTask unset despite task being set");
     }
     // Spend energy until we run out or something happens.
-    const spent = Math.min(getEnergyToNextEvent(engine), unspentEnergy);
+    const energyPerMs = getEnergyPerMs(engine);
+    const spent = Math.min(
+      getEnergyToNextEvent(engine),
+      unspentTime * getEnergyPerMs(engine)
+    );
+    unspentTime -= spent / energyPerMs;
     spendEnergy(engine, spent);
 
     if (engine.currentHp <= 0) {
@@ -238,7 +249,6 @@ export function tickTime(
       });
       advanceTask(engine, schedule);
     }
-    unspentEnergy -= spent;
   }
 
   if (engine.energy <= 0 && engine.taskState?.task) {
@@ -256,9 +266,16 @@ export function tickTime(
  * tickspeed; you can't do more things, but you can do them faster.
  */
 export function getEnergyPerMs(engine: Engine): number {
-  return "burstClock" in engine.simulant.unlocked
-    ? Math.max(1, 2 - engine.timeInLoop / 16384)
-    : 1;
+  if (!("burstClock" in engine.simulant.unlocked)) {
+    return 1;
+  }
+  const denominator =
+    "burstClockGamma" in engine.simulant.unlocked
+      ? 65536
+      : "burstClockBeta" in engine.simulant.unlocked
+      ? 32768
+      : 16384;
+  return Math.max(1, 2 - engine.timeInLoop / denominator);
 }
 
 /**
@@ -279,7 +296,7 @@ export function getEnergyToNextEvent(engine: Engine): number {
         taskState.hpLeft / damagePerEnergy(engine, task.stats).dealt;
       break;
   }
-  return Math.min(engine.energy, toTaskCompletion);
+  return Math.max(1, Math.min(engine.energy, toTaskCompletion));
 }
 
 export function getCurrentTask(engine: Engine): Task | undefined {
@@ -317,7 +334,13 @@ function perform(engine: Engine, task: Task) {
     engine.flags[flag] = value;
   });
   entries(task.trainedSkills).forEach(([id, xp]) => {
-    const metaMult = 1 + Math.log2(1 + engine.skills.metacognition.level / 256);
+    const metaExponent =
+      "metametacognition" in engine.simulant.unlocked ? 1.5 : 1;
+    const metaMult =
+      1 +
+      Math.log2(
+        1 + Math.pow(engine.skills.metacognition.level, metaExponent) / 256
+      );
     addProgressXp(engine.skills[id], xp * metaMult);
     addProgressXp(engine.skills.metacognition, (xp * metaMult) / 4);
   });
@@ -423,10 +446,16 @@ function spendEnergy(engine: Engine, amount: number) {
       }
       break;
   }
+  if (engine.energy < 0.001) {
+    engine.energy = 0;
+  }
 }
 
 /* Invoked whenever the player receives matter. Does something different based on the player's matter mode. */
 export function processMatter(engine: Engine, value: number) {
+  if ("electrovore" in engine.simulant.unlocked) {
+    addEnergy(engine, value * 24);
+  }
   switch (engine.matterMode) {
     case "save":
       engine.resources.matter += value;

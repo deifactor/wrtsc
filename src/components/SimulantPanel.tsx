@@ -26,6 +26,11 @@ function simulantLore(id: SimulantId): {
           "Specialist in ultra-high-density energy storage and transport.",
         name: "Ergon",
       };
+    case "enkephalos":
+      return {
+        description: "Cognitive architect and synthetic neurologist.",
+        name: "Enkephalos",
+      };
   }
 }
 
@@ -36,9 +41,49 @@ function subroutineLore(id: SubroutineId): {
   switch (id) {
     case "burstClock":
       return {
-        name: "Burst Clock",
+        name: "Burst Clock α",
         description:
           "Provides an increase in speed (and matching increase in energy consumption) for the first 16384 AEU of a loop.",
+      };
+    case "burstClockBeta":
+      return {
+        name: "Burst Clock β",
+        description:
+          "Provides an increase in speed (and matching increase in energy consumption) for the first 32768 AEU of a loop.",
+      };
+    case "burstClockGamma":
+      return {
+        name: "Burst Clock γ",
+        description:
+          "Provides an increase in speed (and matching increase in energy consumption) for the first 65536 AEU of a loop.",
+      };
+    case "capacitiveCoupler":
+      return {
+        name: "Capacitive Coupler",
+        description: "Increases the energy cap of teracapacitors to 102400.",
+      };
+    case "electrovore":
+      return {
+        name: "Electrovore",
+        description: "Obtaining matter now also recharges your energy.",
+      };
+    case "metametacognition":
+      return {
+        name: "Meta-metacognition",
+        description:
+          "Your metacognition level is treated as if it was multiplied by its square root.",
+      };
+    case "selfOptimizing":
+      return {
+        name: "Self-Optimization",
+        description:
+          "The cost of all non-combat tasks decreases the more time you've spent across all loops.",
+      };
+    case "combatAccelerator":
+      return {
+        name: "Combat Accelerator",
+        description:
+          "All multipliers to speed also apply a corresponding multiplier to your offense.",
       };
   }
 }
@@ -86,6 +131,7 @@ export const SimulantPanel = React.memo(() => {
     <div>
       <SimulantSection id="tekhne" />
       <SimulantSection id="ergon" />
+      <SimulantSection id="enkephalos" />
     </div>
   );
 });

@@ -2,7 +2,7 @@
  * This is a very minimal file, but it gives us the approach to complicate
  * things later, add more stats, and so on.
  */
-import { Engine } from "./engine";
+import { Engine, getEnergyPerMs } from "./engine";
 
 export type CombatStats = {
   /** Damage dealt per 1 kAEU (1 second, before tickspeed/etc). */
@@ -16,16 +16,18 @@ export function damagePerEnergy(
   engine: Engine,
   taskStats: CombatStats
 ): { dealt: number; received: number } {
-  return {
-    dealt:
-      (getCombat(engine) *
-        armorMultiplier(getCombat(engine), taskStats.defense)) /
-      1000,
-    received:
-      (taskStats.offense *
-        armorMultiplier(taskStats.offense, getDefense(engine))) /
-      1000,
-  };
+  let dealt =
+    (getCombat(engine) *
+      armorMultiplier(getCombat(engine), taskStats.defense)) /
+    1000;
+  let received =
+    (taskStats.offense *
+      armorMultiplier(taskStats.offense, getDefense(engine))) /
+    1000;
+  if ("combatAccelerator" in engine.simulant.unlocked) {
+    dealt *= getEnergyPerMs(engine);
+  }
+  return { dealt, received };
 }
 
 function armorMultiplier(offense: number, defense: number) {

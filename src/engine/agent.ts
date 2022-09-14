@@ -28,6 +28,15 @@ export function first(...agents: Agent[]): Agent {
   };
 }
 
+export function when(
+  predicate: (engine: Engine) => boolean,
+  then: Agent,
+  otherwise?: Agent
+): Agent {
+  return (engine) =>
+    predicate(engine) ? then(engine) : otherwise && otherwise(engine);
+}
+
 /**
  * Returns whether performing the given course of actions starting from the
  * engine *right now* will succeed.
