@@ -15,10 +15,8 @@ module.exports = {
         "simulant",
         "skill",
         "task",
-        // balance tasks
-        "balance",
       ],
     ],
-    "type-enum": [2, "always", ["fix", "feat", "test", "chore", "refactor"]],
+    "type-enum": [2, "always", ["fix", "feat", "test", "chore", "refactor", "balance"]],
   },
 };
