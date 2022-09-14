@@ -9,28 +9,48 @@ import {
   tickTime,
 } from "./engine";
 import { entries } from "../records";
+import { TaskId } from "./task";
+import equal from "fast-deep-equal";
+import { TaskQueue } from "./taskQueue";
+import prettyMilliseconds from "pretty-ms";
+
+class AgentSchedule {
+  agent: Agent;
+  log: TaskQueue = [];
+  constructor(agent: Agent) {
+    this.agent = agent;
+  }
+  next(engine: Engine): TaskId | undefined {
+    const id = this.agent(engine)?.id;
+    if (!id) {
+      return;
+    }
+    const log = this.log;
+    if (log.length === 0 || log[log.length - 1].task !== id) {
+      log.push({ task: id, count: 1 });
+    } else {
+      log[log.length - 1].count++;
+    }
+    return id;
+  }
+  recordResult(success: boolean) {
+    if (!success) {
+      throw new Error(`Task mysteriously failed!`);
+    }
+  }
+}
 
 function benchmark(
   name: string,
   agent: Agent,
   stopCondition: (engine: Engine) => boolean
 ) {
-  const schedule = {
-    next(engine: Engine) {
-      return agent(engine)?.id;
-    },
-    recordResult(success: boolean) {
-      if (!success) {
-        throw new Error(`Task mysteriously failed!`);
-      }
-    },
-    restart() {},
-  };
   const engine = makeEngine();
-  startLoop(engine, schedule);
 
+  let lastLog = [] as TaskQueue;
   const now = new Date().getTime();
   while (!stopCondition(engine)) {
+    const schedule = new AgentSchedule(agent);
     startLoop(engine, schedule);
     while (engine.taskState?.task && !stopCondition(engine)) {
       tickTime(
@@ -38,6 +58,10 @@ function benchmark(
         schedule,
         Math.max(getEnergyToNextEvent(engine) / getEnergyPerMs(engine), 1)
       );
+    }
+    if (!equal(schedule.log, lastLog)) {
+      console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
+      lastLog = schedule.log;
     }
   }
   const duration = new Date().getTime() - now;

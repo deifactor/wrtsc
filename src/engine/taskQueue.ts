@@ -2,8 +2,8 @@ import { Task, TaskId, TASKS } from "./task";
 
 /** An entry in a task queue consists of a task and a number of times to repeat it. */
 export interface TaskBatch {
-  readonly task: TaskId;
-  readonly count: number;
+  task: TaskId;
+  count: number;
 }
 
 export type TaskQueuePointer = Readonly<

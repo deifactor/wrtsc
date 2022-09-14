@@ -21,6 +21,7 @@
   },
   "scripts": {
     "dev": "parcel src/index.html",
+    "tas": "ts-node -T --esm --experimental-specifier-resolution=node src/engine/speedrun.ts",
     "test": "jest"
   },
   "eslintConfig": {
@@ -80,5 +81,6 @@
   "lint-staged": {
     "*.{ts,tsx}": "tsc-files --noEmit src/react-app-env.d.ts",
     "*.{ts,tsx,js}": "eslint --fix --max-warnings 0"
-  }
+  },
+  "type": "module"
 }
