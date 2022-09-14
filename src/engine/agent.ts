@@ -104,6 +104,12 @@ export const hijacker: Agent = (engine) => {
   if (engine.matterMode === "save") {
     return TASKS.matterWeaponry;
   }
+  if (
+    !willSucceed(engine, "eradicateScout", "eradicateScout") &&
+    engine.matterMode !== "repair"
+  ) {
+    return TASKS.matterRepair;
+  }
   return first(
     () => TASKS.eradicateScout,
     () => TASKS.hijackShip
