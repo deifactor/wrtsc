@@ -23,7 +23,6 @@ export const ZonePane = (props: Props) => {
             <ResourceDisplay id="teracapacitors" />
             <ResourceDisplay id="unlinkedSensorDrones" />
             <ResourceDisplay id="scouts" />
-            <ResourceDisplay id="unoccupiedShips" />
           </div>
         );
     }

@@ -7,8 +7,6 @@ export const RESOURCE_IDS = [
   "teracapacitors",
   "linkedSensorDrones",
   "scouts",
-  "unoccupiedShips",
-  "weaponSalvage",
   "qhLockoutAttempts",
   // 'Matter' is something the player can use to augment their abilities.
   "matter",
@@ -58,18 +56,6 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     zone: "ruins",
     initial: (engine) =>
       Math.floor(engine.progress.patrolRoutesObserved.level / 6),
-  },
-  unoccupiedShips: {
-    id: "unoccupiedShips",
-    name: "Unoccupied Ships",
-    zone: "ruins",
-    initial: () => 0,
-  },
-  weaponSalvage: {
-    id: "weaponSalvage",
-    name: "Weapon Salvage",
-    zone: null,
-    initial: () => 0,
   },
   qhLockoutAttempts: {
     id: "qhLockoutAttempts",

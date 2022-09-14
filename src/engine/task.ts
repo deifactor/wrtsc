@@ -225,8 +225,6 @@ export const KILL_SCOUT: Task = {
   rewards: (engine) => {
     return {
       resources: {
-        weaponSalvage: 1,
-        unoccupiedShips: 1,
         matter: 15,
         qhLockoutAttempts: lockoutsPerScout(engine),
       },
@@ -299,7 +297,6 @@ export const HIJACK_SHIP: Task = {
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   required: {
     flags: { shipHijacked: false },
-    resources: { unoccupiedShips: 1 },
     progress: { patrolRoutesObserved: 15 },
   },
   rewards: () => ({
