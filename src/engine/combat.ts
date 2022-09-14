@@ -41,7 +41,7 @@ export function getCombat(engine: Engine): number {
 }
 
 export function getDefense(engine: Engine): number {
-  return 100 * Math.log2(1 + engine.skills.lethality.level / 32);
+  return 100 * Math.log2(1 + engine.skills.spatial.level / 32);
 }
 
 export function getMaxHp(_engine: Engine): number {

@@ -148,12 +148,14 @@ export const DRAIN_TERACAPACITOR: Task = {
   id: "dischargeTeracapacitor",
   name: "Discharge Teracapacitor",
   shortName: "DIS_TERA",
-  baseCost: () => 4000,
-  description: `Gives 200 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
+  baseCost: () => 6000,
+  description: `Gives 150 * (seconds spent in loop at end of action) energy, capped at 25600 at 128 seconds.`,
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
   required: { resources: { teracapacitors: 1 } },
-  rewards: (engine) => ({ energy: Math.min(25600, engine.timeInLoop / 5) }),
+  rewards: (engine) => ({
+    energy: Math.min(25600, engine.timeInLoop * 0.15),
+  }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),
   trainedSkills: { energyTransfer: 8 },
@@ -164,7 +166,7 @@ export const LINK_SENSOR_DRONES: Task = {
   id: "linkSensorDrones",
   name: "Link Sensor Drones",
   shortName: "LINK_DRN",
-  baseCost: () => 1000,
+  baseCost: () => 1500,
   description:
     "Multiplies progress for Explore Ruins and Observe Patrol Routes by sqrt(1 + linked drones). Bonus stacks with Ship Hijacked bonuses.",
   flavor:
@@ -184,7 +186,7 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   id: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
-  baseCost: () => 3500,
+  baseCost: () => 4500,
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
@@ -207,9 +209,9 @@ export const KILL_SCOUT: Task = {
   name: "Kill Scout",
   shortName: "KILL_SCT",
   stats: {
-    offense: 100,
-    defense: 15,
-    hp: 100,
+    offense: 150,
+    defense: 25,
+    hp: 80,
   },
   description:
     "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
@@ -224,14 +226,14 @@ export const KILL_SCOUT: Task = {
       resources: {
         weaponSalvage: 1,
         unoccupiedShips: 1,
-        matter: 20,
+        matter: 15,
         qhLockoutAttempts: lockoutsPerScout(engine),
       },
     };
   },
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: { lethality: 16 },
+  trainedSkills: { lethality: 48, spatial: 48 },
 };
 
 export const MATTER_REPAIR: Task = {
@@ -287,8 +289,8 @@ export const HIJACK_SHIP: Task = {
   shortName: "HJCK_SHP",
   stats: {
     offense: 0,
-    defense: 150,
-    hp: 2000,
+    defense: 200,
+    hp: 2500,
   },
   description:
     "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
@@ -307,7 +309,7 @@ export const HIJACK_SHIP: Task = {
     engine.milestones.shipHijacked = true;
   },
   maxIterations: (engine) => RESOURCES.scouts.initial(engine),
-  trainedSkills: { lethality: 128, spatial: 128 },
+  trainedSkills: { lethality: 128 },
 };
 
 export const UNLOCK_SIMULANT: Task = {
@@ -329,6 +331,7 @@ export const UNLOCK_SIMULANT: Task = {
     engine.milestones.simulantUnlocked = true;
   },
   rewards: () => ({}),
+  trainedSkills: { datalink: 2048 },
 };
 
 export const DISABLE_LOCKOUTS: Task = {
@@ -336,7 +339,7 @@ export const DISABLE_LOCKOUTS: Task = {
   id: "disableLockouts",
   name: "Override Lockouts",
   shortName: "OVR_LOCK",
-  baseCost: () => 800,
+  baseCost: () => 1200,
   description:
     "Hack your stolen ship to bring the weapons, thrusters, and jump drive online.",
   flavor:
@@ -348,8 +351,8 @@ export const DISABLE_LOCKOUTS: Task = {
     resources: { qhLockoutAttempts: 1 },
     flags: { shipHijacked: true },
   },
-  rewards: () => ({ progress: { qhLockout: 512 } }),
-  trainedSkills: { datalink: 4 },
+  rewards: () => ({ progress: { qhLockout: 128 } }),
+  trainedSkills: { datalink: 16 },
 };
 
 export const STRAFING_RUN: Task = {
@@ -368,7 +371,7 @@ export const STRAFING_RUN: Task = {
     progress: { qhLockout: 50 },
   },
   rewards: () => ({}),
-  trainedSkills: { spatial: 128 },
+  trainedSkills: { lethality: 512, spatial: 256 },
 };
 
 export const DISMANTLE_SENSOR_DRONES: Task = {
@@ -388,7 +391,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     resources: { linkedSensorDrones: 1 },
   },
   rewards: () => ({ energy: 2000 }),
-  trainedSkills: { energyTransfer: 16, datalink: 16 },
+  trainedSkills: { energyTransfer: 64, datalink: 64 },
 };
 
 export const LEAVE_RUINS: Task = {
@@ -409,7 +412,7 @@ export const LEAVE_RUINS: Task = {
     engine.zoneId = "phobosDeimos";
   },
   visible: (engine) => "shipHijacked" in engine.milestones,
-  trainedSkills: { spatial: 128 },
+  trainedSkills: { spatial: 192 },
 };
 
 export const COMPLETE_RUINS: Task = {
@@ -456,11 +459,11 @@ export const TASKS: Record<TaskId, Task> = {
 };
 
 function exploreMultiplier(engine: Engine): number {
-  const droneBonus = Math.sqrt(1 + engine.resources.linkedSensorDrones) - 1;
-  const shipBonus = engine.flags.shipHijacked ? 1.5 : 0;
-  const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 32);
+  const droneBonus = Math.pow(1 + engine.resources.linkedSensorDrones, 0.3) - 1;
+  const shipBonus = engine.flags.shipHijacked ? 1 : 0;
+  const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 64);
   return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
 }
 function lockoutsPerScout(engine: Engine): number {
-  return Math.floor(8 * (1 + Math.log2(1 + engine.skills.datalink.level / 64)));
+  return Math.floor(6 * (1 + Math.log2(1 + engine.skills.datalink.level / 64)));
 }

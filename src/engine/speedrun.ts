@@ -67,6 +67,7 @@ function benchmark(
       );
     }
     if (!equal(schedule.log, lastLog)) {
+      console.log(prettyMilliseconds(engine.timeAcrossAllLoops), schedule.log);
       lastLog = schedule.log;
     }
     for (const milestone of keys(engine.milestones)) {

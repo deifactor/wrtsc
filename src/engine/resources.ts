@@ -35,9 +35,9 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     id: "teracapacitors",
     name: "Functioning Teracapacitors",
     zone: "ruins",
-    // Available at 10, 35, 60, 85.
+    // Available at 25, 75.
     initial: (engine) =>
-      Math.floor((engine.progress.ruinsExploration.level + 15) / 25),
+      Math.floor(engine.progress.ruinsExploration.level / 80),
   },
   unlinkedSensorDrones: {
     id: "unlinkedSensorDrones",
@@ -57,7 +57,7 @@ export const RESOURCES: Record<ResourceId, Resource> = {
     name: "Preserver Scouts Located",
     zone: "ruins",
     initial: (engine) =>
-      Math.floor(engine.progress.patrolRoutesObserved.level / 5),
+      Math.floor(engine.progress.patrolRoutesObserved.level / 6),
   },
   unoccupiedShips: {
     id: "unoccupiedShips",
