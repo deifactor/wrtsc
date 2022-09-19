@@ -14,7 +14,7 @@ import { Switch } from "./common/Switch";
 export const SettingsPanel = () => {
   const dispatch = useAppDispatch();
   const autoRestart = useAppSelector((store) => store.settings.autoRestart);
-  const autoRestartOnFailure = useAppSelector(
+  const pauseOnFailure = useAppSelector(
     (store) => store.settings.pauseOnFailure
   );
   const speedrunMode = useAppSelector((store) => store.settings.speedrunMode);
@@ -44,10 +44,10 @@ export const SettingsPanel = () => {
           Auto-restart
         </Switch>
         <Switch
-          checked={autoRestartOnFailure}
+          checked={pauseOnFailure}
           onChange={(checked) => dispatch(setPauseOnFailure(checked))}
         >
-          Auto-restart on failure
+          Pause on failure
         </Switch>
       </div>
       <div></div>
