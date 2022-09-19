@@ -17,8 +17,8 @@ export function damagePerEnergy(
   taskStats: CombatStats
 ): { dealt: number; received: number } {
   let dealt =
-    (getCombat(engine) *
-      armorMultiplier(getCombat(engine), taskStats.defense)) /
+    (getOffense(engine) *
+      armorMultiplier(getOffense(engine), taskStats.defense)) /
     1000;
   let received =
     (taskStats.offense *
@@ -34,7 +34,7 @@ function armorMultiplier(offense: number, defense: number) {
   return Math.pow(offense / (offense + defense), 2);
 }
 
-export function getCombat(engine: Engine): number {
+export function getOffense(engine: Engine): number {
   return (
     100 *
     (1 + Math.log2(1 + engine.skills.lethality.level / 32)) *

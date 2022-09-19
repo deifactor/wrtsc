@@ -8,7 +8,7 @@ import { ProgressBar } from "./common/ProgressBar";
 import { SkillIcon } from "./common/SkillIcon";
 import classNames from "classnames";
 import prettyMilliseconds from "pretty-ms";
-import { getCombat, getDefense, getMaxHp } from "../engine/combat";
+import { getOffense, getDefense, getMaxHp } from "../engine/combat";
 import { GiBatteryPack, GiHealthNormal } from "react-icons/gi";
 import { CardTooltip, WithTooltip } from "./common/Tooltip";
 
@@ -105,7 +105,7 @@ export const PlayerPane = React.memo(() => {
   const dispatch = useAppDispatch();
   const energy = useEngineSelector((engine) => engine.energy);
   const totalEnergy = useEngineSelector((engine) => engine.totalEnergy);
-  const combat = useEngineSelector((engine) => getCombat(engine).toFixed(0));
+  const offense = useEngineSelector((engine) => getOffense(engine).toFixed(0));
   const defense = useEngineSelector((engine) => getDefense(engine).toFixed(0));
   const currentHp = useEngineSelector((engine) => engine.currentHp);
   const maxHp = useEngineSelector(getMaxHp);
@@ -154,7 +154,7 @@ export const PlayerPane = React.memo(() => {
       <hr className="mx-3 my-2 border-gray-800" />
       <h2>Stats</h2>
       <p>
-        <strong>Combat:</strong> {combat}
+        <strong>Offense:</strong> {offense}
       </p>
       <p>
         <strong>Defense:</strong> {defense}
