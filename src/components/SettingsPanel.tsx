@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { exportSave } from "../save";
+import { exportSave, importSave } from "../save";
 import {
   setAutoRestart,
   setPauseOnFailure,
@@ -26,7 +26,15 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
     const exported = dispatch(exportSave());
     saveRef.current!.value = exported;
   };
-  const importSave = () => {};
+  const onImport = () => {
+    const saveString = saveRef.current!.value;
+    try {
+      dispatch(importSave(saveString));
+    } catch (e) {
+      // yeah, yeah. simpler than real error handling.
+      alert(e);
+    }
+  };
   return (
     <div>
       <div>
@@ -64,7 +72,7 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
         </div>
         <div>
           <Button onClick={onExport}>Export Save</Button>
-          <Button kind="danger" onClick={importSave}>
+          <Button kind="danger" onClick={onImport}>
             Import Save
           </Button>
         </div>
