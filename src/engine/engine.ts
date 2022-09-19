@@ -144,7 +144,7 @@ export function toEngineSave(engine: Engine): EngineSave {
 }
 
 /**
- * True if the engine meets the requiriments for the task. Does *not* check
+ * True if the engine meets the requiriments for the task. Does _not_ check
  * energy or HP. XXX: rename this or something.
  */
 export function canPerform(engine: Engine, task: Task): boolean {
@@ -270,11 +270,7 @@ export function getEnergyPerMs(engine: Engine): number {
     return 1;
   }
   const denominator =
-    "burstClockGamma" in engine.simulant.unlocked
-      ? 65536
-      : "burstClockBeta" in engine.simulant.unlocked
-      ? 32768
-      : 16384;
+    "burstClockBeta" in engine.simulant.unlocked ? 32768 : 16384;
   return Math.max(1, 2 - engine.timeInLoop / denominator);
 }
 

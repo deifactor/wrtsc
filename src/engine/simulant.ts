@@ -7,7 +7,6 @@ export type SimulantId = typeof SIMULANT_IDS[number];
 export const SUBROUTINE_IDS = [
   "burstClock",
   "burstClockBeta",
-  "burstClockGamma",
   "electrovore",
   "capacitiveCoupler",
   "metametacognition",
@@ -18,12 +17,7 @@ export const SUBROUTINE_IDS = [
 export type SubroutineId = typeof SUBROUTINE_IDS[number];
 
 export const SIMULANT_TO_SUBROUTINE: Record<SimulantId, SubroutineId[]> = {
-  tekhne: [
-    "burstClock",
-    "burstClockBeta",
-    "burstClockGamma",
-    "combatAccelerator",
-  ],
+  tekhne: ["burstClock", "burstClockBeta", "combatAccelerator"],
   ergon: ["electrovore", "capacitiveCoupler"],
   enkephalos: ["selfOptimizing", "metametacognition"],
 };
@@ -33,7 +27,6 @@ const COSTS: Record<SubroutineId, number> = {
   // player ever gets.
   burstClock: 64,
   burstClockBeta: 16384,
-  burstClockGamma: 65536,
   capacitiveCoupler: 24576,
   selfOptimizing: 4096,
   electrovore: 16384,

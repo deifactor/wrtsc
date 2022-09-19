@@ -51,12 +51,6 @@ function subroutineLore(id: SubroutineId): {
         description:
           "Provides an increase in speed (and matching increase in energy consumption) for the first 32768 AEU of a loop.",
       };
-    case "burstClockGamma":
-      return {
-        name: "Burst Clock γ",
-        description:
-          "Provides an increase in speed (and matching increase in energy consumption) for the first 65536 AEU of a loop.",
-      };
     case "capacitiveCoupler":
       return {
         name: "Capacitive Coupler",
