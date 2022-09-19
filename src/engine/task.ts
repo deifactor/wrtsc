@@ -407,7 +407,8 @@ export const LEAVE_RUINS: Task = {
   name: "Leave Ruins",
   shortName: "LEAVE",
   baseCost: () => 20000,
-  description: "Advance to the next zone.",
+  description:
+    "Advance to the next zone. (NOTE: This is where the alpha currently ends.)",
   flavor:
     "QH-283 lockouts have been disabled. Jump drive ready and online. There's nothing for you here any more.",
   required: {
@@ -415,9 +416,6 @@ export const LEAVE_RUINS: Task = {
     progress: { qhLockout: 100 },
   },
   rewards: () => ({}),
-  extraPerform: (engine) => {
-    engine.zoneId = "phobosDeimos";
-  },
   visible: (engine) => "shipHijacked" in engine.milestones,
   trainedSkills: { spatial: 192 },
 };
