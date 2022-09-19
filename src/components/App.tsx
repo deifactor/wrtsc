@@ -92,7 +92,7 @@ const App = () => {
         <PlayerPane />
       </Pane>
 
-      <Pane className="w-8/12 h-full">
+      <Pane className="w-8/12 h-full -z-10">
         <Tabs
           className="flex flex-col h-full"
           selectedTabPanelClassName="flex-auto overflow-auto"
