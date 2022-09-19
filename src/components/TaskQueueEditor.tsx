@@ -21,6 +21,7 @@ import { ConnectableElement, useDrag, useDrop } from "react-dnd";
 import { SimulationStep } from "../engine/predict";
 import { selectVisibleTasks } from "../worldStore";
 import { entries } from "../records";
+import { WithTooltip } from "./common/Tooltip";
 
 const DRAG_TYPE = "TASK_BATCH";
 
@@ -43,16 +44,21 @@ const AddTaskButton = React.memo(({ id }: { id: TaskId }) => {
   const dispatch = useAppDispatch();
   const canAddToQueue = useEngineSelector(selectCanAddToQueue, TASKS[id]);
   return (
-    <Button
-      className="font-mono whitespace-pre"
-      key={id}
-      icon={ICONS[id]}
-      onClick={() => dispatch(pushTaskToQueue(id))}
+    <WithTooltip
       tooltip={<TaskTooltip id={id} />}
-      state={canAddToQueue ? "active" : "locked"}
-    >
-      {TASKS[id].shortName.padEnd(8)}
-    </Button>
+      render={(ref) => (
+        <Button
+          ref={ref}
+          className="font-mono whitespace-pre"
+          key={id}
+          icon={ICONS[id]}
+          onClick={() => dispatch(pushTaskToQueue(id))}
+          state={canAddToQueue ? "active" : "locked"}
+        >
+          {TASKS[id].shortName.padEnd(8)}
+        </Button>
+      )}
+    />
   );
 });
 

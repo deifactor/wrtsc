@@ -8,7 +8,7 @@ import {
 import { useAppDispatch, useEngineSelector } from "../store";
 import { unlockSubroutine } from "../worldStore";
 import { Button } from "./common/Button";
-import { Tooltip } from "./common/Tooltip";
+import { WithTooltip } from "./common/Tooltip";
 
 function simulantLore(id: SimulantId): {
   name: ReactNode;
@@ -97,13 +97,18 @@ const SubroutineButton = React.memo(({ id }: { id: SubroutineId }) => {
   );
 
   return (
-    <Button
-      state={unlocked ? "unlocked" : available ? "active" : "locked"}
-      onClick={() => dispatch(unlockSubroutine(id))}
-      tooltip={<Tooltip title={name}>{description}</Tooltip>}
-    >
-      {name}
-    </Button>
+    <WithTooltip
+      tooltip={description}
+      render={(ref) => (
+        <Button
+          ref={ref}
+          state={unlocked ? "unlocked" : available ? "active" : "locked"}
+          onClick={() => dispatch(unlockSubroutine(id))}
+        >
+          {name}
+        </Button>
+      )}
+    />
   );
 });
 

@@ -10,7 +10,7 @@ import {
 import React, { ReactNode } from "react";
 import { entries } from "../records";
 import { SKILL_NAME } from "../engine/skills";
-import { Tooltip } from "./common/Tooltip";
+import { CardTooltip } from "./common/Tooltip";
 import { useEngineSelector } from "../store";
 import { ResourceId, RESOURCES } from "../engine/resources";
 
@@ -96,9 +96,9 @@ export const TaskTooltip = React.memo(({ id }: Props) => {
   });
 
   return (
-    <Tooltip title={task.name} metadata={metadata} lore={task.flavor}>
+    <CardTooltip title={task.name} metadata={metadata} lore={task.flavor}>
       {task.description}
-    </Tooltip>
+    </CardTooltip>
   );
 });
 TaskTooltip.displayName = "TaskTooltip";
