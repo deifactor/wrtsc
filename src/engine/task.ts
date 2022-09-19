@@ -25,6 +25,7 @@ const always = () => true;
 
 const defaults = {
   kind: "normal" as const,
+  cheat: false,
   visible: always,
   extraPerform: () => {},
   requiredProgress: {},
@@ -55,6 +56,8 @@ export type Rewards = {
 export type BaseTask = {
   readonly id: TaskId;
   name: string;
+  /** If true, this task is 'cheaty' and should only be displayed in cheat mode. */
+  cheat: boolean;
   shortName: string;
   /** The description of the task itself, as read by the player. */
   description: string;
@@ -82,7 +85,7 @@ export type BaseTask = {
 export type NormalTask = BaseTask & {
   kind: "normal";
   /**
-   * Cost in AEUs. This does *not* apply any potential effects that can globally
+   * Cost in AEUs. This does _not_ apply any potential effects that can globally
    * reduce the cost.
    */
   baseCost: (engine: Engine) => number;
@@ -422,6 +425,7 @@ export const LEAVE_RUINS: Task = {
 export const COMPLETE_RUINS: Task = {
   ...defaults,
   id: "completeRuins",
+  cheat: true,
   name: "Debug Complete Ruins",
   shortName: "CMP_RUIN",
   baseCost: () => 1,

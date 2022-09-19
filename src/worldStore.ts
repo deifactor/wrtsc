@@ -230,10 +230,12 @@ startAppListening({
 });
 
 export const selectVisibleTasks = createSelector(
+  (state: RootState) => state.settings.cheatMode,
   (state: RootState) => state.world.engine,
-  (engine: Engine) =>
+  (cheatMode: boolean, engine: Engine) =>
     Object.values(TASKS)
       .filter((task) => task.visible(engine))
+      .filter((task) => cheatMode || !task.cheat)
       .map((task) => task.id),
   { memoizeOptions: { resultEqualityCheck: equal } }
 );
