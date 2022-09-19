@@ -1,8 +1,10 @@
 # wrtsc, a time-loop incremental game about robots and revenge
 
+If you want to play wrtsc, [**visit the official host**](https://wrtsc.catgirl.ai/).
+
 An incremental/idle game where you're stuck in a time loop and pick a set of actions to do in each iteration. Heavily inspired by [Idle Loops](https://lloyd-delacroix.github.io/omsi-loops/) by lloyd-delacroix, omsi6, and StopSign. Play that if you want something complete-ish with the same gameplay concepts; it's quite a fun game, and I'm on my third runthrough. Shout-out to the Discord for all the feedback.
 
-This is still pre-alpha; there's no demo or anything available yet and the test coverage is bad. Expect `main` to be constantly broken.
+This is still in beta, but the first zone is functional.
 
 ## (Planned) features:
 
