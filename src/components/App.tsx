@@ -96,7 +96,7 @@ const App = () => {
         <PlayerPane />
       </Pane>
 
-      <Pane className="w-8/12 h-full -z-10">
+      <Pane className="w-8/12 h-full">
         <Tabs
           className="flex flex-col h-full"
           selectedTabPanelClassName="flex-auto overflow-auto"
