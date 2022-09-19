@@ -19,9 +19,11 @@ export const ZonePane = (props: Props) => {
             <ProgressDisplay id="ruinsExploration" />
             <ProgressDisplay id="patrolRoutesObserved" />
             <ProgressDisplay id="qhLockout" />
+            <ResourceDisplay id="unlinkedSensorDrones" />
+            <ResourceDisplay id="linkedSensorDrones" />
+            <ResourceDisplay id="qhLockoutAttempts" />
             <ResourceDisplay id="ruinsBatteries" />
             <ResourceDisplay id="teracapacitors" />
-            <ResourceDisplay id="unlinkedSensorDrones" />
             <ResourceDisplay id="scouts" />
           </div>
         );

@@ -122,7 +122,17 @@ export const PlayerPane = React.memo(() => {
   );
   return (
     <div>
-      <h1>Vitals</h1>
+      <h2>Time</h2>
+      <TimeStats />
+      <div className="mt-2">
+        <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
+        <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
+        <Button onClick={toggleUnspentTime}>
+          {useUnspentTime ? "Disable" : "Enable"} Unspent Time
+        </Button>
+      </div>
+      <hr className="mx-3 my-2 border-gray-800" />
+      <h2>Vitals</h2>
       <div className="flex font-mono h-8 text-yellow-300">
         <GiBatteryPack className="flex-0 mr-3" size="1.5em" />
         <ProgressBar
@@ -141,13 +151,8 @@ export const PlayerPane = React.memo(() => {
           className="h-full flex-grow"
         />
       </div>
-      <hr className="mx-3 my-4 border-gray-800" />
-      <h1>Resources</h1>
-      <ResourceDisplay id="linkedSensorDrones" />
-      <ResourceDisplay id="qhLockoutAttempts" />
-      <ResourceDisplay id="matter" />
-      <hr className="mx-3 my-4 border-gray-800" />
-      <h1>Stats</h1>
+      <hr className="mx-3 my-2 border-gray-800" />
+      <h2>Stats</h2>
       <p>
         <strong>Combat:</strong> {combat}
       </p>
@@ -157,24 +162,15 @@ export const PlayerPane = React.memo(() => {
       <p>
         <strong>Simulant XP:</strong> {simulantXp.toFixed(0)}
       </p>
-      <hr className="mx-3 my-4 border-gray-800" />
-      <h1>Skills</h1>
+      <ResourceDisplay id="matter" />
+      <hr className="mx-3 my-2 border-gray-800" />
+      <h2>Skills</h2>
       <SkillDisplay skillId="ergodicity" />
       <SkillDisplay skillId="datalink" />
       <SkillDisplay skillId="lethality" />
       <SkillDisplay skillId="spatial" />
       <SkillDisplay skillId="energyTransfer" />
       <SkillDisplay skillId="metacognition" />
-      <hr className="mx-3 my-4 border-gray-800" />
-      <h1>Time</h1>
-      <TimeStats />
-      <div className="mt-2">
-        <Button onClick={() => dispatch(startLoop())}>Restart Loop</Button>
-        <Button onClick={togglePause}>{isPaused ? "Play" : "Pause"}</Button>
-        <Button onClick={toggleUnspentTime}>
-          {useUnspentTime ? "Disable" : "Enable"} Unspent Time
-        </Button>
-      </div>
     </div>
   );
 });
