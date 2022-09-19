@@ -11,15 +11,15 @@ type Props = {
 export const Switch = ({ children, checked, onChange }: Props) => {
   return (
     <label className="inline-flex items-center m-3">
-      {children}
       <RSSwitch
-        className="ml-3"
+        className="mr-3"
         checked={checked}
         onChange={onChange}
         height={25}
         width={50}
         handleDiameter={25}
       />
+      {children}
     </label>
   );
 };
