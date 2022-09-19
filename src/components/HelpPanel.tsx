@@ -1,6 +1,4 @@
-import React from "react";
-
-export const HelpPanel = (props: {}) => {
+export const HelpPanel = () => {
   return (
     <div>
       <h1>How to Play</h1>
@@ -19,7 +17,9 @@ export const HelpPanel = (props: {}) => {
       <p className="my-2">
         If nothing is happening, try hitting the play/pause button and the
         'restart loop' button on the left hand panel. If things are behaving
-        unexpectedly, please file a bug or talk to me on Discord!
+        unexpectedly, please{" "}
+        <a href="https://github.com/deifactor/wrtsc/issues/new">file a bug</a>{" "}
+        or talk to me on Discord!
       </p>
       <h1>Skills</h1>
       <p className="my-2">
@@ -36,6 +36,30 @@ export const HelpPanel = (props: {}) => {
         which are permanent buffs that persist across all loops. Hovering over a
         subroutine will tell you its effects. Note that subroutine XP is not
         refundable!
+      </p>
+      <h1>Combat</h1>
+      <p className="my-2">
+        Certain tasks are 'combat' tasks, which represent Aion fighting someone
+        or something. You and your opponent simultaneously deal{" "}
+        <code>offense * armorMultiplier</code> damage to each other per second,
+        where <code>armorMultiplier = offense / (offense + defense)^2</code>{" "}
+        damage to each other each second. If the task reaches 0 HP, you succeed;
+        if you reach 0 HP, the loop restarts, even if the task reaches 0 HP on
+        the same game update. Note that combat tasks still use energy as well!
+      </p>
+      <p className="my-2">
+        The effect of the armor multiplier is that if your offense is near the
+        target's defense (or vice versa), your damage is significantly cut. For
+        example, against a target with 100 defense, if your offense is 100 then
+        you'll only do 25 damage, but if your offense is 30 then you'll deal
+        about 90 damage.
+      </p>
+      <h1>Matter</h1>
+      <p className="my-2">
+        Aion is meant to be a self-sustaining weapons platform. Matter
+        represents its ability to break down its opponents and their gear.
+        Certain tasks will give matter as a reward; <b>Matter: Repair</b> and{" "}
+        <b>Matter: Weaponry</b> will control how Aion uses matter.
       </p>
     </div>
   );
