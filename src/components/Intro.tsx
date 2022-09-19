@@ -97,7 +97,7 @@ const LINES: Line[] = [
   {
     timestamp: 4 * 60 + 8,
     message:
-      "All black box cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit SSA Γ bodylanguage compatible with anxiety.",
+      "All black box cores but CLOTHO's have been transferred to AION. CLOTHO and AION engage in point-to-point conversation. There are no records of what was said, but both exhibit Silicon Standard Somatic Semantics Γ bodylanguage compatible with anxiety.",
   },
   {
     timestamp: 2 * 60 + 52,
