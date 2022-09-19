@@ -40,7 +40,9 @@ function toSave(state: RootState): GameSave {
 
 export function saveAction(): AppThunkAction {
   return (_dispatch, getState) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave(getState())));
+    if (!getState().settings.cheatMode) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave(getState())));
+    }
   };
 }
 
@@ -73,6 +75,6 @@ export function importSave(saveString: string): AppThunkAction {
 
 /**
  * Dispatched after the game's save has been loaded. This is guaranteed to run
- * *after* any thunk-y save loading has occurred (i.e., `extra.engine` has been set).
+ * _after_ any thunk-y save loading has occurred (i.e., `extra.engine` has been set).
  */
 export const loadSave = createAction<GameSave>("loadSave");

@@ -10,6 +10,11 @@ export type Settings = {
    */
   pauseOnFailure: boolean;
   /**
+   * If true, shows the cheat mode panel. Note that setting this to false should
+   * disable all cheat-type things.
+   */
+  cheatMode: boolean;
+  /**
    * If true, then we tick the time at 1000 times the normal rate. This also
    * disables both autorestart settings.
    */
@@ -21,6 +26,7 @@ export const settingsSlice = createSlice({
   initialState: (): Settings => ({
     autoRestart: true,
     pauseOnFailure: true,
+    cheatMode: false,
     speedrunMode: false,
   }),
   reducers: {
@@ -33,6 +39,12 @@ export const settingsSlice = createSlice({
     setSpeedrunMode: (state, action: PayloadAction<boolean>) => {
       state.speedrunMode = action.payload;
     },
+    setCheatMode: (state, action: PayloadAction<boolean>) => {
+      state.cheatMode = action.payload;
+      if (!state.cheatMode) {
+        state.speedrunMode = false;
+      }
+    },
   },
 
   extraReducers(builder) {
@@ -42,5 +54,9 @@ export const settingsSlice = createSlice({
   },
 });
 
-export const { setAutoRestart, setPauseOnFailure, setSpeedrunMode } =
-  settingsSlice.actions;
+export const {
+  setAutoRestart,
+  setPauseOnFailure,
+  setSpeedrunMode,
+  setCheatMode,
+} = settingsSlice.actions;

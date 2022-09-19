@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { exportSave, importSave } from "../save";
 import {
   setAutoRestart,
+  setCheatMode,
   setPauseOnFailure,
   setSpeedrunMode,
 } from "../settingsStore";
@@ -20,6 +21,7 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
     (store) => store.settings.pauseOnFailure
   );
   const speedrunMode = useAppSelector((store) => store.settings.speedrunMode);
+  const cheatMode = useAppSelector((store) => store.settings.cheatMode);
   const saveRef = useRef<HTMLTextAreaElement>(null);
 
   const onExport = () => {
@@ -53,14 +55,6 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
       </div>
       <div></div>
       <div>
-        <Switch
-          checked={speedrunMode}
-          onChange={(checked) => dispatch(setSpeedrunMode(checked))}
-        >
-          Speedrun Mode
-        </Switch>
-      </div>
-      <div>
         Export/import save
         <div>
           <textarea
@@ -85,6 +79,32 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
             Hard Reset
           </Button>
         </div>
+      </div>
+      <hr className="border-gray-400 my-4" />
+      <h1>Cheats</h1>
+      <div>
+        <Switch
+          checked={cheatMode}
+          onChange={(checked) => dispatch(setCheatMode(checked))}
+        >
+          Enable cheats. This shows the rest of the cheat-mode settings and
+          enables some extra actions. This will turn off autosaves since the
+          developer uses it to debug; to manually save, just export your save
+          and then immediately reimport.
+        </Switch>
+        {cheatMode && (
+          <div>
+            <Switch
+              checked={speedrunMode}
+              onChange={(checked) => dispatch(setSpeedrunMode(checked))}
+            >
+              Speedrun Mode. This runs the game at a massively increased
+              tickspeed, making loops complete basically instantly. Loops will
+              not automatically restart if this is on, since otherwise you'd
+              just complete everything hundreds of times instantly.
+            </Switch>
+          </div>
+        )}
       </div>
     </div>
   );
