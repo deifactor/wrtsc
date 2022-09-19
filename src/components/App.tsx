@@ -9,7 +9,7 @@ import { SettingsPanel } from "./SettingsPanel";
 import { AboutPanel } from "./AboutPanel";
 import { Intro } from "./Intro";
 import { tick } from "../worldStore";
-import { useAppDispatch } from "../store";
+import { useAppDispatch, useAppSelector } from "../store";
 import { hasSave, loadAction, saveAction } from "../save";
 import { SimulantPanel } from "./SimulantPanel";
 import { HelpPanel } from "./HelpPanel";
@@ -74,6 +74,10 @@ const App = () => {
     dispatch(saveAction());
   }, 1000);
 
+  const simulantUnlocked = useAppSelector(
+    (store) => "simulantUnlocked" in store.world.engine.milestones
+  );
+
   const introFinished = useCallback(() => setInIntro(false), []);
   if (inIntro) {
     return <Intro onFinished={introFinished} />;
@@ -100,7 +104,7 @@ const App = () => {
         >
           <TabList className="flex flex-row text-xl justify-evenly text-gray-400">
             <Tab>Queue</Tab>
-            <Tab>Simulant</Tab>
+            {simulantUnlocked && <Tab>Simulant</Tab>}
             <Tab>Settings</Tab>
             <Tab>Help</Tab>
             <Tab>About</Tab>
@@ -113,9 +117,11 @@ const App = () => {
               <ScheduleDisplay className="h-full w-2/5" />
             </div>
           </TabPanel>
-          <TabPanel>
-            <SimulantPanel />
-          </TabPanel>
+          {simulantUnlocked && (
+            <TabPanel>
+              <SimulantPanel />
+            </TabPanel>
+          )}
           <TabPanel>
             <SettingsPanel />
           </TabPanel>
