@@ -23,7 +23,7 @@ export type GameSave = {
 export const STORAGE_KEY = "save";
 
 export function hasSave(): boolean {
-  return localStorage.getItem(STORAGE_KEY) !== undefined;
+  return localStorage.getItem(STORAGE_KEY) !== null;
 }
 
 function toSave(state: RootState): GameSave {
