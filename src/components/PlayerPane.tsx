@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { SkillId, totalToNextSkillLevel } from "../engine/skills";
+import { SkillId, SKILL_NAME, totalToNextSkillLevel } from "../engine/skills";
 import { setPaused, setUseUnspentTime, startLoop } from "../worldStore";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
 import { Button } from "./common/Button";
@@ -10,6 +10,7 @@ import classNames from "classnames";
 import prettyMilliseconds from "pretty-ms";
 import { getCombat, getDefense, getMaxHp } from "../engine/combat";
 import { GiBatteryPack, GiHealthNormal } from "react-icons/gi";
+import { CardTooltip, WithTooltip } from "./common/Tooltip";
 
 // We have to explicitly write out the class names, otherwise PostCSS will
 // "optimize" them out.
@@ -27,6 +28,21 @@ const scientific = Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
+const SKILL_DESCRIPTION: Record<SkillId, string> = {
+  ergodicity:
+    "Your ability to move randomly and to uncover the unknown. Boosts all progress-type skills (i.e., those that fill a meter to 100%).",
+  datalink:
+    "Communication with non-sentient electronic systems. Boosts actions involving hacking and similar things.",
+  spatial:
+    "Awareness of the position of your chassis and other objects around you. Boosts defense.",
+  energyTransfer:
+    "Awareness of your internal battery's charging characteristics. Increases energy gain from all sources.",
+  metacognition:
+    "Optimizing your own thinking. Increases XP gain for all skills, and trained whenever any other skill is trained.",
+  lethality:
+    "You are a weapon as yet unforged. Hone yourself. Increases offense.",
+};
+
 export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
   // Randomly offset the background image so it doesn't look weird.
   const [offsetX] = useState(Math.random() * 100);
@@ -38,16 +54,28 @@ export const SkillDisplay = React.memo((props: { skillId: SkillId }) => {
     totalToNextLevel
   )})`;
   return (
-    <div className={classNames("flex font-mono h-8", SKILL_CLASS[skillId])}>
-      <SkillIcon id={skillId} className="flex-0 mr-3" size="2em" />
-      <ProgressBar
-        current={xp}
-        max={totalToNextLevel}
-        text={text}
-        className="flex-grow h-full"
-        backgroundPosition={`${100 * offsetX}%`}
-      />
-    </div>
+    <WithTooltip
+      tooltip={
+        <CardTooltip title={SKILL_NAME[skillId]}>
+          {SKILL_DESCRIPTION[skillId]}
+        </CardTooltip>
+      }
+      render={(ref) => (
+        <div
+          className={classNames("flex font-mono h-8", SKILL_CLASS[skillId])}
+          ref={ref}
+        >
+          <SkillIcon id={skillId} className="flex-0 mr-3" size="2em" />
+          <ProgressBar
+            current={xp}
+            max={totalToNextLevel}
+            text={text}
+            className="flex-grow h-full"
+            backgroundPosition={`${100 * offsetX}%`}
+          />
+        </div>
+      )}
+    />
   );
 });
 
