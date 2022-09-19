@@ -8,7 +8,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { SettingsPanel } from "./SettingsPanel";
 import { AboutPanel } from "./AboutPanel";
 import { Intro } from "./Intro";
-import { tick, hardReset } from "../worldStore";
+import { tick } from "../worldStore";
 import { useAppDispatch } from "../store";
 import { hasSave, loadAction, saveAction } from "../save";
 import { SimulantPanel } from "./SimulantPanel";
@@ -117,7 +117,7 @@ const App = () => {
             <SimulantPanel />
           </TabPanel>
           <TabPanel>
-            <SettingsPanel onHardReset={() => dispatch(hardReset())} />
+            <SettingsPanel />
           </TabPanel>
           <TabPanel>
             <HelpPanel />

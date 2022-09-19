@@ -175,8 +175,8 @@ export const startLoop: () => AppThunkAction = () => (dispatch, getState) => {
 };
 
 export const hardReset: () => AppThunkAction = () => () => {
-  // XXX: fixme
-  throw new Error("temporarily broken");
+  localStorage.clear();
+  window.location.reload();
 };
 
 function wrapperSchedule(

@@ -7,14 +7,11 @@ import {
   setSpeedrunMode,
 } from "../settingsStore";
 import { useAppDispatch, useAppSelector } from "../store";
+import { hardReset } from "../worldStore";
 import { Button } from "./common/Button";
 import { Switch } from "./common/Switch";
 
-type Props = {
-  onHardReset: () => void;
-};
-
-export const SettingsPanel = ({ onHardReset }: Props) => {
+export const SettingsPanel = () => {
   const dispatch = useAppDispatch();
   const autoRestart = useAppSelector((store) => store.settings.autoRestart);
   const autoRestartOnFailure = useAppSelector(
@@ -75,7 +72,7 @@ export const SettingsPanel = ({ onHardReset }: Props) => {
         Warning: This will <em>delete your entire save</em>. This is not a
         prestige. There is no backup!
         <div>
-          <Button kind="danger" onClick={onHardReset}>
+          <Button kind="danger" onClick={() => dispatch(hardReset())}>
             Hard Reset
           </Button>
         </div>
