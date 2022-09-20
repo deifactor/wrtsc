@@ -218,7 +218,7 @@ export const KILL_SCOUT: Task = {
     hp: 100,
   },
   description:
-    "Kill one of the remaining Preserver scouts and take their ship. Gives extra attempts at Disable Lockouts.",
+    "Kill one of the remaining Preserver scouts. Gives extra attempts at Disable Lockouts.",
   flavor:
     "Simulations predict >99.99% kill rate with minimal retaliatory damage.",
   required: {
@@ -294,8 +294,7 @@ export const HIJACK_SHIP: Task = {
     defense: 200,
     hp: 2500,
   },
-  description:
-    "Adds the Ship Hijacked flag. Cost decreases with Combat and Patrol Routes Observed.",
+  description: "Adds the Ship Hijacked flag, increasing rate of exploration.",
   flavor:
     "Target spotted: Humanity United patrol vessel QH-283 appears to be separated from the rest. Simulations indicate hijack possible.",
   required: {
@@ -397,7 +396,7 @@ export const DISMANTLE_SENSOR_DRONES: Task = {
     progress: { qhLockout: 25 },
     resources: { linkedSensorDrones: 1 },
   },
-  rewards: () => ({ energy: 2000 }),
+  rewards: () => ({ energy: 3000 }),
   trainedSkills: { energyTransfer: 64, datalink: 64 },
 };
 
