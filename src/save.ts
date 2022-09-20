@@ -70,6 +70,7 @@ export function importSave(saveString: string): AppThunkAction {
     JSON.parse(saveString);
     localStorage.setItem(STORAGE_KEY, saveString);
     dispatch(loadAction());
+    dispatch(saveAction());
   };
 }
 
