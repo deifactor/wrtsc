@@ -2,6 +2,7 @@ import React from "react";
 import { ReactNode } from "react";
 import "react-popper-tooltip/dist/styles.css";
 import { usePopperTooltip } from "react-popper-tooltip";
+import ReactDOM from "react-dom";
 
 function renderMetadata(metadata: Record<string, ReactNode>): ReactNode {
   const entries = Object.entries(metadata);
@@ -76,17 +77,19 @@ export const WithTooltip = React.memo(
     return (
       <>
         {render(setTriggerRef)}
-        {visible && (
-          <div
-            ref={setTooltipRef}
-            {...getTooltipProps({
-              className: "tooltip-container w-96 p-2 text-sm",
-            })}
-          >
-            {tooltip}
-            <div {...getArrowProps({ className: "tooltip-arrow" })} />
-          </div>
-        )}
+        {visible &&
+          ReactDOM.createPortal(
+            <div
+              ref={setTooltipRef}
+              {...getTooltipProps({
+                className: "tooltip-container w-96 p-2 text-sm z-10",
+              })}
+            >
+              {tooltip}
+              <div {...getArrowProps({ className: "tooltip-arrow" })} />
+            </div>,
+            document.body
+          )}
       </>
     );
   }
