@@ -172,7 +172,7 @@ export const LINK_SENSOR_DRONES: Task = {
   shortName: "LINK_DRN",
   baseCost: () => 1500,
   description:
-    "Multiplies progress for Explore Ruins and Observe Patrol Routes by sqrt(1 + linked drones). Bonus stacks with Ship Hijacked bonuses.",
+    "Multiplies progress for Explore Ruins and Observe Patrol Routes by log2(1 + drones/4). The bonus is itself multiplied by log2(1 + datalink/64). Bonus stacks with Ship Hijacked bonuses.",
   flavor:
     "Long-range sensors are still responding to pings. Superresolution routines loaded. Beginning handshake...",
   required: {
@@ -465,7 +465,7 @@ export const TASKS: Record<TaskId, Task> = {
 };
 
 function exploreMultiplier(engine: Engine): number {
-  const droneBonus = Math.pow(1 + engine.resources.linkedSensorDrones, 0.3) - 1;
+  const droneBonus = Math.log2(1 + engine.resources.linkedSensorDrones / 4);
   const shipBonus = engine.flags.shipHijacked ? 1 : 0;
   const datalinkBonus = Math.log2(1 + engine.skills.datalink.level / 64);
   return (1 + droneBonus * (1 + datalinkBonus)) * (1 + shipBonus);
