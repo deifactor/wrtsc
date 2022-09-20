@@ -246,7 +246,7 @@ export const MATTER_REPAIR: Task = {
   shortName: "MAT_REP",
   baseCost: () => 100,
   description:
-    "Obtained matter will be used to instantly regenerate HP. 1 matter restores 1 HP. Will not waste matter.",
+    "Command your autoforge systems to prepare to use any matter from future tasks to restore HP. Any matter you already have will also be consumed.",
   flavor:
     "Damage to chassis systems detected. Matter breakdown systems and repair systems online and functional.",
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
@@ -271,7 +271,7 @@ export const MATTER_WEAPONRY: Task = {
   shortName: "MAT_WEPN",
   baseCost: () => 100,
   description:
-    "Obtained matter will be used to augment offensive capabilities. Also consumes any spare matter.",
+    "Command your autoforge systems to prepare to use any matter from future tasks to augment offensive capabilities. Any matter you already have will also be consumed.",
   flavor:
     "Preserver materiel is not mechanically compatible with weapon systems, but can be used for parts.",
   visible: (engine) => engine.progress.patrolRoutesObserved.level > 0,
