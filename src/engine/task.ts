@@ -280,6 +280,7 @@ export const MATTER_WEAPONRY: Task = {
   extraPerform: (engine) => {
     engine.matterMode = "weaponry";
     processMatter(engine, engine.resources.matter);
+    engine.resources.matter = 0;
   },
 };
 
