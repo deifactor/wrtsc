@@ -31,7 +31,7 @@ export function damagePerEnergy(
 }
 
 function armorMultiplier(offense: number, defense: number) {
-  return Math.pow(offense / (offense + defense), 2);
+  return Math.pow(offense / (offense + defense), 1.5);
 }
 
 export function getOffense(engine: Engine): number {

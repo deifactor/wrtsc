@@ -51,8 +51,8 @@ export const HelpPanel = () => {
         The effect of the armor multiplier is that if your offense is near the
         target's defense (or vice versa), your damage is significantly cut. For
         example, against a target with 100 defense, if your offense is 100 then
-        you'll only do 25 damage, but if your offense is 30 then you'll deal
-        about 90 damage.
+        you'll only do 35 damage, but if your offense is 300 then you'll deal
+        about 194 damage.
       </p>
       <h1>Matter</h1>
       <p className="my-2">

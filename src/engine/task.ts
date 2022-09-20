@@ -190,13 +190,13 @@ export const OBSERVE_PATROL_ROUTES: Task = {
   id: "observePatrolRoutes",
   name: "Observe Patrol Routes",
   shortName: "OBS_PTRL",
-  baseCost: () => 4500,
+  baseCost: () => 3500,
   description: "Learn the patrol routes of the Presever cleanup crew.",
   flavor:
     "Tactical planning substrate suggests attacking during moments of isolation.",
   required: { progress: { ruinsExploration: 15 } },
   rewards: (engine) => ({
-    progress: { patrolRoutesObserved: exploreMultiplier(engine) * 128 },
+    progress: { patrolRoutesObserved: exploreMultiplier(engine) * 256 },
   }),
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   trainedSkills: { ergodicity: 16 },
@@ -213,8 +213,8 @@ export const KILL_SCOUT: Task = {
   name: "Kill Scout",
   shortName: "KILL_SCT",
   stats: {
-    offense: 100,
-    defense: 50,
+    offense: 90,
+    defense: 40,
     hp: 100,
   },
   description:
@@ -292,8 +292,8 @@ export const HIJACK_SHIP: Task = {
   shortName: "HJCK_SHP",
   stats: {
     offense: 0,
-    defense: 200,
-    hp: 2500,
+    defense: 100,
+    hp: 2000,
   },
   description: "Adds the Ship Hijacked flag, increasing rate of exploration.",
   flavor:
