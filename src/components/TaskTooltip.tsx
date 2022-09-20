@@ -32,7 +32,7 @@ function taskMetadata({
   const task = TASKS[id];
   const metadata: Record<string, ReactNode> = {};
 
-  metadata["Cost"] = cost;
+  metadata["Cost"] = cost.toFixed(0);
   metadata["Trains"] = entries(task.trainedSkills)
     .map(([id, xp]) => `${xp} ${SKILL_NAME[id]} XP`)
     .join(", ");
