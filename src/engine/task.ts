@@ -152,13 +152,15 @@ export const DRAIN_TERACAPACITOR: Task = {
   name: "Discharge Teracapacitor",
   shortName: "DIS_TERA",
   baseCost: () => 6000,
-  description: `Gives 150 * (seconds spent in loop at end of action) energy, capped at 25600.`,
+  description: `Gives energy equal to 40% of the total energy spent in the loop, capped at 25600.`,
   flavor:
     "Teracapacitor integrity critical. Attempting repair; however, discharge is likely to destroy charging circuits. Recommend delaying their use.",
   required: { resources: { teracapacitors: 1 } },
   rewards: (engine) => {
     const cap = engine.simulant.unlocked.capacitiveCoupler ? 102400 : 25600;
-    return { energy: Math.min(cap, engine.timeInLoop * 0.4) };
+    return {
+      energy: Math.min(cap, engine.totalEnergy * 0.4),
+    };
   },
   visible: (engine) => engine.progress.ruinsExploration.level >= 10,
   maxIterations: (engine) => RESOURCES.teracapacitors.initial(engine),

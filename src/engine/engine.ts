@@ -26,7 +26,7 @@ export const STORAGE_KEY = "save";
 
 export type TaskFailureReason = "outOfEnergy" | "taskFailed" | "outOfHp";
 
-const INITIAL_ENERGY = 5000;
+export const INITIAL_ENERGY = 5000;
 
 /** The current task and how far in it we are. */
 export type TaskState =
