@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import {
+  getSubroutineCost,
   isSubroutineAvailable,
   SimulantId,
   SIMULANT_TO_SUBROUTINE,
@@ -8,7 +9,7 @@ import {
 import { useAppDispatch, useEngineSelector } from "../store";
 import { unlockSubroutine } from "../worldStore";
 import { Button } from "./common/Button";
-import { WithTooltip } from "./common/Tooltip";
+import { CardTooltip, WithTooltip } from "./common/Tooltip";
 
 function simulantLore(id: SimulantId): {
   name: ReactNode;
@@ -85,6 +86,7 @@ function subroutineLore(id: SubroutineId): {
 const SubroutineButton = React.memo(({ id }: { id: SubroutineId }) => {
   const { name, description } = subroutineLore(id);
   const dispatch = useAppDispatch();
+  const cost = getSubroutineCost(id);
   const available = useEngineSelector(isSubroutineAvailable, id);
   const unlocked = useEngineSelector(
     (engine) => id in engine.simulant.unlocked
@@ -92,7 +94,9 @@ const SubroutineButton = React.memo(({ id }: { id: SubroutineId }) => {
 
   return (
     <WithTooltip
-      tooltip={description}
+      tooltip={
+        <CardTooltip metadata={{ Cost: cost }}>{description}</CardTooltip>
+      }
       render={(ref) => (
         <Button
           ref={ref}
