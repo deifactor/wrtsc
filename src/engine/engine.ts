@@ -416,7 +416,6 @@ function addEnergy(engine: Engine, amount: number) {
  */
 function spendEnergy(engine: Engine, amount: number) {
   const energyPerMs = getEnergyPerMs(engine);
-  const time = amount / energyPerMs;
   engine.energy -= amount;
   engine.timeInLoop += amount / energyPerMs;
   engine.timeAcrossAllLoops += amount / energyPerMs;
@@ -432,8 +431,8 @@ function spendEnergy(engine: Engine, amount: number) {
     case "combat":
       const task = getCurrentTask(engine)! as CombatTask;
       const { dealt, received } = damagePerEnergy(engine, task.stats);
-      taskState.hpLeft -= time * dealt;
-      engine.currentHp -= time * received;
+      taskState.hpLeft -= amount * dealt;
+      engine.currentHp -= amount * received;
       // floating-point math strikes again; engine prevents the player from
       // surviving something that should have reduced them to exactly 0 HP.
       if (Math.abs(engine.currentHp) < 0.001) {
