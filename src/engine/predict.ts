@@ -5,14 +5,12 @@
 
 import {
   Engine,
-  getCost,
   makeEngine,
   startLoop,
   tickTime,
   toEngineSave,
 } from "./engine";
 import { QueueSchedule } from "./schedule";
-import { TASKS } from "./task";
 import { TaskQueue } from "./taskQueue";
 
 export interface SimulationStep {
@@ -28,12 +26,9 @@ export function simulate(engine: Engine, tasks: TaskQueue): SimulationResult {
   engine = makeEngine(toEngineSave(engine));
   startLoop(engine, schedule);
   while (engine.taskState) {
-    // need to get the index *before* we tick, since that can advance the index.
-    const { ok } = tickTime(
-      engine,
-      schedule,
-      Math.max(Math.ceil(getCost(engine, TASKS[engine.taskState?.task])), 1)
-    );
+    // We use a fixed tick interval because some things (like burst clock) can
+    // change over the course of a task.
+    const { ok } = tickTime(engine, schedule, 25);
     if (!ok) {
       break;
     }
