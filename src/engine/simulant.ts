@@ -67,7 +67,7 @@ export function unlockSubroutine(engine: Engine, id: SubroutineId) {
 
 /** Whether the given subroutine is unlocked. */
 export function isSubroutineAvailable({ simulant }: Engine, id: SubroutineId) {
-  return simulant.freeXp >= getSubroutineCost(id);
+  return simulant.freeXp >= getSubroutineCost(id) && !simulant.unlocked[id];
 }
 
 export type SimulantSave = {

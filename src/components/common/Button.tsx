@@ -47,7 +47,7 @@ export const Button = React.memo(
       return (
         <button
           ref={ref}
-          onClick={state !== "locked" ? onClick : () => {}}
+          onClick={state === "active" ? onClick : () => {}}
           className={classNames(
             "font-bold rounded-sm",
             "inline-flex items-center",
