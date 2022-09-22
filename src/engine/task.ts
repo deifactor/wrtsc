@@ -311,7 +311,6 @@ export const HIJACK_SHIP: Task = {
   extraPerform: (engine) => {
     engine.milestones.shipHijacked = true;
   },
-  maxIterations: (engine) => RESOURCES.scouts.initial(engine),
   trainedSkills: { lethality: 128 },
 };
 
