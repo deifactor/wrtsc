@@ -8,6 +8,10 @@ All notable changes will be recorded here. This project does *not* adhere to sem
 
 - Sensor drones now give a `1 + log2(1 + drones/4)` bonus to explore/observe, making them better early on.
 
+## Features
+
+- The UI now displays the current version in the upper left.
+
 ## Fixes
 
 - Tooltips are now always on top of all other parts of the UI

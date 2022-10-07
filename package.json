@@ -20,8 +20,8 @@
     "tailwindcss": "^3.0.1"
   },
   "scripts": {
-    "dev": "parcel src/index.html",
-    "build": "rm -rf dist && parcel build src/index.html",
+    "dev": "WRTSC_VERSION=$(git describe --tags) parcel src/index.html",
+    "build": "WRTSC_VERSION=$(git describe --tags) rm -rf dist && parcel build src/index.html",
     "deploy": "rsync -av --delete dist/ catgirl.ai:/var/www/wrtsc",
     "tas": "ts-node -T --esm --experimental-specifier-resolution=node src/engine/speedrun.ts",
     "test": "jest"

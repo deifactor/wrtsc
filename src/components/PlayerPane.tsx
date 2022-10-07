@@ -122,6 +122,8 @@ export const PlayerPane = React.memo(() => {
   );
   return (
     <div>
+      <div>wrtsc {process.env.WRTSC_VERSION}</div>
+      <hr className="mx-3 my-2 border-gray-800" />
       <h2>Time</h2>
       <TimeStats />
       <div className="mt-2">
