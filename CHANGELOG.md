@@ -6,7 +6,12 @@ All notable changes will be recorded here. This project does *not* adhere to sem
 
 ## Balance
 
-- Sensor drones now give a `1 + log2(1 + drones/4)` bonus to explore/observe, making them better early on.
+- Sensor drones now give a `1 + log2(1 + drones/4)` bonus to explore/observe,
+  making them better early on.
+- Several nerfs to patrol scouts and the ship, making them both easier to defeat.
+- Teracapacitors now generate energy based on the amount of energy you've spent
+  so far. This fixes an issue where taking Burst Clock simulants would result
+  in you getting there faster, breaking your loop.
 
 ## Features
 
@@ -21,6 +26,8 @@ All notable changes will be recorded here. This project does *not* adhere to sem
   spent in suspend as bonus time.
 - The "maximize count" task button now takes other task queue entries into
   account when determining how many times to perform the task.
+- Combat was always meant to progress based on energy spent, not time spent,
+  but I was multiplying by the wrong variable. Oops.
 
 ## [0.1.0]: 2022-09-19
 
