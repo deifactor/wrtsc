@@ -1,6 +1,7 @@
 import { pushTaskToQueue } from "./nextQueueStore";
 import { createStore } from "./store";
 import {
+  MAXIMUM_TICK,
   setPaused,
   setUseUnspentTime,
   startLoop,
@@ -66,5 +67,13 @@ describe("bonus time", () => {
     store.dispatch(tickDelta(50));
     expect(store.getState().world.unspentTime).toEqual(100);
     expect(store.getState().world.engine.timeInLoop).toEqual(50);
+  });
+
+  it("should accumulate the excess time from very large ticks", () => {
+    const store = createTestStore();
+    store.dispatch(setPaused(false));
+    store.dispatch(tickDelta(10000));
+    expect(store.getState().world.unspentTime).toEqual(10000 - MAXIMUM_TICK);
+    expect(store.getState().world.engine.timeInLoop).toEqual(MAXIMUM_TICK);
   });
 });

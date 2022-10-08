@@ -31,6 +31,12 @@ interface Completions {
 /** If we're finished with this particular loop, why are we finished with it? */
 type FinishReason = "outOfTasks" | "failure";
 
+/**
+ * Largest possible tick in milliseconds. Anything larger than this and we add
+ * the rest as bonus time.
+ */
+export const MAXIMUM_TICK = 2000;
+
 export const worldSlice = createSlice({
   name: "world",
   initialState: () => {
@@ -70,12 +76,17 @@ export const worldSlice = createSlice({
     ) => {
       const { engine } = state;
       const { now, settings } = action.payload;
-      let dt = now - state.lastUpdate;
-      state.unspentTime += dt;
+      state.unspentTime += now - state.lastUpdate;
+      // If the tick is *really* large, then the user probably suspended their
+      // laptop. In order to avoid having a really large catch-up tick, just add
+      // the rest as bonus time. This would be 'cleaner' if tickTime could
+      // instead return how much time was consumed, but that's a fix for later.
+      let dt = Math.min(now - state.lastUpdate, MAXIMUM_TICK);
       state.lastUpdate = now;
       if (state.paused) {
         return;
       }
+
       const speedrunMode = settings.speedrunMode;
       if (speedrunMode) {
         dt *= 1000;

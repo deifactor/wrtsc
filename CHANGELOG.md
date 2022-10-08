@@ -17,6 +17,8 @@ All notable changes will be recorded here. This project does *not* adhere to sem
 - Tooltips are now always on top of all other parts of the UI
 - "Auto-restart on failure" relabeled to "pause on failure", with the same functionality
 - Hijack Ship, Strafing Run, and Dismantle Drones can now only be performed once in a loop.
+- Suspending your computer with the game open will now properly award the time
+  spent in suspend as bonus time.
 
 ## [0.1.0]: 2022-09-19
 
