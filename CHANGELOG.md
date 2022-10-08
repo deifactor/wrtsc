@@ -19,6 +19,8 @@ All notable changes will be recorded here. This project does *not* adhere to sem
 - Hijack Ship, Strafing Run, and Dismantle Drones can now only be performed once in a loop.
 - Suspending your computer with the game open will now properly award the time
   spent in suspend as bonus time.
+- The "maximize count" task button now takes other task queue entries into
+  account when determining how many times to perform the task.
 
 ## [0.1.0]: 2022-09-19
 

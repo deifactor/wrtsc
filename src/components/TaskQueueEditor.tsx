@@ -13,7 +13,7 @@ import {
   moveTask,
   pushTaskToQueue,
   removeTask,
-  setBatchCount,
+  setEntryToMax,
 } from "../nextQueueStore";
 import equal from "fast-deep-equal";
 import { useAppDispatch, useAppSelector, useEngineSelector } from "../store";
@@ -94,10 +94,6 @@ const TaskQueueItem = React.memo(
       (store) => store.nextQueue.queue[index],
       equal
     );
-    const maxIterations = useEngineSelector((engine) => {
-      const { maxIterations } = TASKS[entry.task];
-      return maxIterations && maxIterations(engine);
-    });
     const step: SimulationStep | undefined = useAppSelector(
       (store) => store.nextQueue.simulation[index],
       equal
@@ -117,10 +113,7 @@ const TaskQueueItem = React.memo(
       <Button
         className={maxClass}
         size="xs"
-        onClick={() =>
-          maxIterations !== undefined &&
-          dispatch(setBatchCount({ index, amount: maxIterations }))
-        }
+        onClick={() => dispatch(setEntryToMax(index))}
       >
         <FiMaximize />
       </Button>

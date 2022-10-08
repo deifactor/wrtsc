@@ -1,5 +1,5 @@
 import { createSlice, isAnyOf, PayloadAction } from "@reduxjs/toolkit";
-import { TaskQueue, TaskId } from "./engine";
+import { TaskQueue, TaskId, TASKS } from "./engine";
 import { simulate, SimulationResult } from "./engine/predict";
 import { startAppListening } from "./listener";
 import { loadSave } from "./save";
@@ -123,6 +123,28 @@ export function setSimulationFromEngine(): AppThunkAction {
         simulate(getState().world.engine, queue)
       )
     );
+  };
+}
+
+export function setEntryToMax(index: number): AppThunkAction {
+  return (dispatch, getState) => {
+    const { queue } = getState().nextQueue;
+    const { engine } = getState().world;
+    const task = TASKS[queue[index].task];
+    if (!task.maxIterations) {
+      return;
+    }
+    const max = task.maxIterations(engine);
+    let current = 0;
+    for (const entry of queue) {
+      if (entry.task === task.id) {
+        current += entry.count;
+      }
+    }
+    // This arranges it so that the new total number of iterations will be
+    // exactly `max` (assuming that's possible just by changing this entry).
+    let newCount = Math.max(0, queue[index].count + (max - current));
+    dispatch(setBatchCount({ index, amount: newCount }));
   };
 }
 
