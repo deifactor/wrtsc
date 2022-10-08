@@ -24,7 +24,11 @@ import { RUINS, ZoneId } from "./zone";
 
 export const STORAGE_KEY = "save";
 
-export type TaskFailureReason = "outOfEnergy" | "taskFailed" | "outOfHp";
+export type TaskFailureReason =
+  | "outOfEnergy"
+  | "taskFailed"
+  | "outOfHp"
+  | "onceOnly";
 
 export const INITIAL_ENERGY = 5000;
 
@@ -56,6 +60,11 @@ export interface Engine {
   timeAcrossAllLoops: number;
   simulant: SimulantState;
   matterMode: MatterMode;
+  /**
+   * Any tasks that we've started. We record this in order to implement the
+   * `oncePerLoop` flag properly.
+   */
+  hasPerformed: Partial<Record<TaskId, true>>;
 
   taskState: TaskState | undefined;
 
@@ -89,6 +98,7 @@ export function makeEngine(save?: EngineSave): Engine {
       shipHijacked: false,
     },
     matterMode: "repair",
+    hasPerformed: {},
     energy: INITIAL_ENERGY,
     totalEnergy: INITIAL_ENERGY,
     timeInLoop: 0,
@@ -213,6 +223,13 @@ export function tickTime(
     if (!task) {
       return { ok: true };
     }
+    if (task.oncePerLoop && engine.hasPerformed[task.id]) {
+      schedule.recordResult(false, {
+        hp: engine.currentHp,
+        energy: engine.energy,
+      });
+      return { ok: false, reason: "onceOnly" };
+    }
     if (!canPerform(engine, task)) {
       schedule.recordResult(false, {
         hp: engine.currentHp,
@@ -309,6 +326,7 @@ export function getCurrentTask(engine: Engine): Task | undefined {
  * the engine's schedule or anything like that.
  */
 function perform(engine: Engine, task: Task) {
+  engine.hasPerformed[task.id] = true;
   const rewards = task.rewards(engine);
   entries(task.required.resources || {}).forEach(([res, value]) => {
     engine.resources[res] -= value;
@@ -347,6 +365,7 @@ function perform(engine: Engine, task: Task) {
 /** Restart the time loop. */
 export function startLoop(engine: Engine, schedule?: Schedule) {
   engine.timeInLoop = 0;
+  engine.hasPerformed = {};
   engine.energy = engine.totalEnergy = INITIAL_ENERGY;
   for (const resource of RESOURCE_IDS) {
     engine.resources[resource] = RESOURCES[resource].initial(engine);

@@ -32,6 +32,7 @@ const defaults = {
   requiredLoopFlags: {},
   requiredResources: {},
   trainedSkills: [],
+  oncePerLoop: false,
 };
 
 export type Requirements = {
@@ -80,6 +81,11 @@ export type BaseTask = {
    * a resource. If supplied, this must be always right.
    */
   maxIterations?: (engine: Engine) => number;
+  /**
+   * If true, this task can only be executed once per loop. Attempting to
+   * perform it multiple times will cause it to fail immediately.
+   */
+  oncePerLoop: boolean;
 };
 
 export type NormalTask = BaseTask & {
@@ -292,6 +298,7 @@ export const HIJACK_SHIP: Task = {
   id: "hijackShip",
   name: "Hijack Ship",
   shortName: "HJCK_SHP",
+  oncePerLoop: true,
   stats: {
     offense: 0,
     defense: 100,
@@ -320,6 +327,7 @@ export const UNLOCK_SIMULANT: Task = {
   name: "Unlock Simulant",
   shortName: "UNLOK_SM",
   baseCost: () => 30000,
+  oncePerLoop: true,
   description:
     "Unlocks the simulant subsystem, allowing you to permanently upgrade your mind.",
   flavor:
@@ -363,6 +371,7 @@ export const STRAFING_RUN: Task = {
   name: "Strafing Run",
   shortName: "STRAF_RN",
   baseCost: () => 1000,
+  oncePerLoop: true,
   description: "Kill all remaining Preserver scouts",
   flavor:
     "Surviving Preserver forces may alert superiors. They cannot be allowed to live.",
